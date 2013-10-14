@@ -5,7 +5,7 @@ var http = require('http')
   , cons = require('consolidate')
   , passport = require('passport')
   , mongoose = require('mongoose')
-  , UserRoutes = require('./routes/user')
+  , configureUserRoutes = require('./routes/user').configure
   , routes = require('./routes')
   , configurePassport = require('./app/config/passport').configure
   , configureMongoose = require('./app/config/mongoose').configure
@@ -32,8 +32,8 @@ app.engine('handlebars', cons.handlebars)
 
 configureMongoose(mongoose, "mongodb://localhost: 27017/videosite");
 configurePassport(passport);
+configureUserRoutes(app, passport);
 
-UserRoutes.configure(app);
 app.get('/', routes.index);
 
 server.listen(app.get('port'), function () {

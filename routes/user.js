@@ -1,3 +1,49 @@
+var User = require('../app/models').User
+  , verifyAuth = require('../app/config/passport').verifyAuth;
+
+function formatDbResponse (model) {
+  var formattedModel = model.toObject();
+
+  formattedModel.id = formattedModel._id;
+  delete formattedModel.password;
+  delete formattedModel._id;
+  delete formattedModel.__v;
+  return formattedModel;
+}
+
+function createUser (req, res) {
+  User.findOne({username: req.body.username}, function (err, user) {
+    var data = {};
+
+    if (err) { return console.log(err); }
+
+    if (user) {
+      return res.status(400).send('User already exists.');
+    } else {
+      data.username = req.body.username;
+      data.password= req.body.password;
+      data.email = req.body.email;
+      User.create(data, function (err, user) {
+        if (err) { return console.log(err); } 
+        
+        console.log(user.username, "created");
+        res.json(formatDbResponse(user));
+      });
+    }
+  });
+}
+
+function login (req, res) {
+  res.json({user: req.user});
+}
+
+function logout (req, res) {
+  req.logout()
+  res.json({});
+}
+
 exports.configure = function (app, passport, options) {
-  return app;
+  app.get('user/create', createUser);
+  app.get('user/login', passport.authenticate('local'), login);
+  app.get('user/logout', logout);
 }
