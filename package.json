@@ -18,6 +18,10 @@
     "connect-redis": "~1.4.5",
     "consolidate": "~0.9.1",
     "handlebars": "~1.0.12",
-    "bower": "~1.2.7"
+    "bower": "~1.2.7",
+    "passport-local": "~0.1.6",
+    "passport": "~0.1.17",
+    "bcrypt": "~0.7.7",
+    "mongoose": "~3.6.20"
   }
 }
