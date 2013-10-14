@@ -41,11 +41,9 @@ function deserializeMongo (id, done) {
 }
 
 exports.configure = function (passport, options) {
-  
   passport.use(mongoStrategy);
   passport.serializeUser(serialize);
   passport.deserializeUser(deserializeMongo);
-
 }
 
 exports.verifyAuth = function (req, res, next) {

@@ -1,4 +1,5 @@
-exports.configure = function (mongoose, url) {
+exports.configure = function (mongoose) {
+  var url = "mongodb://localhost:27017/videosite";
 
   mongoose.connect(url, function (err) {
     if (err) throw err; 

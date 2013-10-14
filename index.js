@@ -5,8 +5,8 @@ var http = require('http')
   , cons = require('consolidate')
   , passport = require('passport')
   , mongoose = require('mongoose')
-  , configureUserRoutes = require('./routes/user').configure
   , routes = require('./routes')
+  , configureUserRoutes = require('./routes/user').configure
   , configurePassport = require('./app/config/passport').configure
   , configureMongoose = require('./app/config/mongoose').configure
   , app = express()
@@ -30,7 +30,7 @@ app.engine('handlebars', cons.handlebars)
   .use(passport.initialize())
   .use(passport.session());
 
-configureMongoose(mongoose, "mongodb://localhost: 27017/videosite");
+configureMongoose(mongoose);
 configurePassport(passport);
 configureUserRoutes(app, passport);
 

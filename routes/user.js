@@ -12,7 +12,9 @@ function formatDbResponse (model) {
 }
 
 function createUser (req, res) {
-  User.findOne({username: req.body.username}, function (err, user) {
+  var searchTerms = {username: req.body.username};
+
+  User.findOne(searchTerms, function (err, user) {
     var data = {};
 
     if (err) { return console.log(err); }
@@ -21,25 +23,25 @@ function createUser (req, res) {
       return res.status(400).send('User already exists.');
     } else {
       data.username = req.body.username;
-      data.password= req.body.password;
+      data.password = req.body.password;
       data.email = req.body.email;
       User.create(data, function (err, user) {
         if (err) { return console.log(err); } 
         
         console.log(user.username, "created");
-        res.json(formatDbResponse(user));
+        return res.json(formatDbResponse(user));
       });
     }
   });
 }
 
 function login (req, res) {
-  res.json({user: req.user});
+  return res.json({user: req.user});
 }
 
 function logout (req, res) {
-  req.logout()
-  res.json({});
+  req.logout();
+  return res.json({});
 }
 
 exports.configure = function (app, passport, options) {
