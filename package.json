@@ -1,0 +1,23 @@
+{
+  "name": "videosite",
+  "version": "0.0.0",
+  "description": "Ember.js video site",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:stevekane/videosite.git"
+  },
+  "author": "Steve Kane",
+  "license": "BSD",
+  "dependencies": {
+    "express": "~3.4.0",
+    "redis": "~0.8.6",
+    "connect-redis": "~1.4.5",
+    "consolidate": "~0.9.1",
+    "handlebars": "~1.0.12",
+    "bower": "~1.2.7"
+  }
+}
