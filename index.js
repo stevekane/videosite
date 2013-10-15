@@ -6,9 +6,9 @@ var http = require('http')
   , passport = require('passport')
   , mongoose = require('mongoose')
   , routes = require('./routes')
-  , configureUserRoutes = require('./routes/user').configure
   , configurePassport = require('./app/config/passport').configure
   , configureMongoose = require('./app/config/mongoose').configure
+  , configureUserRoutes = require('./routes/user').configure
   , app = express()
   , server = http.createServer(app);
 
@@ -33,6 +33,8 @@ app.engine('handlebars', cons.handlebars)
 configureMongoose(mongoose);
 configurePassport(passport);
 configureUserRoutes(app, passport);
+
+
 
 //serve the web app yo
 app.get('/', routes.index);
