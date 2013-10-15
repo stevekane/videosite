@@ -2,14 +2,13 @@ minispade.register('Application.js', function() {
 window.App = Ember.Application.create();
 minispade.require('Router.js');
 minispade.require('Models.js');
+minispade.require('Controllers.js');
 
-App.deferReadiness();
+});
 
-var activeUser = localStorage['user'];
+minispade.register('Controllers.js', function() {
 
-console.log(activeUser);
-
-App.advanceReadiness();
+minispade.require('controllers/User.js');
 
 });
 
@@ -20,11 +19,19 @@ minispade.require('models/User.js');
 });
 
 minispade.register('Router.js', function() {
+
+minispade.require('routes/Application.js');
+
 App.Router.map(function () {
   this.resource('signup');
   this.resource('login');
   this.resource('account');
 });
+
+});
+
+minispade.register('controllers/User.js', function() {
+App.UserController = Ember.ObjectController.extend({});
 
 });
 
@@ -42,6 +49,23 @@ App.User = DS.Model.extend({
   fullName: function () {
     return this.get('firstName') + this.get('lastName'); 
   }.property('firstName', 'lastName')
+
+});
+
+});
+
+minispade.register('routes/Application.js', function() {
+App.ApplicationRoute = Ember.Route.extend({
+  
+  model: function (params) {
+    return store.get('user'); 
+  },
+
+  setupController: function (controller, model) {
+    var userController = this.controllerFor('user');
+    userController.set('content', model);
+    console.log(model); 
+  }
 
 });
 
