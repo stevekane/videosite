@@ -7,8 +7,9 @@
 
     <ul class="nav navbar-nav pull-right">
       {{#if activeUser}}
+        <span class="navbar-text">Signed in as {{activeUser.username}}</span>
         <li>{{#link-to "account"}}View Account{{/link-to}}</li>
-        <li {{action logout}}>Logout</li>
+        <li><a {{action logout}}>Logout</a></li>
       {{else}}
         <li>{{#link-to "signup"}}Signup{{/link-to}}</li> 
         <li>{{#link-to "login"}}Login{{/link-to}}</li>
