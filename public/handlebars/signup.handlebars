@@ -1,36 +1,35 @@
 <section class="container page-section">
   <div class="row">
-    <div class="col-md-8 col-md-offset-2">
-      <h1 class="text-center">{{activeUser.name}}'s Account</h1> 
-    </div>
     <div class="row">
       <div class="col-md-8 col-md-offset-2">
-        {{#if editing}}
 
-          <form class="form-horizontal" role="form">
+        <form class="form-horizontal" role="form">
+          <legend>Create Free Account!</legend>
+          <div class="form-group">
+            <label for="username">Username</label>
+            {{input type="text" class="form-control" placeholder="Your Username"}}
+          </div>
 
-            <div class="form-group">
-              {{input type="text" class="form-control" placeholder="Your Name"}}
-            </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            {{input type="email" class="form-control" placeholder="Your Email"}}
+          </div>
 
-            <div class="form-group">
-              {{input type="text" class="form-control" placeholder="Your Email"}}
-            </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            {{input type="password" class="form-control" placeholder="Password"}}
+          </div>
 
-            <div class="form-group">
-              <button class="btn btn-submit" {{action updateAccountInfo}}>Update</button>
-            </div>
+          <div class="form-group">
+            <label for="confirmPassword">Confirm Password</label>
+            {{input type="password" class="form-control" placeholder="Confirm Password"}}
+          </div>
 
-          </form> 
+          <div class="form-group">
+            <button class="btn btn-submit" {{action updateAccountInfo}}>Update</button>
+          </div>
+        </form> 
 
-        {{else}}
-
-        <ul>
-          <li>
-        </ul>
-
-        {{/if}}
-        </ul>
       </div>
     </div>
   </div>
