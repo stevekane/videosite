@@ -89,24 +89,12 @@ module.exports = (grunt) ->
 
   grunt.registerTask('default',
     [
-      'emberTemplates',
-      'sass',
-      'minispade',
-      'connect',
-      'open:localhost'
-      'watch'
-    ]
-  )
-
-  grunt.registerTask('noserver',
-    [
-      'emberTemplates',
+     'emberTemplates',
       'sass',
       'minispade',
       'watch'
     ]
   )
-
   grunt.registerTask('simple',
     [
       'handlebars',

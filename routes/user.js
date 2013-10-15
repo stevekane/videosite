@@ -20,7 +20,7 @@ function createUser (req, res) {
     if (err) { return console.log(err); }
 
     if (user) {
-      return res.status(400).send('User already exists.');
+      return res.status(400).send('User name already exists.');
     } else {
       data.username = req.body.username;
       data.password = req.body.password;
@@ -45,7 +45,7 @@ function logout (req, res) {
 }
 
 exports.configure = function (app, passport, options) {
-  app.get('user/create', createUser);
-  app.get('user/login', passport.authenticate('local'), login);
-  app.get('user/logout', logout);
+  app.post('/user/create', createUser);
+  app.post('/user/login', passport.authenticate('local'), login);
+  app.get('/user/logout', logout);
 }

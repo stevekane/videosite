@@ -41,7 +41,7 @@ function deserializeMongo (id, done) {
 }
 
 exports.configure = function (passport, options) {
-  passport.use(mongoStrategy);
+  passport.use(new LocalStrategy(mongoStrategy));
   passport.serializeUser(serialize);
   passport.deserializeUser(deserializeMongo);
 }
