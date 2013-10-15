@@ -34,6 +34,7 @@ configureMongoose(mongoose);
 configurePassport(passport);
 configureUserRoutes(app, passport);
 
+//serve the web app yo
 app.get('/', routes.index);
 
 server.listen(app.get('port'), function () {
