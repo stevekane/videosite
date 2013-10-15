@@ -7,26 +7,26 @@
           <legend>Create Free Account!</legend>
           <div class="form-group">
             <label for="username">Username</label>
-            {{input type="text" class="form-control" placeholder="Your Username"}}
+            {{input type="text" class="form-control" placeholder="Your Username" value=username}}
           </div>
 
           <div class="form-group">
             <label for="email">Email</label>
-            {{input type="email" class="form-control" placeholder="Your Email"}}
+            {{input type="email" class="form-control" placeholder="Your Email" value = email}}
           </div>
 
           <div class="form-group">
             <label for="password">Password</label>
-            {{input type="password" class="form-control" placeholder="Password"}}
+            {{input type="password" class="form-control" placeholder="Password" value = password}}
           </div>
 
           <div class="form-group">
             <label for="confirmPassword">Confirm Password</label>
-            {{input type="password" class="form-control" placeholder="Confirm Password"}}
+            {{input type="password" class="form-control" placeholder="Confirm Password" value =confirmPassword}}
           </div>
 
           <div class="form-group">
-            <button class="btn btn-warning" {{action updateAccountInfo}}>Create!</button>
+            <button class="btn btn-warning" {{action createNewAccount}}>Create!</button>
           </div>
         </form> 
 

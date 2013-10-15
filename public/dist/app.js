@@ -10,6 +10,8 @@ minispade.register('Controllers.js', function() {
 
 minispade.require('controllers/Application.js');
 minispade.require('controllers/User.js');
+minispade.require('controllers/Login.js');
+minispade.require('controllers/Signup.js');
 
 });
 
@@ -42,6 +44,68 @@ App.ApplicationController = Ember.Controller.extend({
 
 });
 
+});
+
+minispade.register('controllers/Login.js', function() {
+App.LoginController = Ember.Controller.extend({
+  username: null,
+  password: null,
+  actions:{
+    updateAccountInfo: function(){
+      user = this.get('username');
+      password = this.get('password');
+      _this = this;
+      $.ajax({
+        type: 'POST',
+        url: "http://localhost:3000/user/login",
+        data: {username:user, password: password},
+        success: function(response){
+          console.log("OK!", response);
+        },
+        error: function(response){
+          console.log(response);
+        },
+        complete: function(res){
+          _this.setProperties({username: null, password: null});
+        }
+      });
+    }
+  }
+});
+});
+
+minispade.register('controllers/Signup.js', function() {
+App.SignupController = Ember.Controller.extend({
+  username: null,
+  password: null,
+  confirmPassword: null,
+  email: null,
+  actions:{
+    createNewAccount: function(){
+      user = this.get('username');
+      password = this.get('password');
+      passwordConfirm = this.get('confirmPassword');
+      email = this.get('email');
+      _this = this;
+      
+      $.ajax({
+        type: 'POST',
+        url: "http://localhost:3000/user/create",
+        data: {username:user, password: password, email: email},
+        success: function(response){
+          console.log("OK!", response);
+        },
+        error: function(response){
+          console.log(response);
+        },
+        complete: function(res){
+          _this.setProperties({username: null, password: null});
+        }
+      });
+    }
+  }
+
+});
 });
 
 minispade.register('controllers/User.js', function() {
