@@ -1,0 +1,24 @@
+{
+  "name": "minispade",
+  "summary": "A tiny runtime dependency management solution",
+  "description": "A tiny runtime dependency management solution that makes it easy to wrap up an entire package as a dependency",
+  "homepage": "http://yehudakatz.com",
+  "author": "Yehuda Katz",
+  "version": "1.0.0.pre2",
+
+  "directories": {
+    "lib": "lib"
+  },
+
+  "bpm:build": {
+    "bpm_libs.js": {
+      "files": ["lib"]
+    }
+  },
+
+  "bpm:provides": {
+    "transport": {
+      "main": "minispade/transport"
+    }
+  }
+}

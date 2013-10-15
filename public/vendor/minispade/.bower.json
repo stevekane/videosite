@@ -1,0 +1,13 @@
+{
+  "name": "minispade",
+  "homepage": "https://github.com/wycats/minispade",
+  "_release": "7d5c876941",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "7d5c876941ef6d88813a4ef419a5ada2ad2b72ff"
+  },
+  "_source": "git://github.com/wycats/minispade.git",
+  "_target": "*",
+  "_originalSource": "git://github.com/wycats/minispade.git"
+}
