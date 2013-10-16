@@ -25,9 +25,6 @@ function mongoStrategy (username, password, done) {
   }); 
 }
 
-//strategy for use with redis
-function redisStrategy (username, password, done) {}
-
 //return the id of the provided user
 function serialize (user, done) {
   done(null, user._id);

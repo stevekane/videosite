@@ -45,6 +45,7 @@ function handleFailure (res, error) {
 
 //utility function to send an error 
 function sendError (res, error) {
+  console.log('sendError');
   return res.status(400).send({error: error});
 }
 
@@ -67,12 +68,14 @@ function createNewUser (User, data) {
 }
 
 function returnNewUser (req, res) {
+  console.log('returnNewUser');
   return function (user) {
     return res.json(formatDbResponse(user)); 
   }
 }
 
 function registerWithCustomerIO (cio) {
+  console.log('registerWithCIO');
   return function (user) {
     cio.identify(user._id, user.email);
     return user;
@@ -82,7 +85,7 @@ function registerWithCustomerIO (cio) {
 //closure gives access to our customer.io object
 function processNewUser (cio) {
 
-  return function processNewUser (req, res) {
+  return function (req, res) {
     var data = {
      username: req.body.user.username,
      password: req.body.user.password,
@@ -100,7 +103,7 @@ function processNewUser (cio) {
       .then(returnNewUser(req, res))
       .done();
     })
-    .done()
+    .done();
   }
 }
 

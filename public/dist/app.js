@@ -166,37 +166,34 @@ App.LoginController = Ember.Controller.extend({
   actions:{
   
     attemptLogin: function(hash){
-        var passwordError
-          , store = this.get('store')
-          , self = this
-          , values = {
-          username: hash.username.value,
-          password: hash.password.value,
-        };
-        window.store2 = store;
-        
-        $.ajax({
-          type: 'POST',
-          url: "http://localhost:3000/user/login",
-          data: {username: values.username, 
-                 password: values.password
-                 },
-          success: function(response){
-            var user = response.user.user;
-            var emberUser = store.push(App.User, user);
-            self.set('activeUser', emberUser);
-            self.resetFields(hash);
-            self.transitionToRoute('index');
-          },
-          error: function(response){
-            console.log(response.responseText);
-            set(hash, "username.error", response.responseText);
-            set(hash, "password.error", response.responseText);
-          },
-          complete: function(res){
-            //self.resetFields(hash);
-          }
-        })
+      var passwordError
+        , store = this.get('store')
+        , self = this
+        , values = {
+        username: hash.username.value,
+        password: hash.password.value,
+      };
+      window.store2 = store;
+      
+      $.ajax({
+        type: 'POST',
+        url: "http://localhost:3000/user/login",
+        data: {username: values.username, 
+               password: values.password
+               },
+        success: function(response){
+          var user = response.user.user;
+          var emberUser = store.push(App.User, user);
+          self.set('activeUser', emberUser);
+          self.resetFields(hash);
+          self.transitionToRoute('index');
+        },
+        error: function(response){
+          console.log(response.responseText);
+          set(hash, "username.error", response.responseText);
+          set(hash, "password.error", response.responseText);
+        }
+      })
     }
   }
 });
