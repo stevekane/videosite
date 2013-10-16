@@ -15,7 +15,7 @@ var routes = require('./routes')
 
 var callWithPromise = Q.ninvoke
   , cioConfig = require('./config.json').customerIO
-  , cio = customerIO.init(cioConfig.id, cioConfig.token);
+  , cio = customerIO.init(cioConfig.id, cioConfig.token)
   , app = express()
   , server = http.createServer(app);
 
@@ -50,4 +50,5 @@ callWithPromise(server, "listen", app.get('port'))
 })
 .then(function () {
   console.log('server connected on', app.get('port'));
-});
+})
+.done();

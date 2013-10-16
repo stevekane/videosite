@@ -14,38 +14,41 @@ function formatDbResponse (model) {
   return {user: formattedModel};
 }
 
-function logAndSendError (req, res) {
+function logAndSendError (req, res, next) {
   return function (err) {
     console.log(err);
-    return res.status(400).send({global: err});
+    res.error = err;
+    return next();
   }
 }
 
-function createUser (req, res) {
-  var searchTerms = {username: req.body.username};
+function createUser (req, res, next) {
+  var data = {
+   username: req.body.user.username,
+   password: req.body.user.password,
+   email: req.body.user.email
+  }; 
 
-  callWithPromise(User, "findOne", searchTerms)
-  .fail(logAndSendError(req, res))
+  callWithPromise(User, "findOne", {username: data.username})
   .then(function (user) {
-    var data = {}; 
-    if (user) {
-      return res.status(400).send({username: "Error: Username is already in use!"});
+    if (user) { 
+      res.error = {username: "Username already taken."};
+      return next();
     }
-    data.username = req.body.user.username;
-    data.password = req.body.user.password;
-    data.email = req.body.user.email;
 
     callWithPromise(User, "create", data)
-    .fail(logAndSendError(req, res))
     .then(function (user) {
-      //should this have a callback??
-      cio.identify(user.id, user.email);
-      return res.json(formatDbResponse(user));
+      res.user = formatDbResponse(user);
+      return next();
     })
-  });
+    .fail(logAndSendError(req, res, next))
+    .done();
+  })
+  .fail(logAndSendError(req, res, next))
+  .done();
 }
 
-function editUser (req, res) {
+function editUser (req, res, next) {
   var updatedInfo = req.body;
   delete updatedInfo._id;
   delete updatedInfo.__v;
@@ -55,12 +58,15 @@ function editUser (req, res) {
   delete updatedInfo.password;
   
   callWithPromise(User, "findOneAndUpdate", {_id: req.body.id}, {$set: updatedInfo})
-  .fail(logAndSendError(req, res))
   .then(function (user) {
     var response = {};
-    response.user = user ? formatDbResponse(user) : null;
+    response.user = user 
+      ? formatDbResponse(user) 
+      : null;
     res.send(response);
   })
+  .fail(logAndSendError(req, res))
+  .done();
 };
 
 
@@ -73,9 +79,19 @@ function logout (req, res) {
   res.status(200).send("logged out successfully");
 }
 
+function returnUserOrError (req, res) {
+  if (res.error) {
+    return res.status(400).send(res.error);
+  } else if (res.user) {
+    return res.json(res.user);
+  } else {
+    return res.status(400).send({global: "There was an error."});
+  }
+}
+
 exports.configure = function (app, passport, cio, options) {
-  app.post('/users', createUser);
-  app.post('/user/create', createUser);
+  app.post('/users', createUser, returnUserOrError);
+  app.post('/user/create', createUser, returnUserOrError);
   app.post('/user/login', passport.authenticate('local'), login);
   app.all('/user/logout', verifyAuth, logout);
   app.post('/user/edit', verifyAuth, editUser);
