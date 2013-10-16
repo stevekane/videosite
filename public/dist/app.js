@@ -21,6 +21,8 @@ minispade.require('controllers/Application.js');
 minispade.require('controllers/User.js');
 minispade.require('controllers/Login.js');
 minispade.require('controllers/Signup.js');
+minispade.require('controllers/Account.js');
+minispade.require('controllers/AccountChangeEmail.js');
 
 });
 
@@ -33,11 +35,88 @@ minispade.require('models/User.js');
 minispade.register('Router.js', function() {
 
 minispade.require('routes/Application.js');
+minispade.require('routes/Account.js');
+minispade.require('routes/AccountChangeEmail.js');
 
 App.Router.map(function () {
   this.resource('signup');
   this.resource('login');
-  this.resource('account');
+  this.resource('account', function () {
+    this.route('changeEmail');
+    this.route('changePassword');
+  });
+});
+
+});
+
+minispade.register('controllers/Account.js', function() {
+var alias = Ember.computed.alias
+  , set = Ember.set;
+
+App.AccountController = Ember.ObjectController.extend({
+  
+  needs: ['user'],
+
+  content: alias('controllers.user.content'),
+
+});
+
+});
+
+minispade.register('controllers/AccountChangeEmail.js', function() {
+var set = Ember.set
+  , alias = Ember.computed.alias;
+
+App.AccountChangeEmailController = Ember.ObjectController.extend({
+  
+  needs: ['user'],
+
+  content: alias('controllers.user.content'),
+
+  newEmailHash: {
+    email: {value: "", error: ""},
+    confirmEmail: {value: "", error: ""},
+  },
+
+  resetFields: function (emailHash) {
+    set(emailHash, 'email.value', "");
+    set(emailHash, 'email.error', "");
+    set(emailHash, 'confirmEmail.value', "");
+    set(emailHash, 'confirmEmail.error', "");
+  },
+
+  actions: {
+    
+    changeEmail: function (user, hash) {
+      var emailError
+        , store = this.get('store')
+        , self = this
+        , values = {
+        email: hash.email.value,
+        confirmEmail: hash.confirmEmail.value,
+      };
+      
+      if (hash.email.value !== hash.confirmEmail.value) {
+        emailError = "Provided emails did not match."
+        set(hash, "email.value", "");
+        set(hash, "email.error", emailError);
+        set(hash, "confirmEmail.value", "");
+        set(hash, "confirmEmail.error", emailError);
+        return;
+      } else {
+        user.set('email', hash.email.value)
+          .save()
+          .then(function (user) { 
+            self.resetFields(hash);
+          })
+          .fail(function (errors) {
+            set(hash, "email.error", errors.email);             
+            set(hash, "confirmEmail.error", errors.email);             
+          });
+      }
+    }
+  }
+
 });
 
 });
@@ -164,13 +243,12 @@ App.UserController = Ember.ObjectController.extend({
 
   storeInLocalStorage: function () {
     var user = this.get('content');
-    App.localStore.set('user', {
-      id: user.get('id'),
-      username: user.get('username'),
-      email: user.get('email')
-    });
-    console.log('User ', user.get('username'), ' stored in localStorage!');
-  }.observes('content')
+    var localStoredUser = user 
+      ? {id: user.get('id'), username: user.get('username'), email: user.get('email')}
+      : null;
+
+    App.localStore.set('user', localStoredUser);
+  }.observes('content', 'content.email', 'content.username')
 
 });
 
@@ -182,22 +260,37 @@ var attr = DS.attr;
 App.User = DS.Model.extend({
   
   username: attr(),
-  firstName: attr(),
-  lastName: attr(),
-
-  email: "",
-
-  fullName: function () {
-    return this.get('firstName') + this.get('lastName'); 
-  }.property('firstName', 'lastName')
+  email: attr(),
 
 });
+
+});
+
+minispade.register('routes/Account.js', function() {
+App.AccountRoute = Ember.Route.extend({});
+
+});
+
+minispade.register('routes/AccountChangeEmail.js', function() {
+App.AccountChangeEmailRoute = Ember.Route.extend({});
 
 });
 
 minispade.register('routes/Application.js', function() {
+var set = Ember.set;
+
 App.ApplicationRoute = Ember.Route.extend({
   
+  actions: {
+    
+    logout: function (activeUser) {
+      var userController = this.controllerFor('user');
+      set(userController, "content", null);
+      this.transitionTo('index');
+    }
+
+  },
+
   model: function (params) {
     var store= this.get('store')
       , storedUser = App.localStore.get('user'); 
@@ -209,7 +302,6 @@ App.ApplicationRoute = Ember.Route.extend({
     var userController = this.controllerFor('user')
 
     userController.set('content', model);
-    console.log(userController.get('content.username')); 
   }
 
 });

@@ -1,5 +1,17 @@
+var set = Ember.set;
+
 App.ApplicationRoute = Ember.Route.extend({
   
+  actions: {
+    
+    logout: function (activeUser) {
+      var userController = this.controllerFor('user');
+      set(userController, "content", null);
+      this.transitionTo('index');
+    }
+
+  },
+
   model: function (params) {
     var store= this.get('store')
       , storedUser = App.localStore.get('user'); 
@@ -11,7 +23,6 @@ App.ApplicationRoute = Ember.Route.extend({
     var userController = this.controllerFor('user')
 
     userController.set('content', model);
-    console.log(userController.get('content.username')); 
   }
 
 });
