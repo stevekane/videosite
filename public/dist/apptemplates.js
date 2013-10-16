@@ -22,13 +22,13 @@ function program3(depth0,data) {
   data.buffer.push("'s Account</h1>\n      <div class=\"row\">\n        <div class=\"col-md-4 col-md-offset-2 text-center\">\n          ");
   hashTypes = {};
   hashContexts = {};
-  options = {hash:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data};
+  options = {hash:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["STRING"],hashContexts:hashContexts,hashTypes:hashTypes,data:data};
   stack2 = ((stack1 = helpers['link-to'] || depth0['link-to']),stack1 ? stack1.call(depth0, "account.changeEmail", options) : helperMissing.call(depth0, "link-to", "account.changeEmail", options));
   if(stack2 || stack2 === 0) { data.buffer.push(stack2); }
   data.buffer.push("\n        </div>\n        <div class=\"col-md-4 text-center\">\n          ");
   hashTypes = {};
   hashContexts = {};
-  options = {hash:{},inverse:self.noop,fn:self.program(3, program3, data),contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data};
+  options = {hash:{},inverse:self.noop,fn:self.program(3, program3, data),contexts:[depth0],types:["STRING"],hashContexts:hashContexts,hashTypes:hashTypes,data:data};
   stack2 = ((stack1 = helpers['link-to'] || depth0['link-to']),stack1 ? stack1.call(depth0, "account.changePassword", options) : helperMissing.call(depth0, "link-to", "account.changePassword", options));
   if(stack2 || stack2 === 0) { data.buffer.push(stack2); }
   data.buffer.push("\n        </div>\n        </div>\n      </div>\n\n    </div>\n  </header>\n\n  <section class=\"row\">\n    <content class=\"col-md-4 col-md-offset-1\">\n      <div class=\"row\">\n\n        <div class=\"col-md-6\">\n          <h4>Username</h4>\n        </div>\n        <div class=\"col-md-6\">\n          <h4>");
@@ -45,6 +45,36 @@ function program3(depth0,data) {
   data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "outlet", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
   data.buffer.push(" \n    </aside>\n  </section>\n\n</section>\n");
   return buffer;
+  
+});
+
+Ember.TEMPLATES["account/changeEmail"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};
+  var buffer = '';
+
+
+  return buffer;
+  
+});
+
+Ember.TEMPLATES["account/changePassword"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};
+  var buffer = '';
+
+
+  return buffer;
+  
+});
+
+Ember.TEMPLATES["account/index"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
+this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};
+  
+
+
+  data.buffer.push("<h2>Empty space</h2>\n");
   
 });
 
