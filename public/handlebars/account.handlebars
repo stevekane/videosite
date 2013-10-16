@@ -1,41 +1,15 @@
 <section class="container page-section">
   <div class="row">
     <div class="col-md-8 col-md-offset-2">
-      <h1 class="text-center">{{username}}'s Account</h1> 
+      <h1 class="text-center">{{username}}'s Account</h1>
     </div>
   </div>
   <div class="row">
     <div class="col-md-8 col-md-offset-2">
-      {{#if editing}}
-
-        <form class="form-horizontal" role="form">
-          <div class="form-group">
-            {{input type="text" class="form-control" placeholder="Your Name"}}
-          </div>
-          <div class="form-group">
-            {{input type="text" class="form-control" placeholder="Your Email"}}
-          </div>
-
-          <div class="form-group">
-            {{input type="password" class="form-control" placeholder="New Password"}}
-          </div>
-          <div class="form-group">
-            {{input type="password" class="form-control" placeholder="Confirm New Password"}}
-          </div>
-
-          <div class="form-group">
-            <button class="btn btn-submit" {{action updateAccountInfo}}>Update Account Settings</button>
-          </div>
-        </form> 
-
-      {{else}}
-
-        <ul>
-          <li>{{activeUser.name}}</li>
-          <li>{{activeUser.email}}</li>
-        </ul>
-
-      {{/if}}
+      <ul>
+        <li>{{username}}</li>
+        <li>{{email}}</li>
+      </ul>
     </div>
   </div>
 </section>

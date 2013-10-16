@@ -45,13 +45,20 @@ App.Router.map(function () {
 });
 
 minispade.register('controllers/Account.js', function() {
-var alias = Ember.computed.alias;
+var alias = Ember.computed.alias
+  , set = Ember.set;
 
 App.AccountController = Ember.ObjectController.extend({
   
   needs: ['user'],
 
-  content: alias('controllers.user.content')
+  content: alias('controllers.user.content'),
+
+  editing: false,
+
+  actions: {
+    
+  }
 
 });
 
@@ -196,7 +203,7 @@ var attr = DS.attr;
 App.User = DS.Model.extend({
   
   username: attr(),
-  email: "",
+  email: attr(),
 
 });
 
