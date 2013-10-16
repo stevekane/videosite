@@ -7,26 +7,50 @@
           <legend>Create Free Account!</legend>
           <div class="form-group">
             <label for="username">Username</label>
-            {{input type="text" class="form-control" placeholder="Your Username" value=username}}
+            {{input type="text"
+              class="form-control"
+              placeholder="Your Username"
+              value=newAccountHash.username.value}}
+            {{#if newAccountHash.username.error}}
+              <small class="text-danger">{{newAccountHash.username.error}}</small>
+            {{/if}}
           </div>
 
           <div class="form-group">
             <label for="email">Email</label>
-            {{input type="email" class="form-control" placeholder="Your Email" value = email}}
+            {{input type="email"
+              class="form-control"
+              placeholder="Your Email"
+              value=newAccountHash.email.value}}
+            {{#if newAccountHash.email.error}}
+              <small class="text-danger">{{newAccountHash.email.error}}</small>
+            {{/if}}
           </div>
 
           <div class="form-group">
             <label for="password">Password</label>
-            {{input type="password" class="form-control" placeholder="Password" value = password}}
+            {{input type="password"
+              class="form-control"
+              placeholder="Password"
+              value=newAccountHash.password.value}}
+            {{#if newAccountHash.password.error}}
+              <small class="text-danger">{{newAccountHash.password.error}}</small>
+            {{/if}}
           </div>
 
           <div class="form-group">
             <label for="confirmPassword">Confirm Password</label>
-            {{input type="password" class="form-control" placeholder="Confirm Password" value =confirmPassword}}
+            {{input type="password"
+              class="form-control"
+              placeholder="Confirm Password"
+              value=newAccountHash.confirmPassword.value}}
+            {{#if newAccountHash.confirmPassword.error}}
+              <small class="text-danger">{{newAccountHash.confirmPassword.error}}</small>
+            {{/if}}
           </div>
 
           <div class="form-group">
-            <button class="btn btn-warning" {{action createNewAccount}}>Create!</button>
+            <button class="btn btn-warning" {{action signUp newAccountHash}}>Create!</button>
           </div>
         </form> 
 

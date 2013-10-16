@@ -1,8 +1,17 @@
 minispade.register('Application.js', function() {
 window.App = Ember.Application.create();
+
+App.Store = DS.Store.extend({
+  adapter: DS.FixtureAdapter
+});
 minispade.require('Router.js');
 minispade.require('Models.js');
 minispade.require('Controllers.js');
+
+//store.js uses the store variable globally.
+//re-assign it here to avoid naming conflicts throughout app
+App.localStore = store;
+store = null;
 
 });
 
@@ -47,69 +56,99 @@ App.ApplicationController = Ember.Controller.extend({
 });
 
 minispade.register('controllers/Login.js', function() {
-App.LoginController = Ember.Controller.extend({
-  username: null,
-  password: null,
-  actions:{
-    updateAccountInfo: function(){
-      user = this.get('username');
-      password = this.get('password');
-      _this = this;
-      $.ajax({
-        type: 'POST',
-        url: "http://localhost:3000/user/login",
-        data: {username:user, password: password},
-        success: function(response){
-          console.log("OK!", response);
-        },
-        error: function(response){
-          console.log(response);
-        },
-        complete: function(res){
-          _this.setProperties({username: null, password: null});
-        }
-      });
-    }
-  }
-});
+App.LoginController = Ember.Controller.extend({});
+
 });
 
 minispade.register('controllers/Signup.js', function() {
+var set = Ember.set
+  , alias = Ember.computed.alias;
+
+var clearAndSetError = function (property, error) {
+  set(property, "value", "");
+  set(property, "error", error);
+};
+
+
 App.SignupController = Ember.Controller.extend({
-  username: null,
-  password: null,
-  confirmPassword: null,
-  email: null,
-  actions:{
-    createNewAccount: function(){
-      user = this.get('username');
-      password = this.get('password');
-      passwordConfirm = this.get('confirmPassword');
-      email = this.get('email');
-      _this = this;
+
+  needs: ['user'],
+
+  activeUser: alias('controllers.user.content'),
+
+  newAccountHash: {
+    username: {value: "", error: ""},
+    email: {value: "", error: ""},
+    password: {value: "", error: ""},
+    confirmPassword: {value: "", error: ""}
+  },
+
+  resetFields: function (newAccountHash) {
+    set(newAccountHash, 'username.value', "");
+    set(newAccountHash, 'username.error', "");
+    set(newAccountHash, 'email.value', "");
+    set(newAccountHash, 'email.error', "");
+    set(newAccountHash, 'password.value', "");
+    set(newAccountHash, 'password.error', "");
+    set(newAccountHash, 'confirmPassword.value', "");
+    set(newAccountHash, 'confirmPassword.error', "");
+  },
+
+  actions: {
+    
+    signUp: function (hash) {
+      var passwordError
+        , store = this.get('store')
+        , self = this
+        , values = {
+        username: hash.username.value,
+        email: hash.email.value,
+        password: hash.password.value,
+        confirmPassword: hash.confirmPassword.value,
+      };
       
-      $.ajax({
-        type: 'POST',
-        url: "http://localhost:3000/user/create",
-        data: {username:user, password: password, email: email},
-        success: function(response){
-          console.log("OK!", response);
-        },
-        error: function(response){
-          console.log(response);
-        },
-        complete: function(res){
-          _this.setProperties({username: null, password: null});
-        }
-      });
+      if (hash.password.value !== hash.confirmPassword.value) {
+        passwordError = "Provided passwords did not match."
+        set(hash, "password.value", "");
+        set(hash, "confirmPassword.value", "");
+        set(hash, "password.error", passwordError);
+        set(hash, "confirmPassword.error", passwordError);
+        return;
+      } else {
+        store.createRecord('user', values)
+          .save()
+          .then(function (user) { 
+            self.set('activeUser', user);
+            self.resetFields(hash);
+            self.transitionToRoute('index');
+          })
+          .fail(function (errors) {
+            set(hash, "username.error", errors.username);             
+            set(hash, "email.error", errors.email);             
+            set(hash, "password.error", errors.password);             
+            set(hash, "confirmPassword.error", errors.confirmPassword);             
+          });
+      }
     }
   }
-
 });
+
 });
 
 minispade.register('controllers/User.js', function() {
-App.UserController = Ember.ObjectController.extend({});
+App.UserController = Ember.ObjectController.extend({
+
+  storeInLocalStorage: function () {
+    var user = this.get('content');
+    App.localStore.set('user', {
+      id: user.get('id'),
+      username: user.get('username'),
+      email: user.get('email')
+    });
+    console.log('User ', user.get('username'), ' stored in localStorage!');
+  }.observes('content')
+
+});
 
 });
 
@@ -136,10 +175,10 @@ minispade.register('routes/Application.js', function() {
 App.ApplicationRoute = Ember.Route.extend({
   
   model: function (params) {
-    var emberStore = this.get('store')
-      , storedUser = store.get('user'); 
+    var store= this.get('store')
+      , storedUser = App.localStore.get('user'); 
 
-    return storedUser ? emberStore.push('user', storedUser) : null;
+    return storedUser ? store.push('user', storedUser) : null;
   },
 
   setupController: function (controller, model) {
