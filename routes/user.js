@@ -16,23 +16,6 @@ function formatDbResponse (model) {
   return {user: formattedModel};
 }
 
-function editUser (req, res, next) {
-  var updatedInfo = req.body.user;
-  delete updatedInfo._id;
-  delete updatedInfo.__v;
-  //TODO: add email change, needs to switch old customer.io email to new, updating
-  
-  callWithPromise(User, "findOneAndUpdate", {_id: req.body.user.id}, {$set: updatedInfo})
-  .then(function (user) {
-    var response = {};
-    response = user 
-      ? formatDbResponse(user) 
-      : null;
-    res.send(response);
-  })
-  .fail(handleFailure(res, "Server error while handling edit user."))
-  .done();
-};
 
 //used to send errors from promise .fail hooks
 function handleFailure (res, error) {
@@ -73,12 +56,39 @@ function returnNewUser (req, res) {
   }
 }
 
+function returnUpdatedUser(req, res){
+  return function(user){
+    return res.json(formatDbResponse(user));
+  }
+}
+
+
+
 function registerWithCustomerIO (cio) {
   return function (user) {
     cio.identify(user._id, user.email);
     return user;
   }
 }
+
+function updateWithCustomerIO (cio) {
+  return function (user) {
+    cio.identify(user._id, user.email);
+    return user;
+  }
+}
+
+
+
+
+function editUserInfo(User, data){
+  console.log("edit User");
+  var updatedInfo = {};
+  updatedInfo.email = data.email;
+  
+  return callWithPromise(User, "findOneAndUpdate", {_id: data.id}, {$set: updatedInfo})      
+}
+
 
 //closure gives access to our customer.io object
 function processNewUser (cio) {
@@ -105,6 +115,19 @@ function processNewUser (cio) {
   }
 }
 
+function processEditUser(cio){
+  return function (req, res) {
+    var data = {email: req.body.user.email,
+                id: req.body.user.id};
+    
+    editUserInfo(User, data)
+    .fail(handleFailure(res, "Server Error while updating user info"))
+    .then(updateWithCustomerIO(cio))
+    .then(returnUpdatedUser(req,res))
+    .done();
+  };
+}
+
 function login (req, res) {
   return res.json({user: formatDbResponse(req.user)});
 }
@@ -127,7 +150,7 @@ exports.configure = function (app, passport, cio, options) {
   app.post('/user/create', processNewUser(cio));
   app.post('/user/login', passport.authenticate('local'), login);
   app.all('/user/logout', verifyAuth, logout);
-  app.put('/user/edit', verifyAuth, editUser);
-  app.get('/user/authenticated', verifyAuth, isAuthenticated); 
+  app.post('/user/authenticated', verifyAuth, isAuthenticated); 
+  app.put('/user/edit', verifyAuth, processEditUser(cio));
   app.post('/user/pwchange', verifyAuth, passwordChange); 
 }
