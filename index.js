@@ -5,6 +5,8 @@ var http = require('http')
   , cons = require('consolidate')
   , passport = require('passport')
   , mongoose = require('mongoose')
+  , Q = require('q')
+  , callWithPromise = Q.ninvoke
   , routes = require('./routes')
   , configurePassport = require('./app/config/passport').configure
   , configureMongoose = require('./app/config/mongoose').configure
@@ -37,6 +39,10 @@ configureUserRoutes(app, passport);
 //serve the web app yo
 app.get('/', routes.index);
 
-server.listen(app.get('port'), function () {
-  console.log('server connected on ', app.get('port'));
+callWithPromise(server, "listen", app.get('port'))
+.fail(function () {
+  console.log('failed to connect on port', app.get('port'));
+})
+.then(function () {
+  console.log('server connected on', app.get('port'));
 });
