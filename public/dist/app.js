@@ -54,12 +54,6 @@ App.AccountController = Ember.ObjectController.extend({
 
   content: alias('controllers.user.content'),
 
-  editing: false,
-
-  actions: {
-    
-  }
-
 });
 
 });

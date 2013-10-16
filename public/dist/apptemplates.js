@@ -1,22 +1,49 @@
 Ember.TEMPLATES["account"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
 this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};
-  var buffer = '', hashTypes, hashContexts, escapeExpression=this.escapeExpression;
+  var buffer = '', stack1, stack2, hashTypes, hashContexts, options, escapeExpression=this.escapeExpression, self=this, helperMissing=helpers.helperMissing;
 
+function program1(depth0,data) {
+  
+  
+  data.buffer.push("\n            <i class=\"glyphicon glyphicon-edit\"></i>Change Email\n          ");
+  }
 
-  data.buffer.push("<section class=\"container page-section\">\n  <div class=\"row\">\n    <div class=\"col-md-8 col-md-offset-2\">\n      <h1 class=\"text-center\">");
+function program3(depth0,data) {
+  
+  
+  data.buffer.push("\n            <i class=\"glyphicon glyphicon-edit\"></i>Change Password\n          ");
+  }
+
+  data.buffer.push("<section class=\"container page-section\">\n  <header class=\"row\">\n    <div class=\"col-md-8 col-md-offset-2\">\n\n      <h1 class=\"text-center\">");
   hashTypes = {};
   hashContexts = {};
   data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "username", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
-  data.buffer.push("'s Account</h1>\n    </div>\n  </div>\n  <div class=\"row\">\n    <div class=\"col-md-8 col-md-offset-2\">\n      <ul>\n        <li>");
+  data.buffer.push("'s Account</h1>\n      <div class=\"row\">\n        <div class=\"col-md-4 col-md-offset-2 text-center\">\n          ");
+  hashTypes = {};
+  hashContexts = {};
+  options = {hash:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data};
+  stack2 = ((stack1 = helpers['link-to'] || depth0['link-to']),stack1 ? stack1.call(depth0, "account.changeEmail", options) : helperMissing.call(depth0, "link-to", "account.changeEmail", options));
+  if(stack2 || stack2 === 0) { data.buffer.push(stack2); }
+  data.buffer.push("\n        </div>\n        <div class=\"col-md-4 text-center\">\n          ");
+  hashTypes = {};
+  hashContexts = {};
+  options = {hash:{},inverse:self.noop,fn:self.program(3, program3, data),contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data};
+  stack2 = ((stack1 = helpers['link-to'] || depth0['link-to']),stack1 ? stack1.call(depth0, "account.changePassword", options) : helperMissing.call(depth0, "link-to", "account.changePassword", options));
+  if(stack2 || stack2 === 0) { data.buffer.push(stack2); }
+  data.buffer.push("\n        </div>\n        </div>\n      </div>\n\n    </div>\n  </header>\n\n  <section class=\"row\">\n    <content class=\"col-md-4 col-md-offset-1\">\n      <div class=\"row\">\n\n        <div class=\"col-md-6\">\n          <h4>Username</h4>\n        </div>\n        <div class=\"col-md-6\">\n          <h4>");
   hashTypes = {};
   hashContexts = {};
   data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "username", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
-  data.buffer.push("</li>\n        <li>");
+  data.buffer.push("</h4>\n        </div>\n\n        <div class=\"col-md-6\">\n          <h4>Email</h4>\n        </div>\n        <div class=\"col-md-6\">\n          <h4>");
   hashTypes = {};
   hashContexts = {};
   data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "email", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
-  data.buffer.push("</li>\n      </ul>\n    </div>\n  </div>\n</section>\n");
+  data.buffer.push("</h4>\n        </div>\n      </div>\n\n    </content>\n    <aside class=\"col-md-7\">\n      ");
+  hashTypes = {};
+  hashContexts = {};
+  data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "outlet", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
+  data.buffer.push(" \n    </aside>\n  </section>\n\n</section>\n");
   return buffer;
   
 });
