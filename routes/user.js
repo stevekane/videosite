@@ -4,9 +4,6 @@ var User = require('../app/models').User
   , Q = require('q')
   , callWithPromise = Q.ninvoke;
 
-// CustomerIO.init(site ID, API token)
-var cio = CustomerIO.init('61e69d38865a3b27286b', 'faada99ebd4a66168a02')
-
 function formatDbResponse (model) {
   var formattedModel = model.toObject();
 
@@ -48,8 +45,8 @@ function createUser (req, res) {
   });
 }
 
-function editUser(req, res){
-  updatedInfo = req.body;
+function editUser (req, res) {
+  var updatedInfo = req.body;
   delete updatedInfo._id;
   delete updatedInfo.__v;
   //TODO: add email change, needs to switch old customer.io email to new, updating
@@ -76,7 +73,7 @@ function logout (req, res) {
   res.status(200).send("logged out successfully");
 }
 
-exports.configure = function (app, passport, options) {
+exports.configure = function (app, passport, cio, options) {
   app.post('/users', createUser);
   app.post('/user/create', createUser);
   app.post('/user/login', passport.authenticate('local'), login);

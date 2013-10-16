@@ -5,12 +5,17 @@ var http = require('http')
   , cons = require('consolidate')
   , passport = require('passport')
   , mongoose = require('mongoose')
-  , Q = require('q')
-  , callWithPromise = Q.ninvoke
-  , routes = require('./routes')
+  , customerIO = require('customer.io')
+  , Q = require('q');
+
+var routes = require('./routes')
   , configurePassport = require('./app/config/passport').configure
   , configureMongoose = require('./app/config/mongoose').configure
-  , configureUserRoutes = require('./routes/user').configure
+  , configureUserRoutes = require('./routes/user').configure;
+
+var callWithPromise = Q.ninvoke
+  , cioConfig = require('./config.json').customerIO
+  , cio = customerIO.init(cioConfig.id, cioConfig.token);
   , app = express()
   , server = http.createServer(app);
 
@@ -34,7 +39,7 @@ app.engine('handlebars', cons.handlebars)
 
 configureMongoose(mongoose);
 configurePassport(passport);
-configureUserRoutes(app, passport);
+configureUserRoutes(app, passport, cio);
 
 //serve the web app yo
 app.get('/', routes.index);
