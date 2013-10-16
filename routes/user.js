@@ -1,5 +1,9 @@
 var User = require('../app/models').User
-  , verifyAuth = require('../app/config/passport').verifyAuth;
+  , verifyAuth = require('../app/config/passport').verifyAuth
+  , CustomerIO = require('customer.io');
+
+// CustomerIO.init(site ID, API token)
+var cio = CustomerIO.init('61e69d38865a3b27286b', 'faada99ebd4a66168a02')
 
 function formatDbResponse (model) {
   var formattedModel = model.toObject();
@@ -17,19 +21,34 @@ function createUser (req, res) {
   User.findOne(searchTerms, function (err, user) {
     var data = {};
 
-    if (err) { return console.log(err); }
+    if (err) { 
+      errorType = err.match(/\$([^}]+)\_/)[1];
+      console.log(errorType);
+    }
 
     if (user) {
-      return res.status(400).send('User name already exists.');
-    } else {
+      return res.status(400).send({username: "Error: Username is already in use!"});
+    } else
+    {
       data.username = req.body.username;
       data.password = req.body.password;
       data.email = req.body.email;
+      
       User.create(data, function (err, user) {
-        if (err) { return res.status(400).send(err);
+        if (err) {
+          //TODO if add more fields to model, need to check different error types
+          errorType = err.err.match(/\$([^}]+)\_/)[1];
+          if (errorType === "email"){
+            errorObj = {email: "Error: Email is already in Use!"};
+          }else{
+            errorObj = {global: "Error: Server error while saving!"};
+            errorObj["errorData"] = err.err;
+          }
+          return res.status(400).send(errorObj);
         } 
         
-        console.log(user.username, "created");
+        //call Customer.io identify method to either create or update a user by email adress
+        cio.identify(user.id, user.email);
         return res.json(formatDbResponse(user));
       });
     }
@@ -40,6 +59,7 @@ function editUser(req, res){
   updatedInfo = req.body;
   delete updatedInfo._id;
   delete updatedInfo.__v;
+  //TODO: add email change, needs to switch old customer.io email to new, updating
   
   //TODO: fix password hashing on modify, then remove this
   delete updatedInfo.password;
