@@ -1,10 +1,10 @@
 App.ApplicationRoute = Ember.Route.extend({
   
   model: function (params) {
-    var emberStore = this.get('store')
-      , storedUser = store.get('user'); 
+    var store= this.get('store')
+      , storedUser = App.localStore.get('user'); 
 
-    return storedUser ? emberStore.push('user', storedUser) : null;
+    return storedUser ? store.push('user', storedUser) : null;
   },
 
   setupController: function (controller, model) {
