@@ -1,9 +1,9 @@
 minispade.register('Application.js', function() {
 window.App = Ember.Application.create();
 
-App.Store = DS.Store.extend({
-  adapter: DS.FixtureAdapter
-});
+//App.Store = DS.Store.extend({
+//  adapter: DS.FixtureAdapter
+//});
 minispade.require('Router.js');
 minispade.require('Models.js');
 minispade.require('Controllers.js');
@@ -260,6 +260,7 @@ var attr = DS.attr;
 App.User = DS.Model.extend({
   
   username: attr(),
+  password: attr(),
   email: attr(),
 
 });

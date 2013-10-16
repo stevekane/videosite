@@ -14,7 +14,7 @@ function formatDbResponse (model) {
   delete formattedModel.password;
   delete formattedModel._id;
   delete formattedModel.__v;
-  return formattedModel;
+  return {user: formattedModel};
 }
 
 function logAndSendError (req, res) {
@@ -34,9 +34,9 @@ function createUser (req, res) {
     if (user) {
       return res.status(400).send({username: "Error: Username is already in use!"});
     }
-    data.username = req.body.username;
-    data.password = req.body.password;
-    data.email = req.body.email;
+    data.username = req.body.user.username;
+    data.password = req.body.user.password;
+    data.email = req.body.user.email;
 
     callWithPromise(User, "create", data)
     .fail(logAndSendError(req, res))
@@ -77,6 +77,7 @@ function logout (req, res) {
 }
 
 exports.configure = function (app, passport, options) {
+  app.post('/users', createUser);
   app.post('/user/create', createUser);
   app.post('/user/login', passport.authenticate('local'), login);
   app.all('/user/logout', verifyAuth, logout);
