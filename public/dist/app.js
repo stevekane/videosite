@@ -164,12 +164,11 @@ App.UserController = Ember.ObjectController.extend({
 
   storeInLocalStorage: function () {
     var user = this.get('content');
-    App.localStore.set('user', {
-      id: user.get('id'),
-      username: user.get('username'),
-      email: user.get('email')
-    });
-    console.log('User ', user.get('username'), ' stored in localStorage!');
+    var localStoredUser = user 
+      ? {id: user.get('id'), username: user.get('username'), email: user.get('email')}
+      : null;
+
+    App.localStore.set('user', localStoredUser);
   }.observes('content')
 
 });
@@ -196,8 +195,19 @@ App.User = DS.Model.extend({
 });
 
 minispade.register('routes/Application.js', function() {
+var set = Ember.set;
+
 App.ApplicationRoute = Ember.Route.extend({
   
+  actions: {
+    
+    logout: function (activeUser) {
+      var userController = this.controllerFor('user');
+      set(userController, "content", null);
+    }
+
+  },
+
   model: function (params) {
     var store= this.get('store')
       , storedUser = App.localStore.get('user'); 
