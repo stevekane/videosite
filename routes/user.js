@@ -6,13 +6,15 @@ var User = require('../app/models').User
 var cio = CustomerIO.init('61e69d38865a3b27286b', 'faada99ebd4a66168a02')
 
 function formatDbResponse (model) {
-  var formattedModel = model.toObject();
+  if(model){
+    var formattedModel = model.toObject();
 
-  formattedModel.id = formattedModel._id;
-  delete formattedModel.password;
-  delete formattedModel._id;
-  delete formattedModel.__v;
-  return formattedModel;
+    formattedModel.id = formattedModel._id;
+    delete formattedModel.password;
+    delete formattedModel._id;
+    delete formattedModel.__v;
+    return formattedModel;
+  }
 }
 
 function createUser (req, res) {
@@ -85,12 +87,12 @@ function login (req, res) {
 
 function logout (req, res) {
   req.logout();
-  req.redirect('/');
+  res.status(200).send("logged out successfully");
 }
 
 exports.configure = function (app, passport, options) {
   app.post('/user/create', createUser);
   app.post('/user/login', passport.authenticate('local'), login);
-  app.all('/user/logout', logout);
+  app.all('/user/logout', verifyAuth, logout);
   app.post('/user/edit', verifyAuth, editUser);
 }
