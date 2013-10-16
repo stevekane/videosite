@@ -34,8 +34,6 @@ configureMongoose(mongoose);
 configurePassport(passport);
 configureUserRoutes(app, passport);
 
-
-
 //serve the web app yo
 app.get('/', routes.index);
 

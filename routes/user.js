@@ -1,59 +1,47 @@
 var User = require('../app/models').User
   , verifyAuth = require('../app/config/passport').verifyAuth
-  , CustomerIO = require('customer.io');
+  , CustomerIO = require('customer.io')
+  , Q = require('q')
+  , callWithPromise = Q.ninvoke;
 
 // CustomerIO.init(site ID, API token)
 var cio = CustomerIO.init('61e69d38865a3b27286b', 'faada99ebd4a66168a02')
 
 function formatDbResponse (model) {
-  if(model){
-    var formattedModel = model.toObject();
+  var formattedModel = model.toObject();
 
-    formattedModel.id = formattedModel._id;
-    delete formattedModel.password;
-    delete formattedModel._id;
-    delete formattedModel.__v;
-    return formattedModel;
-  }
+  formattedModel.id = formattedModel._id;
+  delete formattedModel.password;
+  delete formattedModel._id;
+  delete formattedModel.__v;
+  return formattedModel;
 }
 
 function createUser (req, res) {
   var searchTerms = {username: req.body.username};
 
-  User.findOne(searchTerms, function (err, user) {
-    var data = {};
-
-    if (err) { 
-      errorType = err.match(/\$([^}]+)\_/)[1];
-      console.log(errorType);
-    }
-
+  callWithPromise(User, "findOne", searchTerms)
+  .fail(function (err) {
+    console.log(err); 
+  })
+  .then(function (user) {
+    var data = {}; 
     if (user) {
       return res.status(400).send({username: "Error: Username is already in use!"});
-    } else
-    {
-      data.username = req.body.username;
-      data.password = req.body.password;
-      data.email = req.body.email;
-      
-      User.create(data, function (err, user) {
-        if (err) {
-          //TODO if add more fields to model, need to check different error types
-          errorType = err.err.match(/\$([^}]+)\_/)[1];
-          if (errorType === "email"){
-            errorObj = {email: "Error: Email is already in Use!"};
-          }else{
-            errorObj = {global: "Error: Server error while saving!"};
-            errorObj["errorData"] = err.err;
-          }
-          return res.status(400).send(errorObj);
-        } 
-        
-        //call Customer.io identify method to either create or update a user by email adress
-        cio.identify(user.id, user.email);
-        return res.json(formatDbResponse(user));
-      });
     }
+    data.username = req.body.username;
+    data.password = req.body.password;
+    data.email = req.body.email;
+
+    callWithPromise(User, "create", data)
+    .fail(function (err) {
+      res.status(400).send({global: err});
+    })
+    .then(function (user) {
+      //should this have a callback??
+      cio.identify(user.id, user.email);
+      res.json(formatDbResponse(user));
+    })
   });
 }
 
@@ -66,18 +54,16 @@ function editUser(req, res){
   //TODO: fix password hashing on modify, then remove this
   delete updatedInfo.password;
   
-  User.findOneAndUpdate({_id: req.body.id}, {$set: updatedInfo},
-    function (err, result) {
-      var response = {};
-      if (err) {
-        console.log(err);
-        res.json({message: err});
-      } else {
-        response['user'] = formatDbResponse(result);
-        res.send(response);
-      }
-    });
-
+  callWithPromise(User, "findOneAndUpdate", {_id: req.body.id}, {$set: updatedInfo})
+  .then(function (user) {
+    var response = {};
+    response.user = user ? formatDbResponse(user) : null;
+    res.send(response);
+  })
+  .fail(function (err) {
+    console.log(err);
+    res.json({message: err});
+  });
 };
 
 
