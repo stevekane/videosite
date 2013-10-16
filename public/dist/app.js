@@ -21,6 +21,7 @@ minispade.require('controllers/Application.js');
 minispade.require('controllers/User.js');
 minispade.require('controllers/Login.js');
 minispade.require('controllers/Signup.js');
+minispade.require('controllers/Account.js');
 
 });
 
@@ -33,11 +34,25 @@ minispade.require('models/User.js');
 minispade.register('Router.js', function() {
 
 minispade.require('routes/Application.js');
+minispade.require('routes/Account.js');
 
 App.Router.map(function () {
   this.resource('signup');
   this.resource('login');
   this.resource('account');
+});
+
+});
+
+minispade.register('controllers/Account.js', function() {
+var alias = Ember.computed.alias;
+
+App.AccountController = Ember.ObjectController.extend({
+  
+  needs: ['user'],
+
+  content: alias('controllers.user.content')
+
 });
 
 });
@@ -181,16 +196,14 @@ var attr = DS.attr;
 App.User = DS.Model.extend({
   
   username: attr(),
-  firstName: attr(),
-  lastName: attr(),
-
   email: "",
 
-  fullName: function () {
-    return this.get('firstName') + this.get('lastName'); 
-  }.property('firstName', 'lastName')
+});
 
 });
+
+minispade.register('routes/Account.js', function() {
+App.AccountRoute = Ember.Route.extend({});
 
 });
 
@@ -204,6 +217,7 @@ App.ApplicationRoute = Ember.Route.extend({
     logout: function (activeUser) {
       var userController = this.controllerFor('user');
       set(userController, "content", null);
+      this.transitionTo('index');
     }
 
   },
@@ -219,7 +233,6 @@ App.ApplicationRoute = Ember.Route.extend({
     var userController = this.controllerFor('user')
 
     userController.set('content', model);
-    console.log(userController.get('content.username')); 
   }
 
 });

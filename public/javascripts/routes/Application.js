@@ -7,6 +7,7 @@ App.ApplicationRoute = Ember.Route.extend({
     logout: function (activeUser) {
       var userController = this.controllerFor('user');
       set(userController, "content", null);
+      this.transitionTo('index');
     }
 
   },
@@ -22,7 +23,6 @@ App.ApplicationRoute = Ember.Route.extend({
     var userController = this.controllerFor('user')
 
     userController.set('content', model);
-    console.log(userController.get('content.username')); 
   }
 
 });
