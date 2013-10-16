@@ -62,8 +62,6 @@ function returnUpdatedUser(req, res){
   }
 }
 
-
-
 function registerWithCustomerIO (cio) {
   return function (user) {
     cio.identify(user._id, user.email);
@@ -71,6 +69,7 @@ function registerWithCustomerIO (cio) {
   }
 }
 
+//update and create w customer.io are actually the same
 function updateWithCustomerIO (cio) {
   return function (user) {
     cio.identify(user._id, user.email);
@@ -78,11 +77,10 @@ function updateWithCustomerIO (cio) {
   }
 }
 
-
-
-
 function editUserInfo(User, data){
   console.log("edit User");
+  
+  //strip out the ID from info to update
   var updatedInfo = {};
   updatedInfo.email = data.email;
   
