@@ -7,6 +7,6 @@ App.UserController = Ember.ObjectController.extend({
       : null;
 
     App.localStore.set('user', localStoredUser);
-  }.observes('content')
+  }.observes('content', 'content.email', 'content.username')
 
 });

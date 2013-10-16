@@ -22,6 +22,7 @@ minispade.require('controllers/User.js');
 minispade.require('controllers/Login.js');
 minispade.require('controllers/Signup.js');
 minispade.require('controllers/Account.js');
+minispade.require('controllers/AccountChangeEmail.js');
 
 });
 
@@ -35,6 +36,7 @@ minispade.register('Router.js', function() {
 
 minispade.require('routes/Application.js');
 minispade.require('routes/Account.js');
+minispade.require('routes/AccountChangeEmail.js');
 
 App.Router.map(function () {
   this.resource('signup');
@@ -56,6 +58,64 @@ App.AccountController = Ember.ObjectController.extend({
   needs: ['user'],
 
   content: alias('controllers.user.content'),
+
+});
+
+});
+
+minispade.register('controllers/AccountChangeEmail.js', function() {
+var set = Ember.set
+  , alias = Ember.computed.alias;
+
+App.AccountChangeEmailController = Ember.ObjectController.extend({
+  
+  needs: ['user'],
+
+  content: alias('controllers.user.content'),
+
+  newEmailHash: {
+    email: {value: "", error: ""},
+    confirmEmail: {value: "", error: ""},
+  },
+
+  resetFields: function (emailHash) {
+    set(emailHash, 'email.value', "");
+    set(emailHash, 'email.error', "");
+    set(emailHash, 'confirmEmail.value', "");
+    set(emailHash, 'confirmEmail.error', "");
+  },
+
+  actions: {
+    
+    changeEmail: function (user, hash) {
+      var emailError
+        , store = this.get('store')
+        , self = this
+        , values = {
+        email: hash.email.value,
+        confirmEmail: hash.confirmEmail.value,
+      };
+      
+      if (hash.email.value !== hash.confirmEmail.value) {
+        emailError = "Provided emails did not match."
+        set(hash, "email.value", "");
+        set(hash, "email.error", emailError);
+        set(hash, "confirmEmail.value", "");
+        set(hash, "confirmEmail.error", emailError);
+        return;
+      } else {
+        user.set('email', hash.email.value)
+          .save()
+          .then(function (user) { 
+            self.resetFields(hash);
+          })
+          .fail(function (errors) {
+            set(hash, "email.error", errors.email);             
+            set(hash, "confirmEmail.error", errors.email);             
+          });
+      }
+    }
+  }
 
 });
 
@@ -188,7 +248,7 @@ App.UserController = Ember.ObjectController.extend({
       : null;
 
     App.localStore.set('user', localStoredUser);
-  }.observes('content')
+  }.observes('content', 'content.email', 'content.username')
 
 });
 
@@ -208,6 +268,11 @@ App.User = DS.Model.extend({
 
 minispade.register('routes/Account.js', function() {
 App.AccountRoute = Ember.Route.extend({});
+
+});
+
+minispade.register('routes/AccountChangeEmail.js', function() {
+App.AccountChangeEmailRoute = Ember.Route.extend({});
 
 });
 

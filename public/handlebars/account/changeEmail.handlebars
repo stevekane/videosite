@@ -1,0 +1,33 @@
+<form class="form-horizontal" role="form">
+  <legend>Change Your Email!</legend>
+  <div class="form-group">
+    <label for="oldEmail">Old Email</label>
+    <input class="form-control" disabled {{bind-attr value="email"}}></input>
+  </div>
+
+  <div class="form-group">
+    <label for="newEmail">New Email</label>
+    {{input type="email"
+      classNames="form-control"
+      placeholder="New Email"
+      value=newEmailHash.email.value}}
+    {{#if newEmailHash.email.error}}
+      <small class="text-danger">{{newEmailHash.email.error}}</small>
+    {{/if}}
+  </div>
+
+  <div class="form-group">
+    <label for="newEmailConfirm">Confirm New Email</label>
+    {{input type="email"
+      classNames="form-control"
+      placeholder="Confirm New Email"
+      value=newEmailHash.confirmEmail.value}}
+    {{#if newEmailHash.confirmEmail.error}}
+      <small class="text-danger">{{newEmailHash.confirmEmail.error}}</small>
+    {{/if}}
+  </div>
+
+  <button class="btn btn-warning" {{action changeEmail content newEmailHash}}>
+    Update Email
+  </button>
+</form>
