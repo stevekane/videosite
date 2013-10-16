@@ -17,13 +17,16 @@ function formatDbResponse (model) {
   return formattedModel;
 }
 
+function logAndSendError (err) {
+  console.log(err);
+  return res.status(400).send({global: err});
+}
+
 function createUser (req, res) {
   var searchTerms = {username: req.body.username};
 
   callWithPromise(User, "findOne", searchTerms)
-  .fail(function (err) {
-    console.log(err); 
-  })
+  .fail(logAndSendError)
   .then(function (user) {
     var data = {}; 
     if (user) {
@@ -34,13 +37,11 @@ function createUser (req, res) {
     data.email = req.body.email;
 
     callWithPromise(User, "create", data)
-    .fail(function (err) {
-      res.status(400).send({global: err});
-    })
+    .fail(logAndSendError)
     .then(function (user) {
       //should this have a callback??
       cio.identify(user.id, user.email);
-      res.json(formatDbResponse(user));
+      return res.json(formatDbResponse(user));
     })
   });
 }
@@ -55,15 +56,12 @@ function editUser(req, res){
   delete updatedInfo.password;
   
   callWithPromise(User, "findOneAndUpdate", {_id: req.body.id}, {$set: updatedInfo})
+  .fail(logAndSendError)
   .then(function (user) {
     var response = {};
     response.user = user ? formatDbResponse(user) : null;
     res.send(response);
   })
-  .fail(function (err) {
-    console.log(err);
-    res.json({message: err});
-  });
 };
 
 
