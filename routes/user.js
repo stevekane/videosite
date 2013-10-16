@@ -2,7 +2,9 @@ var User = require('../app/models').User
   , verifyAuth = require('../app/config/passport').verifyAuth
   , CustomerIO = require('customer.io')
   , Q = require('q')
-  , callWithPromise = Q.ninvoke;
+  , callWithPromise = Q.ninvoke
+  , bcrypt = require('bcrypt')
+  , SALT_WORK_FACTOR = 10;
 
 function formatDbResponse (model) {
   var formattedModel = model.toObject();
@@ -15,22 +17,21 @@ function formatDbResponse (model) {
 }
 
 function editUser (req, res, next) {
-  var updatedInfo = req.body;
+  var updatedInfo = req.body.user;
   delete updatedInfo._id;
   delete updatedInfo.__v;
   //TODO: add email change, needs to switch old customer.io email to new, updating
   
-  //TODO: fix password hashing on modify, then remove this
-  delete updatedInfo.password;
-  
-  callWithPromise(User, "findOneAndUpdate", {_id: req.body.id}, {$set: updatedInfo})
+  callWithPromise(User, "findOneAndUpdate", {_id: req.body.user.id}, {$set: updatedInfo})
   .then(function (user) {
     var response = {};
-    response.user = user 
+    response = user 
       ? formatDbResponse(user) 
       : null;
     res.send(response);
   })
+  .fail(handleFailure(res, "Server error while handling edit user."))
+  .done();
 };
 
 //used to send errors from promise .fail hooks
@@ -113,10 +114,20 @@ function logout (req, res) {
   res.status(200).send("logged out successfully");
 }
 
+function isAuthenticated(req,res){
+  return res.status(200).send();
+}
+
+function passwordChange(req,res){
+  return res.status(200).send(res);
+}
+
 exports.configure = function (app, passport, cio, options) {
   app.post('/users', processNewUser(cio));
   app.post('/user/create', processNewUser(cio));
   app.post('/user/login', passport.authenticate('local'), login);
   app.all('/user/logout', verifyAuth, logout);
-  app.post('/user/edit', verifyAuth, editUser);
+  app.put('/user/edit', verifyAuth, editUser);
+  app.get('/user/authenticated', verifyAuth, isAuthenticated); 
+  app.post('/user/pwchange', verifyAuth, passwordChange); 
 }
