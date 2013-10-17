@@ -20,7 +20,6 @@ function formatDbResponse (model) {
 //used to send errors from promise .fail hooks
 function handleFailure (res, error) {
   return function (err) {
-    console.log('handleFailure', err);
     return res.status(400).send({
       error: error ? error : err
     });
@@ -29,30 +28,25 @@ function handleFailure (res, error) {
 
 //utility function to send an error 
 function sendError (res, error) {
-  console.log('sendError');
   return res.status(400).send({error: error});
 }
 
 function checkForExistingUser (User, data) {
-  console.log('checkForExisting');
   return callWithPromise(User, "findOne", data);
 }
 
 //closure gives access to req, res objects
 function handleExistingUser (req, res) {
-  console.log('handleExisting');
   return function (user) {
     if (user) { return sendError(res, "User already exists"); }
   }
 }
 
 function createNewUser (User, data) {
-  console.log('createNew');
   return callWithPromise(User, "create", data);
 }
 
 function returnNewUser (req, res) {
-  console.log('returnNewUser');
   return function (user) {
     //TODO: MOVE THIS OUT OF HERE IN FUTURE
     return res.json(formatDbResponse(user)); 
@@ -66,9 +60,7 @@ function returnUpdatedUser(req, res){
 }
 
 function registerWithCustomerIO (cio) {
-  console.log('registerWithCIO');
   return function (user) {
-    console.log(user, "from CIO call");
     cio.identify(user._id, user.email);
     return user;
   }
@@ -76,7 +68,6 @@ function registerWithCustomerIO (cio) {
 
 function loginUser (req) {
   return function (user) {
-    console.log(user, "from login");
     req.login(user, function (err) {
       console.log("login error", err); 
     });
@@ -93,11 +84,8 @@ function updateWithCustomerIO (cio) {
 }
 
 function editUserInfo(User, data){
-  console.log("edit User");
-  
   //strip out the ID from info to update
-  var updatedInfo = {};
-  updatedInfo.email = data.email;
+  var updatedInfo = {email: data.email};
   
   return callWithPromise(User, "findOneAndUpdate", {_id: data.id}, {$set: updatedInfo})      
 }
