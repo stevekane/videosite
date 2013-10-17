@@ -23,6 +23,7 @@ function mongoStrategy (email, password, done) {
       }
     });
   }); 
+  
 }
 
 //return the id of the provided user
@@ -38,7 +39,7 @@ function deserializeMongo (id, done) {
 }
 
 exports.configure = function (passport, options) {
-  passport.use(new LocalStrategy(mongoStrategy));
+  passport.use(new LocalStrategy(  {usernameField: 'email'},mongoStrategy));
   passport.serializeUser(serialize);
   passport.deserializeUser(deserializeMongo);
 }
