@@ -7,13 +7,13 @@
         <form class="form-horizontal" role="form">
           <legend>Login</legend>
           <div class="form-group">
-            <label for="username">Username</label>
+            <label for="email">Email</label>
             {{input type="text"
               class="form-control" 
-              placeholder="Your Username" 
-              value = loginHash.username.value}}
-            {{#if loginHash.username.error}}
-            <small class="text-danger">{{loginHash.username.error}}</small>
+              placeholder="Your Email" 
+              value = loginHash.email.value}}
+            {{#if loginHash.email.error}}
+              <small class="text-danger">{{loginHash.email.error}}</small>
             {{/if}}
           </div>
 
@@ -24,7 +24,7 @@
               placeholder="Password" 
               value= loginHash.password.value}}
             {{#if loginHash.password.error}}
-            <small class="text-danger">{{loginHash.password.error}}</small>
+              <small class="text-danger">{{loginHash.password.error}}</small>
             {{/if}}  
               
           </div>
@@ -34,7 +34,7 @@
           </div>
         </form> 
       {{else}}
-        <h2> Already logged in as: {{activeUser.username}} </h2>
+        <h2> Already logged in as: {{activeUser.email}} </h2>
       {{/unless}}
       </div>
     </div>

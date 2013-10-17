@@ -118,8 +118,10 @@ function processNewUser (cio) {
 
 function processEditUser(cio){
   return function (req, res) {
-    var data = {email: req.body.user.email,
-                id: req.body.user.id};
+    var data = {
+      email: req.body.user.email,
+      id: req.body.user.id
+    };
     
     editUserInfo(User, data)
     .fail(handleFailure(res, "Server Error while updating user info"))

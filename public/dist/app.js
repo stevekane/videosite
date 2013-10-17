@@ -234,13 +234,13 @@ App.LoginController = Ember.Controller.extend({
   activeUser: alias('controllers.user.content'),
   
   loginHash: {
-    username: {value: "", error: ""},
+    email: {value: "", error: ""},
     password: {value: "", error: ""},
   },
   
   resetFields: function (loginHash) {
-    set(loginHash, 'username.value', "");
-    set(loginHash, 'username.error', "");
+    set(loginHash, 'email.value', "");
+    set(loginHash, 'email.error', "");
     set(loginHash, 'password.value', "");
     set(loginHash, 'password.error', "");
   },
@@ -252,15 +252,17 @@ App.LoginController = Ember.Controller.extend({
         , store = this.get('store')
         , self = this
         , values = {
-        username: hash.username.value,
+        email: hash.email.value,
         password: hash.password.value,
       };
 
       $.ajax({
         type: 'POST',
         url: "http://localhost:3000/user/login",
-        data: {username: values.username, 
-               password: values.password},
+        data: {
+          email: values.email, 
+          password: values.password
+        },
         success: function(response){
           var user = response.user.user;
           var emberUser = store.push('user', user);
@@ -269,7 +271,7 @@ App.LoginController = Ember.Controller.extend({
           self.transitionToRoute('index');
         },
         error: function(response){
-          set(hash, "username.error", response.responseText);
+          set(hash, "email.error", response.responseText);
           set(hash, "password.error", response.responseText);
         }
       })
@@ -296,15 +298,12 @@ App.SignupController = Ember.Controller.extend({
   activeUser: alias('controllers.user.content'),
 
   newAccountHash: {
-    username: {value: "", error: ""},
     email: {value: "", error: ""},
     password: {value: "", error: ""},
     confirmPassword: {value: "", error: ""}
   },
 
   resetFields: function (newAccountHash) {
-    set(newAccountHash, 'username.value', "");
-    set(newAccountHash, 'username.error', "");
     set(newAccountHash, 'email.value', "");
     set(newAccountHash, 'email.error', "");
     set(newAccountHash, 'password.value', "");
@@ -320,7 +319,6 @@ App.SignupController = Ember.Controller.extend({
         , store = this.get('store')
         , self = this
         , values = {
-        username: hash.username.value,
         email: hash.email.value,
         password: hash.password.value,
         confirmPassword: hash.confirmPassword.value,
@@ -342,7 +340,6 @@ App.SignupController = Ember.Controller.extend({
             self.transitionToRoute('index');
           })
           .fail(function (errors) {
-            set(hash, "username.error", errors.username);             
             set(hash, "email.error", errors.email);             
             set(hash, "password.error", errors.password);             
             set(hash, "confirmPassword.error", errors.confirmPassword);             
@@ -360,11 +357,11 @@ App.UserController = Ember.ObjectController.extend({
   storeInLocalStorage: function () {
     var user = this.get('content');
     var localStoredUser = user 
-      ? {id: user.get('id'), username: user.get('username'), email: user.get('email')}
+      ? {id: user.get('id'), email: user.get('email')}
       : null;
 
     App.localStore.set('user', localStoredUser);
-  }.observes('content', 'content.email', 'content.username')
+  }.observes('content', 'content.email')
 
 });
 
@@ -374,8 +371,6 @@ minispade.register('models/User.js', function() {
 var attr = DS.attr;
 
 App.User = DS.Model.extend({
-  
-  username: attr(),
   password: attr(),
   email: attr(),
 });

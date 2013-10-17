@@ -6,17 +6,6 @@
         <form class="form-horizontal" role="form">
           <legend>Create Free Account!</legend>
           <div class="form-group">
-            <label for="username">Username</label>
-            {{input type="text"
-              class="form-control"
-              placeholder="Your Username"
-              value=newAccountHash.username.value}}
-            {{#if newAccountHash.username.error}}
-              <small class="text-danger">{{newAccountHash.username.error}}</small>
-            {{/if}}
-          </div>
-
-          <div class="form-group">
             <label for="email">Email</label>
             {{input type="email"
               class="form-control"
