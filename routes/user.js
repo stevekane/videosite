@@ -105,14 +105,10 @@ function editUserInfo(User, data){
   return callWithPromise(User, "findOneAndUpdate", {_id: data.id}, {$set: updatedInfo})      
 }
 
-//TODO: REWORK OF PROMISE CHAIN IN PROGRESS
 function processNewUser (cio) {
 
   return function (req, res) {
-    var data = {
-     password: req.body.user.password,
-     email: req.body.user.email
-    }; 
+    var data = req.body.user;
 
     checkForExistingUser(User, {email: data.email})
     .then(handleExistingUser)
@@ -127,10 +123,7 @@ function processNewUser (cio) {
 
 function processEditUser (cio) {
   return function (req, res) {
-    var data = {
-      email: req.body.user.email,
-      id: req.body.user.id
-    };
+    var data = req.body.user;
     
     editUserInfo(User, data)
     .then(updateWithCustomerIO(cio))
