@@ -327,7 +327,8 @@ App.SignupController = Ember.Controller.extend({
           self.transitionToRoute('index');
         })
         .fail(function (error) {
-          set(self, "error", error.error);             
+          console.log(error);
+          set(self, "error", JSON.parse(error.responseText)['error']);             
         });
       }
     }

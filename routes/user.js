@@ -18,11 +18,14 @@ function formatDbResponse (model) {
 
 
 //used to send errors from promise .fail hooks
-function handleFailure (res, error) {
+function handleFailure (res) {
   return function (err) {
-    return res.status(400).send({
-      error: error ? error : err
-    });
+    console.log("handleFailure", err);
+    var message = (err instanceof Error)
+      ? err.message
+      : err;
+
+    return res.status(400).send({error: message});
   }
 }
 
@@ -32,23 +35,33 @@ function sendError (res, error) {
 }
 
 function checkForExistingUser (User, data) {
+  console.log('checkForExisting');
   return callWithPromise(User, "findOne", data);
 }
 
-//closure gives access to req, res objects
-function handleExistingUser (req, res) {
-  return function (user) {
-    if (user) { return sendError(res, "User already exists"); }
+//returns rejected promise if user else returns resolved promise
+function handleExistingUser (user) {
+  console.log('handleExisting', user);
+  var deferred = Q.defer();
+
+  if (user) { 
+    deferred.reject(new Error('User already exists.'));
+  } else { 
+    deferred.resolve();
   }
+  return deferred.promise;
 }
 
 function createNewUser (User, data) {
-  return callWithPromise(User, "create", data);
+  return function (result) {
+    console.log('createNewUser', result);
+    return callWithPromise(User, "create", data);
+  }
 }
 
 function returnNewUser (req, res) {
+  console.log('returnNewUser');
   return function (user) {
-    //TODO: MOVE THIS OUT OF HERE IN FUTURE
     return res.json(formatDbResponse(user)); 
   }
 }
@@ -61,6 +74,7 @@ function returnUpdatedUser(req, res){
 
 function registerWithCustomerIO (cio) {
   return function (user) {
+    console.log('registerWithCIO', user, "user");
     cio.identify(user._id, user.email);
     return user;
   }
@@ -68,6 +82,7 @@ function registerWithCustomerIO (cio) {
 
 function loginUser (req) {
   return function (user) {
+    console.log('loginUser');
     req.login(user, function (err) {
       console.log("login error", err); 
     });
@@ -90,8 +105,7 @@ function editUserInfo(User, data){
   return callWithPromise(User, "findOneAndUpdate", {_id: data.id}, {$set: updatedInfo})      
 }
 
-
-//closure gives access to our customer.io object
+//TODO: REWORK OF PROMISE CHAIN IN PROGRESS
 function processNewUser (cio) {
 
   return function (req, res) {
@@ -101,17 +115,12 @@ function processNewUser (cio) {
     }; 
 
     checkForExistingUser(User, {email: data.email})
-    .then(function (user) {
-      if (user) { return handleExistingUser(req, res); }
-
-      createNewUser(User, data)
-      .then(registerWithCustomerIO(cio))
-      .then(loginUser(req))
-      .then(returnNewUser(req, res))
-      .fail(handleFailure(res, "Server error while creating new user."))
-      .done();
-    })
-    .fail(handleFailure(res, "Server error while handling new user."))
+    .then(handleExistingUser)
+    .then(createNewUser(User, data))
+    .then(registerWithCustomerIO(cio))
+    .then(loginUser(req))
+    .then(returnNewUser(req, res))
+    .fail(handleFailure(res))
     .done();
   }
 }
@@ -126,7 +135,7 @@ function processEditUser (cio) {
     editUserInfo(User, data)
     .then(updateWithCustomerIO(cio))
     .then(returnUpdatedUser(req,res))
-    .fail(handleFailure(res, "Server Error while updating user info"))
+    .fail(handleFailure(res))
     .done();
   };
 }
