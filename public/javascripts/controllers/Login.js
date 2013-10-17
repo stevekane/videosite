@@ -28,7 +28,7 @@ App.LoginController = Ember.Controller.extend({
     
   actions:{
   
-    attemptLogin: function(hash){
+    attemptLogin: function (hash) {
       var passwordError
         , store = this.get('store')
         , self = this
@@ -44,13 +44,13 @@ App.LoginController = Ember.Controller.extend({
           email: values.email, 
           password: values.password
         },
-        success: function(response) {
+        success: function (response) {
           var emberUser = store.push('user', response.user);
           self.set('activeUser', emberUser);
           self.resetFields(hash);
           self.transitionToRoute('index');
         },
-        error: function(response){
+        error: function (response) {
           set(hash, "email.error", response.responseText);
           set(hash, "password.error", response.responseText);
         }
