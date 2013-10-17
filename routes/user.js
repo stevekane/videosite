@@ -96,12 +96,11 @@ function processNewUser (cio) {
 
   return function (req, res) {
     var data = {
-     username: req.body.user.username,
      password: req.body.user.password,
      email: req.body.user.email
     }; 
 
-    checkForExistingUser(User, {username: data.username})
+    checkForExistingUser(User, {email: data.email})
     .fail(handleFailure(res, "Server error while handling new user."))
     .then(function (user) {
       if (user) { return handleExistingUser(req, res); }
@@ -144,8 +143,28 @@ function isAuthenticated(req,res){
   return res.status(200).send();
 }
 
-function passwordChange(req,res){
-  return res.status(200).send(res);
+function allowPasswordChange(req,res){
+  res.status(200).send("password ok");
+  // var incomingPassword = req.user.password;
+  // console.log(req.user);
+  
+  
+  // var bb = bcrypt.compare(incomingPassword, User.password, function (err, isMatch) {
+      // if (err) {
+        // console.log("Error: ", err);
+        // return sendError(res, "error with server");
+      // }
+      // var wrongPass = "incorrect password for " + User.username;
+      
+      // if (!isMatch) { 
+        // return sendError(res, "bad password");
+      // } else {
+        // return res.status(200).send();
+      // }
+    // });
+    
+  //console.log(bb);  
+  
 }
 
 exports.configure = function (app, passport, cio, options) {
@@ -155,5 +174,5 @@ exports.configure = function (app, passport, cio, options) {
   app.all('/user/logout', verifyAuth, logout);
   app.post('/user/authenticated', verifyAuth, isAuthenticated); 
   app.put('/user/edit', verifyAuth, processEditUser(cio));
-  app.post('/user/pwchange', verifyAuth, passwordChange); 
+  app.post('/user/pwchange', verifyAuth, allowPasswordChange); 
 }

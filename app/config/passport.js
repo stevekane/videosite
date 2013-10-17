@@ -3,11 +3,11 @@ var bcrypt = require('bcrypt')
   , User = require('../models').User;
 
 //strategy for use with Mongoose
-function mongoStrategy (username, password, done) {
-  User.findOne({username: username}, function (err, user) {
+function mongoStrategy (email, password, done) {
+  User.findOne({email: email}, function (err, user) {
     if (err) return done(err);
 
-    var noUserFound = "no user found named " + username;
+    var noUserFound = "no user found named " + email;
     if (!user) { 
       return done(null, false, { message: noUserFound }); 
     }
@@ -15,7 +15,7 @@ function mongoStrategy (username, password, done) {
     bcrypt.compare(password, user.password, function (err, isMatch) {
       if (err) return done(err);
 
-      var wrongPass = "incorrect password for " + username;
+      var wrongPass = "incorrect password for " + email;
       if (!isMatch) { 
         return done(null, false, { message: wrongPass });
       } else {
