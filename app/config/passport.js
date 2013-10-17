@@ -39,13 +39,16 @@ function deserializeMongo (id, done) {
 }
 
 exports.configure = function (passport, options) {
-  passport.use(new LocalStrategy(  {usernameField: 'email'},mongoStrategy));
+  passport.use(new LocalStrategy({usernameField: 'email'}, mongoStrategy));
   passport.serializeUser(serialize);
   passport.deserializeUser(deserializeMongo);
 }
 
 exports.verifyAuth = function (req, res, next) {
   var noUser = "no user currently logged in";
-  if (req.isAuthenticated()) return next();
-  res.status(400).send({message: noUser});
+  if (req.isAuthenticated()) {
+    return next();
+  } else {
+    return res.status(400).send({message: noUser});
+  }
 }

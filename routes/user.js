@@ -20,7 +20,7 @@ function formatDbResponse (model) {
 //used to send errors from promise .fail hooks
 function handleFailure (res, error) {
   return function (err) {
-    console.log('handleFailure', error);
+    console.log('handleFailure', err);
     return res.status(400).send({
       error: error ? error : err
     });
@@ -54,6 +54,7 @@ function createNewUser (User, data) {
 function returnNewUser (req, res) {
   console.log('returnNewUser');
   return function (user) {
+    //TODO: MOVE THIS OUT OF HERE IN FUTURE
     return res.json(formatDbResponse(user)); 
   }
 }
@@ -67,7 +68,18 @@ function returnUpdatedUser(req, res){
 function registerWithCustomerIO (cio) {
   console.log('registerWithCIO');
   return function (user) {
+    console.log(user, "from CIO call");
     cio.identify(user._id, user.email);
+    return user;
+  }
+}
+
+function loginUser (req) {
+  return function (user) {
+    console.log(user, "from login");
+    req.login(user, function (err) {
+      console.log("login error", err); 
+    });
     return user;
   }
 }
@@ -101,16 +113,17 @@ function processNewUser (cio) {
     }; 
 
     checkForExistingUser(User, {email: data.email})
-    .fail(handleFailure(res, "Server error while handling new user."))
     .then(function (user) {
       if (user) { return handleExistingUser(req, res); }
 
       createNewUser(User, data)
-      .fail(handleFailure(res, "Server error while creating new user."))
       .then(registerWithCustomerIO(cio))
+      .then(loginUser(req))
       .then(returnNewUser(req, res))
+      .fail(handleFailure(res, "Server error while creating new user."))
       .done();
     })
+    .fail(handleFailure(res, "Server error while handling new user."))
     .done();
   }
 }
@@ -131,7 +144,7 @@ function processEditUser(cio){
 }
 
 function login (req, res) {
-  return res.json({user: formatDbResponse(req.user)});
+  return res.json(formatDbResponse(req.user));
 }
 
 function logout (req, res) {

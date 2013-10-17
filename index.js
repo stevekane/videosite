@@ -24,18 +24,18 @@ var SESSION_CONFIG = {
 }
 
 // some standard stuff
-app.engine('handlebars', cons.handlebars)
-  .set('port', process.env.PORT || 3000)
-  .set('views', path.join(__dirname + "/views/"))
-  .set('view engine', 'handlebars')
-  .use(express.favicon())
-  .use(express.bodyParser())
-  .use(express.methodOverride())
-  .use(express.cookieParser('your secret here'))
-  .use(express.static(__dirname + "/public"))
-  .use(express.session(SESSION_CONFIG))
-  .use(passport.initialize())
-  .use(passport.session());
+app.engine('handlebars', cons.handlebars);
+app.set('port', process.env.PORT || 3000);
+app.set('views', path.join(__dirname + "/views/"));
+app.set('view engine', 'handlebars');
+app.use(express.favicon());
+app.use(express.methodOverride());
+app.use(express.bodyParser());
+app.use(express.cookieParser());
+app.use(express.session(SESSION_CONFIG));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(express.static(__dirname + "/public"));
 
 configureMongoose(mongoose);
 configurePassport(passport);

@@ -44,9 +44,8 @@ App.LoginController = Ember.Controller.extend({
           email: values.email, 
           password: values.password
         },
-        success: function(response){
-          var user = response.user.user;
-          var emberUser = store.push('user', user);
+        success: function(response) {
+          var emberUser = store.push('user', response.user);
           self.set('activeUser', emberUser);
           self.resetFields(hash);
           self.transitionToRoute('index');
