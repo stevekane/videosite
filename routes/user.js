@@ -123,8 +123,8 @@ function processNewUser (cio) {
 
 
 function processEditUser (cio) {
-  console.log("processedit");
   return function (req, res) {
+    console.log("processedit");
     var data = req.body.user;
     
     console.log(data.email);
@@ -144,7 +144,7 @@ function processEditUser (cio) {
         .done();
         
       } else {
-          sendError(res, "email already exists in system");
+        sendError(res, "email already exists in system");
       }
     })
   }
