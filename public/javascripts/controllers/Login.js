@@ -7,7 +7,7 @@ var clearAndSetError = function (property, error) {
 };
 
 function loginUser(user, store){
-  store.load(App.User, user);
+  store.load("user", user);
 };
 
 App.LoginController = Ember.Controller.extend({

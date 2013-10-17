@@ -23,6 +23,7 @@ minispade.require('controllers/Login.js');
 minispade.require('controllers/Signup.js');
 minispade.require('controllers/Account.js');
 minispade.require('controllers/AccountChangeEmail.js');
+minispade.require('controllers/AccountChangePassword.js');
 
 });
 
@@ -36,7 +37,6 @@ minispade.register('Router.js', function() {
 
 minispade.require('routes/Application.js');
 minispade.require('routes/Account.js');
-minispade.require('routes/AccountChangeEmail.js');
 
 App.Router.map(function () {
   this.resource('signup');
@@ -121,6 +121,67 @@ App.AccountChangeEmailController = Ember.ObjectController.extend({
 
 });
 
+minispade.register('controllers/AccountChangePassword.js', function() {
+var set = Ember.set
+  , alias = Ember.computed.alias;
+
+App.AccountChangePasswordController = Ember.ObjectController.extend({
+  
+  needs: ['user'],
+
+  content: alias('controllers.user.content'),
+
+  newPasswordHash: {
+    oldPassword: {value: "", error: ""},
+    password: {value: "", error: ""},
+    confirmPassword: {value: "", error: ""},
+  },
+
+  resetFields: function (passwordHash) {
+    set(passwordHash, 'oldPassword.value', "");
+    set(passwordHash, 'oldPassword.error', "");
+    set(passwordHash, 'password.value', "");
+    set(passwordHash, 'password.error', "");
+    set(passwordHash, 'confirmPassword.value', "");
+    set(passwordHash, 'confirmPassword.error', "");
+  },
+
+  actions: {
+    
+    changePassword: function (user, hash) {
+      var passwordError
+        , store = this.get('store')
+        , self = this
+        , values = {
+        password: hash.password.value,
+        confirmPassword: hash.confirmPassword.value,
+      };
+
+      if (hash.password.value !== hash.confirmPassword.value) {
+        passwordError = "Provided passwords did not match.";
+        set(hash, "password.value", "");
+        set(hash, "password.error", passwordError);
+        set(hash, "confirmPassword.value", "");
+        set(hash, "confirmPassword.error", passwordError);
+        return;
+      } else {
+        user.set('password', hash.password.value)
+          .save()
+          .then(function (user) { 
+            self.resetFields(hash);
+          })
+          .fail(function (errors) {
+            set(hash, "password.error", errors.password);             
+            set(hash, "confirmPassword.error", errors.password);             
+          });
+      }
+    }
+  }
+
+});
+
+});
+
 minispade.register('controllers/Application.js', function() {
 var alias = Ember.computed.alias;
 
@@ -144,7 +205,7 @@ var clearAndSetError = function (property, error) {
 };
 
 function loginUser(user, store){
-  store.load(App.User, user);
+  store.load("user", user);
 };
 
 App.LoginController = Ember.Controller.extend({
@@ -173,23 +234,20 @@ App.LoginController = Ember.Controller.extend({
         username: hash.username.value,
         password: hash.password.value,
       };
-      window.store2 = store;
-      
+
       $.ajax({
         type: 'POST',
         url: "http://localhost:3000/user/login",
         data: {username: values.username, 
-               password: values.password
-               },
+               password: values.password},
         success: function(response){
           var user = response.user.user;
-          var emberUser = store.push(App.User, user);
+          var emberUser = store.push('user', user);
           self.set('activeUser', emberUser);
           self.resetFields(hash);
           self.transitionToRoute('index');
         },
         error: function(response){
-          console.log(response.responseText);
           set(hash, "username.error", response.responseText);
           set(hash, "password.error", response.responseText);
         }
@@ -306,11 +364,6 @@ App.User = DS.Model.extend({
 
 minispade.register('routes/Account.js', function() {
 App.AccountRoute = Ember.Route.extend({});
-
-});
-
-minispade.register('routes/AccountChangeEmail.js', function() {
-App.AccountChangeEmailRoute = Ember.Route.extend({});
 
 });
 

@@ -124,9 +124,91 @@ function program3(depth0,data) {
 Ember.TEMPLATES["account/changePassword"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
 this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};
-  var buffer = '';
+  var buffer = '', stack1, stack2, hashContexts, hashTypes, options, escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing, self=this;
 
+function program1(depth0,data) {
+  
+  var buffer = '', hashTypes, hashContexts;
+  data.buffer.push("\n      <small class=\"text-danger\">");
+  hashTypes = {};
+  hashContexts = {};
+  data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "newPasswordHash.oldPassword.error", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
+  data.buffer.push("</small>\n    ");
+  return buffer;
+  }
 
+function program3(depth0,data) {
+  
+  var buffer = '', hashTypes, hashContexts;
+  data.buffer.push("\n      <small class=\"text-danger\">");
+  hashTypes = {};
+  hashContexts = {};
+  data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "newPasswordHash.password.error", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
+  data.buffer.push("</small>\n    ");
+  return buffer;
+  }
+
+function program5(depth0,data) {
+  
+  var buffer = '', hashTypes, hashContexts;
+  data.buffer.push("\n      <small class=\"text-danger\">");
+  hashTypes = {};
+  hashContexts = {};
+  data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "newPasswordHash.confirmPassword.error", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
+  data.buffer.push("</small>\n    ");
+  return buffer;
+  }
+
+  data.buffer.push("<form class=\"form-horizontal\" role=\"form\">\n  <legend>Change Your Password!</legend>\n\n  <div class=\"form-group\">\n    <label for=\"oldPassword\">Old Password</label>\n    ");
+  hashContexts = {'type': depth0,'classNames': depth0,'placeholder': depth0,'value': depth0};
+  hashTypes = {'type': "STRING",'classNames': "STRING",'placeholder': "STRING",'value': "ID"};
+  options = {hash:{
+    'type': ("password"),
+    'classNames': ("form-control"),
+    'placeholder': ("Old Password"),
+    'value': ("newPasswordHash.oldPassword.value")
+  },contexts:[],types:[],hashContexts:hashContexts,hashTypes:hashTypes,data:data};
+  data.buffer.push(escapeExpression(((stack1 = helpers.input || depth0.input),stack1 ? stack1.call(depth0, options) : helperMissing.call(depth0, "input", options))));
+  data.buffer.push("\n    ");
+  hashTypes = {};
+  hashContexts = {};
+  stack2 = helpers['if'].call(depth0, "newPasswordHash.oldPassword.error", {hash:{},inverse:self.noop,fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data});
+  if(stack2 || stack2 === 0) { data.buffer.push(stack2); }
+  data.buffer.push("\n  </div>\n\n  <div class=\"form-group\">\n    <label for=\"newPassword\">New Password</label>\n    ");
+  hashContexts = {'type': depth0,'classNames': depth0,'placeholder': depth0,'value': depth0};
+  hashTypes = {'type': "STRING",'classNames': "STRING",'placeholder': "STRING",'value': "ID"};
+  options = {hash:{
+    'type': ("password"),
+    'classNames': ("form-control"),
+    'placeholder': ("New Password"),
+    'value': ("newPasswordHash.password.value")
+  },contexts:[],types:[],hashContexts:hashContexts,hashTypes:hashTypes,data:data};
+  data.buffer.push(escapeExpression(((stack1 = helpers.input || depth0.input),stack1 ? stack1.call(depth0, options) : helperMissing.call(depth0, "input", options))));
+  data.buffer.push("\n    ");
+  hashTypes = {};
+  hashContexts = {};
+  stack2 = helpers['if'].call(depth0, "newPasswordHash.password.error", {hash:{},inverse:self.noop,fn:self.program(3, program3, data),contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data});
+  if(stack2 || stack2 === 0) { data.buffer.push(stack2); }
+  data.buffer.push("\n  </div>\n\n  <div class=\"form-group\">\n    <label for=\"newPasswordConfirm\">Confirm New Password</label>\n    ");
+  hashContexts = {'type': depth0,'classNames': depth0,'placeholder': depth0,'value': depth0};
+  hashTypes = {'type': "STRING",'classNames': "STRING",'placeholder': "STRING",'value': "ID"};
+  options = {hash:{
+    'type': ("password"),
+    'classNames': ("form-control"),
+    'placeholder': ("Confirm New Password"),
+    'value': ("newPasswordHash.confirmPassword.value")
+  },contexts:[],types:[],hashContexts:hashContexts,hashTypes:hashTypes,data:data};
+  data.buffer.push(escapeExpression(((stack1 = helpers.input || depth0.input),stack1 ? stack1.call(depth0, options) : helperMissing.call(depth0, "input", options))));
+  data.buffer.push("\n    ");
+  hashTypes = {};
+  hashContexts = {};
+  stack2 = helpers['if'].call(depth0, "newPasswordHash.confirmPassword.error", {hash:{},inverse:self.noop,fn:self.program(5, program5, data),contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data});
+  if(stack2 || stack2 === 0) { data.buffer.push(stack2); }
+  data.buffer.push("\n  </div>\n\n  <button class=\"btn btn-warning\" ");
+  hashTypes = {};
+  hashContexts = {};
+  data.buffer.push(escapeExpression(helpers.action.call(depth0, "changePassword", "content", "newPasswordHash", {hash:{},contexts:[depth0,depth0,depth0],types:["ID","ID","ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
+  data.buffer.push(">\n    Update Password\n  </button>\n</form>\n");
   return buffer;
   
 });
