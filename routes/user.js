@@ -100,10 +100,10 @@ function updateWithCustomerIO (cio) {
 }
 
 function editUserInfo(User, data){
-  var updatedInfo = {email: data.email};
-  console.log("data", data.id);
-  return callWithPromise(User, "findOneAndUpdate", {_id: data.id}, {$set: updatedInfo})
-
+  return function(){
+    var updatedInfo = {email: data.email};
+    return callWithPromise(User, "findOneAndUpdate", {_id: data.id}, {$set: updatedInfo});
+  }
 }
 
 function processNewUser (cio) {
@@ -128,7 +128,7 @@ function handleExistingEmail(user){
   if (user) { 
     deferred.reject(new Error('Email already exists in system'));
   } else { 
-    return deferred.resolve(user);
+    return deferred.resolve();
   }
   return deferred.promise;
 
@@ -138,13 +138,10 @@ function processEditUser (cio) {
   return function (req, res) {
     console.log("processedit");
     var data = req.body.user;
-    
-    console.log(data);
-       
+
     callWithPromise(User, "findOne", {email: data.email})
     .then(handleExistingEmail)
     .then(editUserInfo(User, data))
-    // editUserInfo(User, data)
     .then(updateWithCustomerIO(cio))
     .then(returnUpdatedUser(req,res))
     .fail(handleFailure(res))
