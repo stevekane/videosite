@@ -16,7 +16,7 @@ App.LoginController = Ember.Controller.extend({
   
   loginHash: {
     email: {value: "", error: ""},
-    password: {value: "", error: ""},
+    password: {value: "", error: ""}
   },
   
   resetFields: function (loginHash) {

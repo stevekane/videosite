@@ -10,10 +10,7 @@
             {{input type="email"
               class="form-control"
               placeholder="Your Email"
-              value=newAccountHash.email.value}}
-            {{#if newAccountHash.email.error}}
-              <small class="text-danger">{{newAccountHash.email.error}}</small>
-            {{/if}}
+              value=newAccountHash.email}}
           </div>
 
           <div class="form-group">
@@ -21,10 +18,7 @@
             {{input type="password"
               class="form-control"
               placeholder="Password"
-              value=newAccountHash.password.value}}
-            {{#if newAccountHash.password.error}}
-              <small class="text-danger">{{newAccountHash.password.error}}</small>
-            {{/if}}
+              value=newAccountHash.password}}
           </div>
 
           <div class="form-group">
@@ -32,14 +26,12 @@
             {{input type="password"
               class="form-control"
               placeholder="Confirm Password"
-              value=newAccountHash.confirmPassword.value}}
-            {{#if newAccountHash.confirmPassword.error}}
-              <small class="text-danger">{{newAccountHash.confirmPassword.error}}</small>
-            {{/if}}
+              value=newAccountHash.confirmPassword}}
           </div>
 
           <div class="form-group">
             <button class="btn btn-warning" {{action signUp newAccountHash}}>Create!</button>
+            <small class="text-danger">{{error}}</small>
           </div>
         </form> 
 
