@@ -154,26 +154,25 @@ function isAuthenticated(req,res){
 }
 
 function allowPasswordChange(req,res){
-  var incomingPassword = req.user.password;
-  console.log("incoming", incomingPassword);
-  console.log("existing", User.password);
-  
-  bcrypt.compare(incomingPassword, User.password, function (err, isMatch) {
+  var incomingPassword = req.body.oldpassword;
+  var newPassword = req.body.password;
+
+  bcrypt.compare(incomingPassword,  req.user.password, function (err, isMatch) {
     if (err) {
-      console.log("Error: ", err);
       return sendError(res, "error with server");
     }
-    var wrongPass = "incorrect password for " + User.username;
-    
     if (!isMatch) { 
       return sendError(res, "bad password");
     } else {
-      return res.status(200).send();
+      bcrypt.hash(newPassword, SALT_WORK_FACTOR, function (err, hash) {
+        if (err) return sendError(res, "error hashing"); 
+        //save the newly hashed pw as their password
+        newPassword = hash;
+        callWithPromise(User, "findOneAndUpdate", {_id: req.user.id}, {$set: {password: newPassword}}) 
+        .then(res.status(200).send());
+      });
     }
   });
-    
-  //console.log(bb);  
-  //res.status(200).send();
 }
 
 exports.configure = function (app, passport, cio, options) {

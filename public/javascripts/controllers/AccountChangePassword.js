@@ -1,7 +1,7 @@
 var set = Ember.set
   , alias = Ember.computed.alias;
 
-function sendPasswordChange(user, hash){
+function sendPasswordChange(user, hash, self){
   var url = "http://localhost:3000/user/pwchange";
   
   $.ajax({
@@ -10,13 +10,17 @@ function sendPasswordChange(user, hash){
     data: {
             id: user.id,
             email: user.email,
-            password: hash.password
+            oldpassword: hash.oldPassword.value,
+            password: hash.password.value
           },
     success: function(){
+      self.resetFields(hash);
       alert("Password changed successfully!");
+      
     },
     error: function(){
-      alert("Password was not changed! Something happened on server.");
+      self.resetFields(hash);
+      alert("Password was not changed!");
     }  
   })
 }
@@ -70,7 +74,7 @@ App.AccountChangePasswordController = Ember.ObjectController.extend({
             // set(hash, "password.error", errors.password);             
             // set(hash, "confirmPassword.error", errors.password);             
           // });
-          sendPasswordChange(user, hash);
+          sendPasswordChange(user, hash, self);
       }
     }
   }
