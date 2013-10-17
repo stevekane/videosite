@@ -45,7 +45,7 @@ function handleExistingUser (user) {
   var deferred = Q.defer();
 
   if (user) { 
-    deferred.reject(new Error('User already exists.'));
+    deferred.reject(new Error('Email already exists.'));
   } else { 
     deferred.resolve();
   }
@@ -99,10 +99,10 @@ function updateWithCustomerIO (cio) {
 }
 
 function editUserInfo(User, data){
-  //strip out the ID from info to update
-  var updatedInfo = {email: data.email};
-  
-  return callWithPromise(User, "findOneAndUpdate", {_id: data.id}, {$set: updatedInfo})      
+  if(data){  
+    var updatedInfo = {email: data.email};
+    return callWithPromise(User, "findOneAndUpdate", {_id: data.id}, {$set: updatedInfo})
+  }
 }
 
 function processNewUser (cio) {
@@ -121,16 +121,33 @@ function processNewUser (cio) {
   }
 }
 
+
 function processEditUser (cio) {
+  console.log("processedit");
   return function (req, res) {
     var data = req.body.user;
     
-    editUserInfo(User, data)
-    .then(updateWithCustomerIO(cio))
-    .then(returnUpdatedUser(req,res))
-    .fail(handleFailure(res))
-    .done();
-  };
+    console.log(data.email);
+    User.findOne({email: data.email}, function(err, existing){
+      
+      if(err){
+        sendError(res, "err on server")
+      }
+      
+      if(!existing){
+        console.log("updating");
+        
+        editUserInfo(User, data)
+        .then(updateWithCustomerIO(cio))
+        .then(returnUpdatedUser(req,res))
+        .fail(handleFailure(res))
+        .done();
+        
+      } else {
+          sendError(res, "email already exists in system");
+      }
+    })
+  }
 }
 
 function login (req, res) {
