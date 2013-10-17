@@ -2,7 +2,9 @@ var User = require('../app/models').User
   , verifyAuth = require('../app/config/passport').verifyAuth
   , CustomerIO = require('customer.io')
   , Q = require('q')
-  , callWithPromise = Q.ninvoke;
+  , callWithPromise = Q.ninvoke
+  , bcrypt = require('bcrypt')
+  , SALT_WORK_FACTOR = 10;
 
 function formatDbResponse (model) {
   var formattedModel = model.toObject();
@@ -14,24 +16,6 @@ function formatDbResponse (model) {
   return {user: formattedModel};
 }
 
-function editUser (req, res, next) {
-  var updatedInfo = req.body;
-  delete updatedInfo._id;
-  delete updatedInfo.__v;
-  //TODO: add email change, needs to switch old customer.io email to new, updating
-  
-  //TODO: fix password hashing on modify, then remove this
-  delete updatedInfo.password;
-  
-  callWithPromise(User, "findOneAndUpdate", {_id: req.body.id}, {$set: updatedInfo})
-  .then(function (user) {
-    var response = {};
-    response.user = user 
-      ? formatDbResponse(user) 
-      : null;
-    res.send(response);
-  })
-};
 
 //used to send errors from promise .fail hooks
 function handleFailure (res, error) {
@@ -74,6 +58,12 @@ function returnNewUser (req, res) {
   }
 }
 
+function returnUpdatedUser(req, res){
+  return function(user){
+    return res.json(formatDbResponse(user));
+  }
+}
+
 function registerWithCustomerIO (cio) {
   console.log('registerWithCIO');
   return function (user) {
@@ -81,6 +71,25 @@ function registerWithCustomerIO (cio) {
     return user;
   }
 }
+
+//update and create w customer.io are actually the same
+function updateWithCustomerIO (cio) {
+  return function (user) {
+    cio.identify(user._id, user.email);
+    return user;
+  }
+}
+
+function editUserInfo(User, data){
+  console.log("edit User");
+  
+  //strip out the ID from info to update
+  var updatedInfo = {};
+  updatedInfo.email = data.email;
+  
+  return callWithPromise(User, "findOneAndUpdate", {_id: data.id}, {$set: updatedInfo})      
+}
+
 
 //closure gives access to our customer.io object
 function processNewUser (cio) {
@@ -107,6 +116,19 @@ function processNewUser (cio) {
   }
 }
 
+function processEditUser(cio){
+  return function (req, res) {
+    var data = {email: req.body.user.email,
+                id: req.body.user.id};
+    
+    editUserInfo(User, data)
+    .fail(handleFailure(res, "Server Error while updating user info"))
+    .then(updateWithCustomerIO(cio))
+    .then(returnUpdatedUser(req,res))
+    .done();
+  };
+}
+
 function login (req, res) {
   return res.json({user: formatDbResponse(req.user)});
 }
@@ -116,10 +138,20 @@ function logout (req, res) {
   res.status(200).send("logged out successfully");
 }
 
+function isAuthenticated(req,res){
+  return res.status(200).send();
+}
+
+function passwordChange(req,res){
+  return res.status(200).send(res);
+}
+
 exports.configure = function (app, passport, cio, options) {
   app.post('/users', processNewUser(cio));
   app.post('/user/create', processNewUser(cio));
   app.post('/user/login', passport.authenticate('local'), login);
   app.all('/user/logout', verifyAuth, logout);
-  app.post('/user/edit', verifyAuth, editUser);
+  app.post('/user/authenticated', verifyAuth, isAuthenticated); 
+  app.put('/user/edit', verifyAuth, processEditUser(cio));
+  app.post('/user/pwchange', verifyAuth, passwordChange); 
 }
