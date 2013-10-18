@@ -49,6 +49,11 @@ function checkForExistingUser (User, data) {
   return callWithPromise(User, "findOne", data);
 }
 
+function checkForExistingUserById(User, id){
+  return callWithPromise(User, "findById", id);
+}
+
+
 //returns rejected promise if user else returns resolved promise
 function handleExistingUser (user) {
   console.log('handleExisting', user);
@@ -248,6 +253,68 @@ function restoreSession (req, res) {
   }
 }
 
+function handleInvalidUser(user){
+  var deferred = Q.defer();
+  console.log ("USER: ", user);
+  if (!user) { 
+    deferred.reject(new Error('Invalid Username'));
+  } else { 
+    deferred.resolve(user);
+  }
+  return deferred.promise;
+}
+
+function sendPasswordChangeRequest(cio){
+  return function(user){
+    console.log("sending pw change req email");
+    cio.track(user.id, 'account_modification',
+              {account_action: 'request_pw_change'})
+    return user;
+  }
+}
+
+function sendPasswordChangeNotification(cio, newPassword){
+  return function(user){
+    console.log("sending pw changed email", newPassword);
+    cio.track(user.id, 'account_modification',
+              {account_action: 'pw_change_complete',
+               temp_password: newPassword})
+  }
+}
+
+function processPasswordChangeRequest(cio){
+  return function (req, res) {
+    var data = req.body;
+    console.log(data);
+    checkForExistingUser(User, {email: data.email})
+    .then(handleInvalidUser)
+    .then(sendPasswordChangeRequest(cio))
+    .then(function(){res.status(200).send()})
+    .fail(handleFailure(res))
+    .done();
+  }
+}
+
+function processPasswordChange(cio){
+  return function(req, res){
+  
+    var userId = req.params.id;
+    
+    console.log("id: ", userId);
+    var newPassword = Math.random().toString(36).slice(-8);
+    
+    checkForExistingUserById(User, userId)
+    .then(handleInvalidUser)
+    .then(hashPassword(newPassword, 10))
+    .then(updateUserPassword(userId))
+    .then(sendPasswordChangeNotification(cio, newPassword))
+    .then(function(){res.status(200).send()})
+    .fail(handleFailure(res))
+    .done();
+  }  
+}
+
+
 exports.configure = function (app, passport, cio, options) {
   app.post('/users', processNewUser(cio));
   app.post('/user/create', processNewUser(cio));
@@ -256,7 +323,10 @@ exports.configure = function (app, passport, cio, options) {
   app.post('/user/authenticated', verifyAuth, isAuthenticated); 
   app.get('/user/restore', restoreSession); 
   app.put('/user/edit', verifyAuth, processEditUser(cio));
-  app.post('/user/pwchange', verifyAuth, allowPasswordChange); 
+  app.post('/user/pwchange', verifyAuth, allowPasswordChange);
+  app.post('/user/pwresetrequest', processPasswordChangeRequest(cio));
+  app.get('/user/pwreset/:id', processPasswordChange(cio));
 
   return app;
+
 }

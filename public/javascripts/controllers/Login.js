@@ -52,6 +52,31 @@ App.LoginController = Ember.Controller.extend({
           set(self, "error", "Unauthorized"); 
         }
       })
+    },
+    initiateResetPassword: function(hash){
+      var resetConfirm = 
+        confirm("Are you sure you would like to initiate the password reset process?");
+      if(resetConfirm){
+        var self = this;
+        
+        $.ajax({
+          type: 'POST',
+          url: "http://localhost:3000/user/pwresetrequest",
+          data: {
+            email: hash.email, 
+          },
+          success: function (response) {
+            set(self, "passwordResetMsg", 
+              "Request sent. Please check your email.");   
+            self.resetFields(hash);
+          },
+          error: function (response) {
+            var errMsg = JSON.parse(response.responseText)["error"];
+            console.log(errMsg);
+            set(self, "passwordResetMsg", errMsg); 
+          }
+        })
+      }
     }
   }
 });
