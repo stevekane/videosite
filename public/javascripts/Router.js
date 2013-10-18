@@ -7,5 +7,6 @@ App.Router.map(function () {
   this.resource('account', function () {
     this.route('changeEmail');
     this.route('changePassword');
+    this.route('subscribe');
   });
 });

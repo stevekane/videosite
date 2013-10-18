@@ -58,7 +58,7 @@ function handleFailure (res) {
 
 //create a new customer by registering information with Braintree
 function processNewSubscriber (gateway) {
-  return function (req, res, next) {
+  return function (req, res) {
 
     var customerDetails = {
       firstName: req.body.firstName,
