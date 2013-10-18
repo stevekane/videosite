@@ -7,6 +7,8 @@ App.SignupController = Ember.Controller.extend({
 
   activeUser: alias('controllers.user.content'),
 
+  error: "",
+
   newAccountHash: {
     email: "",
     password: "",

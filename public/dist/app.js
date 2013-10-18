@@ -25,7 +25,7 @@ App.NodeAdapter = DS.RESTAdapter.extend({
 
 App.Store = DS.Store.extend({
   adapter: App.NodeAdapter,
-//  adapter: DS.FixtureAdapter
+  //adapter: DS.FixtureAdapter
 });
 minispade.require('Router.js');
 minispade.require('Models.js');
@@ -97,44 +97,48 @@ App.AccountChangeEmailController = Ember.ObjectController.extend({
   content: alias('controllers.user.content'),
 
   newEmailHash: {
-    email: {value: "", error: ""},
-    confirmEmail: {value: "", error: ""},
+    email: "",
+    confirmEmail: "",
   },
 
   resetFields: function (emailHash) {
-    set(emailHash, 'email.value', "");
-    set(emailHash, 'email.error', "");
-    set(emailHash, 'confirmEmail.value', "");
-    set(emailHash, 'confirmEmail.error', "");
+    set(emailHash, 'email', "");
+    set(emailHash, 'confirmEmail', "");
   },
 
   actions: {
     
     changeEmail: function (user, hash) {
       var emailError
+        , previousEmail = user.get('email')
         , store = this.get('store')
         , self = this
         , values = {
-        email: hash.email.value,
-        confirmEmail: hash.confirmEmail.value,
+        email: hash.email,
+        confirmEmail: hash.confirmEmail,
       };
       
-      if (hash.email.value !== hash.confirmEmail.value) {
-        emailError = "Provided emails did not match."
-        set(hash, "email.value", "");
-        set(hash, "email.error", emailError);
-        set(hash, "confirmEmail.value", "");
-        set(hash, "confirmEmail.error", emailError);
+      if (hash.email === previousEmail) {
+        self.resetFields(hash);
+        set(self, "error", previousEmail + " is already your email address!");
+        return;
+      }
+
+      if (hash.email !== hash.confirmEmail) {
+        set(self, "error", "Provided emails did not match");             
+        set(hash, "email", "");
+        set(hash, "confirmEmail", "");
         return;
       } else {
-        user.set('email', hash.email.value)
+        user.set('email', hash.email)
           .save()
           .then(function (user) { 
             self.resetFields(hash);
           })
-          .fail(function (errors) {
-            set(hash, "email.error", errors.email);             
-            set(hash, "confirmEmail.error", errors.email);             
+          .fail(function (error) {
+            user.set('email', previousEmail);
+            console.log(error);
+            set(self, "error", JSON.parse(error.responseText)['error']);             
           });
       }
     }
@@ -316,6 +320,8 @@ App.SignupController = Ember.Controller.extend({
   needs: ['user'],
 
   activeUser: alias('controllers.user.content'),
+
+  error: "",
 
   newAccountHash: {
     email: "",
