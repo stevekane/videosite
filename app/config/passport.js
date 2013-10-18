@@ -20,11 +20,16 @@ function handleNoUser(user) {
 }
 
 function checkPassword(password, passportDone){
-  return function(user){ 
-    return callWithPromise(bcrypt, "compare", password, user.password)
-            .then( function(isMatch){
-                if (!isMatch) return passportDone(null, false, {message: "Invalid Password"});
-                else          return passportDone(null, user)})
+  return function(user) { 
+    var passwordCompare = callWithPromise(bcrypt, "compare", password, user.password)
+      .then(function(isMatch){
+        if (!isMatch) {
+          return passportDone(null, false, {message: "Invalid Password"});
+        } else {
+          return passportDone(null, user);
+        }
+      });
+    return passwordCompare;
   }
 }
 
