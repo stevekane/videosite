@@ -21,10 +21,13 @@
       value=newEmailHash.confirmEmail}}
   </div>
 
-  <button class="btn btn-warning" {{action changeEmail content newEmailHash}}>
-    Update Email
-  </button>
-  {{#if error}}
-    <small class="text-danger">{{error}}</small>
-  {{/if}}
+
+  <div class = "form-group">
+    <button class="btn btn-warning" {{action changeEmail content newEmailHash}}>
+      Update Email
+    </button>
+    {{#if error}}
+      <small class="text-danger">{{error}}</small>
+    {{/if}}
+  </div>
 </form>
