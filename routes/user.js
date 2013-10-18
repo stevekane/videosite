@@ -4,7 +4,8 @@ var User = require('../app/models').User
   , Q = require('q')
   , callWithPromise = Q.ninvoke
   , bcrypt = require('bcrypt')
-  , SALT_WORK_FACTOR = 10;
+  , SALT_WORK_FACTOR = 10
+  , Moment = require('moment');
 
 function formatResponse (hash) {
   return response = {
@@ -85,7 +86,28 @@ function returnUpdatedUser(req, res){
 function registerWithCustomerIO (cio) {
   return function (user) {
     console.log('registerWithCIO', user, "user");
-    cio.identify(user._id, user.email);
+        
+    //timestamp of creation (linux timestamp 'X')
+    var timeCreated = moment().format('X');
+    
+    cio.identify(user._id, user.email, {created_at: timeCreated});
+    return user;
+  }
+}
+
+function sendNewUserEmail(cio){
+  return function(user){
+    console.log('sending new user email')
+    cio.track(user.id, 'account_created', 
+              {subscription_level: 'new_account'})
+    return user;
+  }
+}
+
+function sendUpdatedAccountInfoNotification(cio){
+  return function(user){
+    console.log('sending user email notifying acct change')
+    cio.track(user.id, 'email_changed')
     return user;
   }
 }
@@ -125,6 +147,7 @@ function processNewUser (cio) {
     .then(handleExistingUser)
     .then(createNewUser(User, data))
     .then(registerWithCustomerIO(cio))
+    .then(sendNewUserEmail(cio))
     .then(loginUser(req))
     .then(returnNewUser(req, res))
     .fail(handleFailure(res))
@@ -153,6 +176,7 @@ function processEditUser (cio) {
     .then(handleExistingEmail)
     .then(editUserInfo(User, data))
     .then(updateWithCustomerIO(cio))
+    .then(sendUpdatedAccountInfoNotification(cio))
     .then(returnUpdatedUser(req,res))
     .fail(handleFailure(res))
     .done();
