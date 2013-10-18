@@ -1,6 +1,5 @@
 var User = require('../app/models').User
   , verifyAuth = require('../app/config/passport').verifyAuth
-  , CustomerIO = require('customer.io')
   , Q = require('q')
   , callWithPromise = Q.ninvoke
   , bcrypt = require('bcrypt')
@@ -226,6 +225,7 @@ function updateUserPassword (id) {
   }
 }
 
+//TODO: SHOULD THE ANON FUNCTION HERE USE FORMAT BEFORE SENDING??
 function allowPasswordChange (req,res) {
   var incomingPassword = req.body.oldpassword;
   var newPassword = req.body.password;
@@ -257,4 +257,6 @@ exports.configure = function (app, passport, cio, options) {
   app.get('/user/restore', restoreSession); 
   app.put('/user/edit', verifyAuth, processEditUser(cio));
   app.post('/user/pwchange', verifyAuth, allowPasswordChange); 
+
+  return app;
 }

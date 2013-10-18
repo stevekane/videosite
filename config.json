@@ -2,5 +2,11 @@
   "customerIO": {
     "id": "61e69d38865a3b27286b",
     "token": "faada99ebd4a66168a02"
+  },
+
+  "braintree": {
+    "merchantId":"hthxknsbjjnd99s5",
+    "publicKey": "9g52fdwvwt44shnd",
+    "privateKey": "0364161f7c67e9f320520afa8ea6535e"
   }
 }

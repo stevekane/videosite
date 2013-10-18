@@ -5,50 +5,62 @@ var http = require('http')
   , cons = require('consolidate')
   , passport = require('passport')
   , mongoose = require('mongoose')
+  , braintree = require('braintree')
   , customerIO = require('customer.io')
-  , Q = require('q');
+  , Q = require('q')
+  , callWithPromise = Q.ninvoke
 
 var routes = require('./routes')
   , configurePassport = require('./app/config/passport').configure
   , configureMongoose = require('./app/config/mongoose').configure
-  , configureUserRoutes = require('./routes/user').configure;
+  , configureUserRoutes = require('./routes/user').configure
+  , configurePaymentRoutes = require('./routes/payment').configure;
 
-var callWithPromise = Q.ninvoke
-  , cioConfig = require('./config.json').customerIO
-  , cio = customerIO.init(cioConfig.id, cioConfig.token)
-  , app = express()
+var cioConfig = require('./config.json').customerIO
+  , cio = customerIO.init(cioConfig.id, cioConfig.token);
+
+var btConfig = require('./config.json').braintree
+  , gateway = braintree.connect({
+      environment: braintree.Environment.Sandbox,
+      merchantId: btConfig.merchantId,
+      publicKey: btConfig.publicKey,
+      privateKey: btConfig.privateKey
+  });
+
+
+var app = express()
+  , SESSION_CONFIG = { secret: "super sekrit" }
   , server = http.createServer(app);
-
-var SESSION_CONFIG = {
-  secret: "super sekrit",
-}
 
 // some standard stuff
 app.engine('handlebars', cons.handlebars);
-app.set('port', process.env.PORT || 3000);
-app.set('views', path.join(__dirname + "/views/"));
-app.set('view engine', 'handlebars');
-app.use(express.favicon());
-app.use(express.methodOverride());
-app.use(express.bodyParser());
-app.use(express.cookieParser());
-app.use(express.session(SESSION_CONFIG));
-app.use(passport.initialize());
-app.use(passport.session());
-app.use(express.static(__dirname + "/public"));
+
+app.set('port', process.env.PORT || 3000)
+  .set('views', path.join(__dirname + "/views/"))
+  .set('view engine', 'handlebars');
+
+app.use(express.favicon())
+  .use(express.methodOverride())
+  .use(express.bodyParser())
+  .use(express.cookieParser())
+  .use(express.session(SESSION_CONFIG))
+  .use(passport.initialize())
+  .use(passport.session())
+  .use(express.static(__dirname + "/public"));
 
 configureMongoose(mongoose);
 configurePassport(passport);
 configureUserRoutes(app, passport, cio);
+configurePaymentRoutes(app, cio, gateway);
 
 //serve the web app yo
 app.get('/', routes.index);
 
 callWithPromise(server, "listen", app.get('port'))
-.fail(function () {
-  console.log('failed to connect on port', app.get('port'));
-})
 .then(function () {
   console.log('server connected on', app.get('port'));
+})
+.fail(function () {
+  console.log('failed to connect on port', app.get('port'));
 })
 .done();
