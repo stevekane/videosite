@@ -5,25 +5,28 @@ var get = Ember.get;
 
 App.NodeAdapter = DS.RESTAdapter.extend({
   updateRecord: function(store, type, record){
-    var data = {};
-    var updateURL = "http://localhost:3000/user/edit"
+    var data = {}
+      , url = "http://localhost:3000/user/edit"
     data[type.typeKey] = store.serializerFor(type.typeKey).serialize(record);
 
     var id = get(record, 'id');
     data[type.typeKey].id = id;
     
-    return this.ajax(updateURL, "PUT", { data: data });
-  }
-})
+    return this.ajax(url, "PUT", { data: data });
+  },
 
-App.Store = DS.Store.extend({
-  adapter: App.NodeAdapter
+  restoreSession: function () {
+    var url = "http://localhost:3000/user/restore";
+
+    return this.ajax(url, "PUT");
+  }
+
 });
 
-
-//App.Store = DS.Store.extend({
+App.Store = DS.Store.extend({
+  adapter: App.NodeAdapter,
 //  adapter: DS.FixtureAdapter
-//});
+});
 minispade.require('Router.js');
 minispade.require('Models.js');
 minispade.require('Controllers.js');
@@ -32,7 +35,6 @@ minispade.require('Controllers.js');
 //re-assign it here to avoid naming conflicts throughout app
  App.localStore = store;
  store = null;
-
 
 });
 
@@ -401,22 +403,43 @@ App.ApplicationRoute = Ember.Route.extend({
   actions: {
     
     logout: function (activeUser) {
-      var userController = this.controllerFor('user');
-      set(userController, "content", null);
-      this.transitionTo('index');
-    }
+      var store = this.get('store')
+        , self = this
+        , url = "http://localhost:3000/user/logout"
+        , userController = this.controllerFor('user');
 
+      //NOTE: this probably should wait for confirmation from the server
+      //before showing the user that they are logged out...
+      store.adapterFor('user').ajax(url, "POST")
+      set(userController, "content", null);
+      self.transitionTo('index');
+    }
   },
 
   model: function (params) {
-    var store= this.get('store')
-      , storedUser = App.localStore.get('user'); 
+    var store = this.get('store')
+      , url = "http://localhost:3000/user/restore"
+      , request = store.adapterFor('user').ajax(url, "GET")
 
-    return storedUser ? store.push('user', storedUser) : null;
+    return request.then(function (payload) {
+      var p = new Ember.RSVP.Promise(function (resolve, reject) {
+        var newUser;
+
+        if (payload) {
+          newUser = store.push("user", payload.user);
+          resolve(newUser);
+        } else {
+          resolve(null); 
+        }
+      }); 
+      return p;
+    });
   },
 
   setupController: function (controller, model) {
-    var userController = this.controllerFor('user')
+    var store = this.get('store')
+    var userController = this.controllerFor('user');
+    console.log('fired');
 
     userController.set('content', model);
   }

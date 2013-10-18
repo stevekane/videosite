@@ -6,6 +6,16 @@ var User = require('../app/models').User
   , bcrypt = require('bcrypt')
   , SALT_WORK_FACTOR = 10;
 
+function formatResponse (hash) {
+  return response = {
+    user: {
+      id: hash._id,
+      password: hash.password,
+      email: hash.email
+    }
+  };
+}
+
 function formatDbResponse (model) {
   var formattedModel = model.toObject();
 
@@ -101,7 +111,7 @@ function updateWithCustomerIO (cio) {
 function editUserInfo(User, data){
   if(data){  
     var updatedInfo = {email: data.email};
-    return callWithPromise(User, "findOneAndUpdate", {_id: data.id}, {$set: updatedInfo})
+    return callWithPromise(User, "findOneAndUpdate", {_id: data.id}, {$set: updatedInfo});
   }
 }
 
@@ -167,7 +177,7 @@ function allowPasswordChange(req,res){
   var incomingPassword = req.body.oldpassword;
   var newPassword = req.body.password;
 
-  bcrypt.compare(incomingPassword,  req.user.password, function (err, isMatch) {
+  bcrypt.compare(incomingPassword, req.user.password, function (err, isMatch) {
     if (err) {
       return sendError(res, "error with server");
     }
@@ -185,12 +195,22 @@ function allowPasswordChange(req,res){
   });
 }
 
+//NOTE: THIS USES FORMAT RESPONSE WHICH IS SLIGHTLY DIFF THAN FORMATDBRESPONSE
+function restoreSession (req, res) {
+  if (req.user && req.isAuthenticated()) {
+    res.status(200).json(formatResponse(req.user)); 
+  } else {
+    res.status(204).send(); 
+  }
+}
+
 exports.configure = function (app, passport, cio, options) {
   app.post('/users', processNewUser(cio));
   app.post('/user/create', processNewUser(cio));
   app.post('/user/login', passport.authenticate('local'), login);
-  app.all('/user/logout', verifyAuth, logout);
+  app.all('/user/logout', logout);
   app.post('/user/authenticated', verifyAuth, isAuthenticated); 
+  app.get('/user/restore', restoreSession); 
   app.put('/user/edit', verifyAuth, processEditUser(cio));
   app.post('/user/pwchange', verifyAuth, allowPasswordChange); 
 }

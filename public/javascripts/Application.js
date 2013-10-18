@@ -4,27 +4,28 @@ var get = Ember.get;
 
 App.NodeAdapter = DS.RESTAdapter.extend({
   updateRecord: function(store, type, record){
-    var data = {};
-    var updateURL = "http://localhost:3000/user/edit"
+    var data = {}
+      , url = "http://localhost:3000/user/edit"
     data[type.typeKey] = store.serializerFor(type.typeKey).serialize(record);
 
     var id = get(record, 'id');
     data[type.typeKey].id = id;
     
-    return this.ajax(updateURL, "PUT", { data: data });
-  }
-})
+    return this.ajax(url, "PUT", { data: data });
+  },
 
-App.Store = DS.Store.extend({
-  adapter: App.NodeAdapter
+  restoreSession: function () {
+    var url = "http://localhost:3000/user/restore";
+
+    return this.ajax(url, "PUT");
+  }
+
 });
 
-
-//App.Store = DS.Store.extend({
+App.Store = DS.Store.extend({
+  adapter: App.NodeAdapter,
 //  adapter: DS.FixtureAdapter
-//});
-
-
+});
 
 require('Router.js');
 require('Models.js');
@@ -34,4 +35,3 @@ require('Controllers.js');
 //re-assign it here to avoid naming conflicts throughout app
  App.localStore = store;
  store = null;
-

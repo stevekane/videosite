@@ -23,19 +23,16 @@ function mongoStrategy (email, password, done) {
       }
     });
   }); 
-  
 }
 
 //return the id of the provided user
 function serialize (user, done) {
-  done(null, user._id);
+  done(null, user);
 }
 
 //return the user based on id using mongo
-function deserializeMongo (id, done) {
-  User.findById(id, function (err, user) {
-    done(err, user);
-  });
+function deserializeMongo (user, done) {
+  done(null, user); 
 }
 
 exports.configure = function (passport, options) {
