@@ -24,7 +24,7 @@ App.NodeAdapter = DS.RESTAdapter.extend({
 
 App.Store = DS.Store.extend({
   adapter: App.NodeAdapter,
-//  adapter: DS.FixtureAdapter
+  //adapter: DS.FixtureAdapter
 });
 
 require('Router.js');
