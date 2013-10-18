@@ -10,9 +10,7 @@ function checkValidUser(email){
 }
 
 function handleNoUser(user) {
-  console.log('handleNoUser');
   var deferred = Q.defer();
-
   if (!user) { 
     deferred.reject(new Error('Invalid Username'));
   } else { 
@@ -31,14 +29,12 @@ function checkPassword(password, passportDone){
 }
 
 //strategy for use with Mongoose
-function mongoStrategy (email, password, passportDone) {
-  
+function mongoStrategy (email, password, passportDone) {  
   checkValidUser(email)
   .then(handleNoUser)
   .then(checkPassword(password, passportDone))
   .fail(function(err){console.log("error: ", err)})
   .done();
-
 } 
 
 //return the id of the provided user
