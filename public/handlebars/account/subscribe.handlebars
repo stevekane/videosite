@@ -1,0 +1,85 @@
+<form class="form-horizontal" role="form">
+  <legend>Subscribe!</legend>
+
+  <fieldset>
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" disabled class="form-control">{{activeUser.email}}</input>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          {{input type="text"
+            classNames="form-control"
+            placeholder="As appears on card"
+            value=newSubscriptionHash.firstName}}
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          {{input type="text"
+            classNames="form-control"
+            placeholder="As appears on card"
+            value=newSubscriptionHash.lastName}}
+        </div>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <div class="form-group">
+      <label for="ccnumber">Credit Card Number</label>
+      {{input type="text"
+        classNames="form-control"
+        placeholder="--no dashes--"
+        value=newSubscriptionHash.ccNumber}}
+    </div>
+
+    <div class="row">
+      <div class="col-md-2">
+        <div class="form-group">
+          <label for="month">Month</label>
+          {{input type="text"
+            classNames="form-control"
+            placeholder="XX"
+            value=newSubscriptionHash.expirationMonth}}
+        </div>
+      </div>
+
+      <div class="col-md-2">
+        <div class="form-group">
+          <label for="year">Year</label>
+          {{input type="text"
+            classNames="form-control"
+            placeholder="XX"
+            value=newSubscriptionHash.expirationYear}}
+        </div>
+      </div>
+
+      <div class="col-md-2">
+        <div class="form-group">
+          <label for="ccv">CCV</label>
+          {{input type="text"
+            classNames="form-control"
+            placeholder="XXX"
+            value=newSubscriptionHash.ccv}}
+        </div>
+      </div>
+
+    </div>
+  </fieldset>
+
+  <div class = "form-group">
+    <button class="btn btn-warning" {{action subscribe subscriptionHash}}>
+      Update Email
+    </button>
+
+    {{#if error}}
+      <small class="text-danger">{{error}}</small>
+    {{/if}}
+  </div>
+</form>
