@@ -33,7 +33,7 @@ function mongoStrategy (email, password, passportDone) {
   checkValidUser(email)
   .then(handleNoUser)
   .then(checkPassword(password, passportDone))
-  .fail(function(err){console.log("error: ", err)})
+  .fail(function(err){return passportDone(null, false, "invalid user")})
   .done();
 } 
 

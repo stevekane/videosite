@@ -317,11 +317,11 @@ helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};
 Ember.TEMPLATES["login"] = Ember.Handlebars.template(function anonymous(Handlebars,depth0,helpers,partials,data) {
 this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Ember.Handlebars.helpers); data = data || {};
-  var buffer = '', stack1, hashTypes, hashContexts, escapeExpression=this.escapeExpression, helperMissing=helpers.helperMissing, self=this;
+  var buffer = '', stack1, hashTypes, hashContexts, helperMissing=helpers.helperMissing, escapeExpression=this.escapeExpression, self=this;
 
 function program1(depth0,data) {
   
-  var buffer = '', stack1, stack2, hashContexts, hashTypes, options;
+  var buffer = '', stack1, hashContexts, hashTypes, options;
   data.buffer.push("\r\n        <form class=\"form-horizontal\" role=\"form\">\r\n          <legend>Login</legend>\r\n          <div class=\"form-group\">\r\n            <label for=\"email\">Email</label>\r\n            ");
   hashContexts = {'type': depth0,'class': depth0,'placeholder': depth0,'value': depth0};
   hashTypes = {'type': "STRING",'class': "STRING",'placeholder': "STRING",'value': "ID"};
@@ -329,59 +329,32 @@ function program1(depth0,data) {
     'type': ("text"),
     'class': ("form-control"),
     'placeholder': ("Your Email"),
-    'value': ("loginHash.email.value")
+    'value': ("loginHash.email")
   },contexts:[],types:[],hashContexts:hashContexts,hashTypes:hashTypes,data:data};
   data.buffer.push(escapeExpression(((stack1 = helpers.input || depth0.input),stack1 ? stack1.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-  data.buffer.push("\r\n            ");
-  hashTypes = {};
-  hashContexts = {};
-  stack2 = helpers['if'].call(depth0, "loginHash.email.error", {hash:{},inverse:self.noop,fn:self.program(2, program2, data),contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data});
-  if(stack2 || stack2 === 0) { data.buffer.push(stack2); }
   data.buffer.push("\r\n          </div>\r\n\r\n          <div class=\"form-group\">\r\n            <label for=\"password\">Password</label>\r\n            ");
   hashContexts = {'type': depth0,'class': depth0,'placeholder': depth0,'value': depth0};
   hashTypes = {'type': "STRING",'class': "STRING",'placeholder': "STRING",'value': "ID"};
   options = {hash:{
     'type': ("password"),
     'class': ("form-control"),
-    'placeholder': ("Password"),
-    'value': ("loginHash.password.value")
+    'placeholder': ("Your Password"),
+    'value': ("loginHash.password")
   },contexts:[],types:[],hashContexts:hashContexts,hashTypes:hashTypes,data:data};
   data.buffer.push(escapeExpression(((stack1 = helpers.input || depth0.input),stack1 ? stack1.call(depth0, options) : helperMissing.call(depth0, "input", options))));
-  data.buffer.push("\r\n            ");
-  hashTypes = {};
-  hashContexts = {};
-  stack2 = helpers['if'].call(depth0, "loginHash.password.error", {hash:{},inverse:self.noop,fn:self.program(4, program4, data),contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data});
-  if(stack2 || stack2 === 0) { data.buffer.push(stack2); }
-  data.buffer.push("  \r\n              \r\n          </div>\r\n\r\n          <div class=\"form-group\">\r\n            <button class=\"btn btn-success\" ");
+  data.buffer.push("\r\n          </div>\r\n\r\n          <div class=\"form-group\">\r\n            <button class=\"btn btn-success\" ");
   hashTypes = {};
   hashContexts = {};
   data.buffer.push(escapeExpression(helpers.action.call(depth0, "attemptLogin", "loginHash", {hash:{},contexts:[depth0,depth0],types:["ID","ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
-  data.buffer.push(">Login!</button>\r\n          </div>\r\n        </form> \r\n      ");
-  return buffer;
-  }
-function program2(depth0,data) {
-  
-  var buffer = '', hashTypes, hashContexts;
-  data.buffer.push("\r\n              <small class=\"text-danger\">");
+  data.buffer.push(">Login!</button>\r\n            <small class=\"text-danger\">");
   hashTypes = {};
   hashContexts = {};
-  data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "loginHash.email.error", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
-  data.buffer.push("</small>\r\n            ");
+  data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "error", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
+  data.buffer.push("</small>\r\n          </div>\r\n        </form> \r\n      ");
   return buffer;
   }
 
-function program4(depth0,data) {
-  
-  var buffer = '', hashTypes, hashContexts;
-  data.buffer.push("\r\n              <small class=\"text-danger\">");
-  hashTypes = {};
-  hashContexts = {};
-  data.buffer.push(escapeExpression(helpers._triageMustache.call(depth0, "loginHash.password.error", {hash:{},contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data})));
-  data.buffer.push("</small>\r\n            ");
-  return buffer;
-  }
-
-function program6(depth0,data) {
+function program3(depth0,data) {
   
   var buffer = '', hashTypes, hashContexts;
   data.buffer.push("\r\n        <h2> Already logged in as: ");
@@ -395,7 +368,7 @@ function program6(depth0,data) {
   data.buffer.push("<section class=\"container page-section\">\r\n  <div class=\"row\">\r\n    <div class=\"row\">\r\n      <div class=\"col-md-4 col-md-offset-4\">\r\n\r\n        ");
   hashTypes = {};
   hashContexts = {};
-  stack1 = helpers.unless.call(depth0, "activeUser", {hash:{},inverse:self.program(6, program6, data),fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data});
+  stack1 = helpers.unless.call(depth0, "activeUser", {hash:{},inverse:self.program(3, program3, data),fn:self.program(1, program1, data),contexts:[depth0],types:["ID"],hashContexts:hashContexts,hashTypes:hashTypes,data:data});
   if(stack1 || stack1 === 0) { data.buffer.push(stack1); }
   data.buffer.push("\r\n      </div>\r\n    </div>\r\n  </div>\r\n</section>\r\n");
   return buffer;

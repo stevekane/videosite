@@ -11,26 +11,20 @@
             {{input type="text"
               class="form-control" 
               placeholder="Your Email" 
-              value = loginHash.email.value}}
-            {{#if loginHash.email.error}}
-              <small class="text-danger">{{loginHash.email.error}}</small>
-            {{/if}}
+              value = loginHash.email}}
           </div>
 
           <div class="form-group">
             <label for="password">Password</label>
             {{input type="password"
               class="form-control" 
-              placeholder="Password" 
-              value= loginHash.password.value}}
-            {{#if loginHash.password.error}}
-              <small class="text-danger">{{loginHash.password.error}}</small>
-            {{/if}}  
-              
+              placeholder="Your Password" 
+              value= loginHash.password}}
           </div>
 
           <div class="form-group">
             <button class="btn btn-success" {{action attemptLogin loginHash}}>Login!</button>
+            <small class="text-danger">{{error}}</small>
           </div>
         </form> 
       {{else}}
