@@ -157,17 +157,18 @@ function sendPasswordChange(user, hash, self){
     data: {
             id: user.id,
             email: user.email,
-            oldpassword: hash.oldPassword.value,
-            password: hash.password.value
+            oldpassword: hash.oldPassword,
+            password: hash.password
           },
     success: function(){
       self.resetFields(hash);
       alert("Password changed successfully!");
       
     },
-    error: function(){
+    error: function(error){
       self.resetFields(hash);
       alert("Password was not changed!");
+      set(self, "error", JSON.parse(error.responseText)['error']);
     }  
   })
 }
@@ -179,18 +180,15 @@ App.AccountChangePasswordController = Ember.ObjectController.extend({
   content: alias('controllers.user.content'),
 
   newPasswordHash: {
-    oldPassword: {value: "", error: ""},
-    password: {value: "", error: ""},
-    confirmPassword: {value: "", error: ""},
+    oldPassword: "",
+    password: "",
+    confirmPassword: "",
   },
 
   resetFields: function (passwordHash) {
-    set(passwordHash, 'oldPassword.value', "");
-    set(passwordHash, 'oldPassword.error', "");
-    set(passwordHash, 'password.value', "");
-    set(passwordHash, 'password.error', "");
-    set(passwordHash, 'confirmPassword.value', "");
-    set(passwordHash, 'confirmPassword.error', "");
+    set(passwordHash, 'oldPassword', "");
+    set(passwordHash, 'password', "");
+    set(passwordHash, 'confirmPassword', "");
   },
 
   actions: {
@@ -200,16 +198,15 @@ App.AccountChangePasswordController = Ember.ObjectController.extend({
         , store = this.get('store')
         , self = this
         , values = {
-        password: hash.password.value,
-        confirmPassword: hash.confirmPassword.value,
+        password: hash.password,
+        confirmPassword: hash.confirmPassword,
       };
 
-      if (hash.password.value !== hash.confirmPassword.value) {
+      if (hash.password !== hash.confirmPassword) {
         passwordError = "Provided passwords did not match.";
-        set(hash, "password.value", "");
-        set(hash, "password.error", passwordError);
-        set(hash, "confirmPassword.value", "");
-        set(hash, "confirmPassword.error", passwordError);
+        set(hash, "password", "");
+        set(hash, "confirmPassword", "");
+        set(this, "error", passwordError);
         return;
       } else {
         // user.set('password', hash.password.value)

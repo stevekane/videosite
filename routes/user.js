@@ -209,7 +209,7 @@ function allowPasswordChange(req,res){
   .then(checkIfMatches)
   .then(hashPassword(newPassword, SALT_WORK_FACTOR))
   .then(updateUserPassword(req.user._id))
-  .then(res.status(200).send())
+  .then(function(user){res.status(200).send(user)})
   .fail(handleFailure(res))
   .done();
 }
