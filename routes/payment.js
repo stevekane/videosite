@@ -1,7 +1,8 @@
-var User = require('../app/models').User
+var moment = require('moment')
+  , Q = require('q')
+  , User = require('../app/models').User
   , Subscriber = require('../app/models').Subscriber
   , verifyAuth = require('../app/config/passport').verifyAuth
-  , Q = require('q')
   , callWithPromise = Q.ninvoke;
 
 
