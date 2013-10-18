@@ -21,6 +21,7 @@ function formatDbResponse (model) {
 
   formattedModel.id = formattedModel._id;
   delete formattedModel.password;
+  delete formattedModel.created_at;
   delete formattedModel._id;
   delete formattedModel.__v;
   return {user: formattedModel};
@@ -90,11 +91,7 @@ function returnUpdatedUser(req, res){
 function registerWithCustomerIO (cio) {
   return function (user) {
     console.log('registerWithCIO', user, "user");
-        
-    //timestamp of creation (linux timestamp 'X')
-    var timeCreated = moment().format('X');
-    
-    cio.identify(user._id, user.email, {created_at: timeCreated});
+    cio.identify(user._id, user.email, {created_at: user.created_at});
     return user;
   }
 }
@@ -131,7 +128,9 @@ function loginUser (req) {
 function updateWithCustomerIO (cio) {
   return function (user) {
     console.log("user: ", user);
-    cio.identify(user._id, user.email);
+    user.updated_at_timestamp("Edit Email");
+    cio.identify(user._id, user.email, {updated_at: user.updated_at,
+                                        last_action: user.last_modified_action});
     return user;
   }
 }
@@ -174,9 +173,9 @@ function handleExistingEmail(user){
 
 function processEditUser (cio) {
   return function (req, res) {
-    console.log("processedit");
+    
     var data = req.body.user;
-
+   
     callWithPromise(User, "findOne", {email: data.email})
     .then(handleExistingEmail)
     .then(editUserInfo(User, data))
@@ -263,6 +262,7 @@ function handleInvalidUser(user){
   }
   return deferred.promise;
 }
+
 
 function sendPasswordChangeRequest(cio){
   return function(user){
