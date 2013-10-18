@@ -196,7 +196,7 @@ function hashPassword(newPassword, salt){
 
 function updateUserPassword(id){
   return function(hash){
-    console.log("HASH: ", hash);
+    console.log("HASH: ", hash, id);
     return callWithPromise(User, "findOneAndUpdate", {_id: id}, {$set: {password: hash}}) 
   }
 }
@@ -208,7 +208,7 @@ function allowPasswordChange(req,res){
   comparePasswords(incomingPassword, req.user.password)
   .then(checkIfMatches)
   .then(hashPassword(newPassword, SALT_WORK_FACTOR))
-  .then(updateUserPassword(req.user.id))
+  .then(updateUserPassword(req.user._id))
   .then(res.status(200).send())
   .fail(handleFailure(res))
   .done();
