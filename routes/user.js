@@ -103,13 +103,14 @@ function loginUser (req) {
 //update and create w customer.io are actually the same
 function updateWithCustomerIO (cio) {
   return function (user) {
+    console.log("user: ", user);
     cio.identify(user._id, user.email);
     return user;
   }
 }
 
 function editUserInfo(User, data){
-  if(data){  
+  return function(){
     var updatedInfo = {email: data.email};
     return callWithPromise(User, "findOneAndUpdate", {_id: data.id}, {$set: updatedInfo});
   }
@@ -131,32 +132,30 @@ function processNewUser (cio) {
   }
 }
 
+function handleExistingEmail(user){
+  var deferred = Q.defer();
+
+  if (user) { 
+    deferred.reject(new Error('Email already exists in system'));
+  } else { 
+    return deferred.resolve();
+  }
+  return deferred.promise;
+
+}
 
 function processEditUser (cio) {
   return function (req, res) {
     console.log("processedit");
     var data = req.body.user;
-    
-    console.log(data.email);
-    User.findOne({email: data.email}, function(err, existing){
-      
-      if(err){
-        sendError(res, "err on server")
-      }
-      
-      if(!existing){
-        console.log("updating");
-        
-        editUserInfo(User, data)
-        .then(updateWithCustomerIO(cio))
-        .then(returnUpdatedUser(req,res))
-        .fail(handleFailure(res))
-        .done();
-        
-      } else {
-        sendError(res, "email already exists in system");
-      }
-    })
+
+    callWithPromise(User, "findOne", {email: data.email})
+    .then(handleExistingEmail)
+    .then(editUserInfo(User, data))
+    .then(updateWithCustomerIO(cio))
+    .then(returnUpdatedUser(req,res))
+    .fail(handleFailure(res))
+    .done();
   }
 }
 
@@ -173,26 +172,46 @@ function isAuthenticated(req,res){
   return res.status(200).send();
 }
 
+function comparePasswords(incoming, current){
+  return callWithPromise(bcrypt, "compare", incoming, current);
+}
+
+function checkIfMatches(isMatch){
+  var deferred = Q.defer();
+
+  if (!isMatch) { 
+    deferred.reject(new Error('Bad password'));
+  } else { 
+    deferred.resolve();
+  }
+  return deferred.promise;
+}
+
+function hashPassword(newPassword, salt){
+  console.log("hashpassword", newPassword, salt);
+  return function(){
+    return callWithPromise(bcrypt, "hash", newPassword, salt);
+  }
+}
+
+function updateUserPassword(id){
+  return function(hash){
+    console.log("HASH: ", hash);
+    return callWithPromise(User, "findOneAndUpdate", {_id: id}, {$set: {password: hash}}) 
+  }
+}
+
 function allowPasswordChange(req,res){
   var incomingPassword = req.body.oldpassword;
   var newPassword = req.body.password;
 
-  bcrypt.compare(incomingPassword, req.user.password, function (err, isMatch) {
-    if (err) {
-      return sendError(res, "error with server");
-    }
-    if (!isMatch) { 
-      return sendError(res, "bad password");
-    } else {
-      bcrypt.hash(newPassword, SALT_WORK_FACTOR, function (err, hash) {
-        if (err) return sendError(res, "error hashing"); 
-        //save the newly hashed pw as their password
-        newPassword = hash;
-        callWithPromise(User, "findOneAndUpdate", {_id: req.user.id}, {$set: {password: newPassword}}) 
-        .then(res.status(200).send());
-      });
-    }
-  });
+  comparePasswords(incomingPassword, req.user.password)
+  .then(checkIfMatches)
+  .then(hashPassword(newPassword, SALT_WORK_FACTOR))
+  .then(updateUserPassword(req.user.id))
+  .then(res.status(200).send())
+  .fail(handleFailure(res))
+  .done();
 }
 
 //NOTE: THIS USES FORMAT RESPONSE WHICH IS SLIGHTLY DIFF THAN FORMATDBRESPONSE
