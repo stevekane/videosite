@@ -1,30 +1,45 @@
 var bcrypt = require('bcrypt')
   , LocalStrategy = require('passport-local').Strategy
-  , User = require('../models').User;
+  , User = require('../models').User
+  , Q = require('q')
+  , callWithPromise = Q.ninvoke;
+
+//helpers for async chain
+function checkValidUser(email){
+  return callWithPromise(User, "findOne", {email: email});
+}
+
+function handleNoUser(user) {
+  console.log('handleNoUser');
+  var deferred = Q.defer();
+
+  if (!user) { 
+    deferred.reject(new Error('Invalid Username'));
+  } else { 
+    deferred.resolve(user);
+  }
+  return deferred.promise;
+}
+
+function checkPassword(password, passportDone){
+  return function(user){ 
+    return callWithPromise(bcrypt, "compare", password, user.password)
+            .then( function(isMatch){
+                if (!isMatch) return passportDone(null, false, {message: "wrong pass"});
+                else          return passportDone(null, user)})
+  }
+}
 
 //strategy for use with Mongoose
-function mongoStrategy (email, password, done) {
-  User.findOne({email: email}, function (err, user) {
-    if (err) return done(err);
-
-    var noUserFound = "no user found named " + email;
-    if (!user) { 
-      return done(null, false, { message: noUserFound }); 
-    }
-    
-    bcrypt.compare(password, user.password, function (err, isMatch) {
-      if (err) return done(err);
-
-      var wrongPass = "incorrect password for " + email;
-      if (!isMatch) { 
-        return done(null, false, { message: wrongPass });
-      } else {
-        return done(null, user);
-      }
-    });
-  }); 
+function mongoStrategy (email, password, passportDone) {
   
-}
+  checkValidUser(email)
+  .then(handleNoUser)
+  .then(checkPassword(password, passportDone))
+  .fail(function(err){console.log("error: ", err)})
+  .done();
+
+} 
 
 //return the id of the provided user
 function serialize (user, done) {
