@@ -15,15 +15,13 @@ App.LoginController = Ember.Controller.extend({
   activeUser: alias('controllers.user.content'),
   
   loginHash: {
-    email: {value: "", error: ""},
-    password: {value: "", error: ""}
+    email: "",
+    password: ""
   },
   
   resetFields: function (loginHash) {
-    set(loginHash, 'email.value', "");
-    set(loginHash, 'email.error', "");
-    set(loginHash, 'password.value', "");
-    set(loginHash, 'password.error', "");
+    set(loginHash, 'email', "");
+    set(loginHash, 'password', "");
   },
     
   actions:{
@@ -33,8 +31,8 @@ App.LoginController = Ember.Controller.extend({
         , store = this.get('store')
         , self = this
         , values = {
-        email: hash.email.value,
-        password: hash.password.value,
+        email: hash.email,
+        password: hash.password,
       };
 
       $.ajax({
@@ -51,8 +49,7 @@ App.LoginController = Ember.Controller.extend({
           self.transitionToRoute('index');
         },
         error: function (response) {
-          set(hash, "email.error", response.responseText);
-          set(hash, "password.error", response.responseText);
+          set(self, "error", "Unauthorized"); 
         }
       })
     }
