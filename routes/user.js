@@ -1,6 +1,5 @@
 var User = require('../app/models').User
   , verifyAuth = require('../app/config/passport').verifyAuth
-  , CustomerIO = require('customer.io')
   , Q = require('q')
   , callWithPromise = Q.ninvoke
   , bcrypt = require('bcrypt')
@@ -103,8 +102,9 @@ function registerWithCustomerIO (cio) {
 function sendNewUserEmail(cio){
   return function(user){
     console.log('sending new user email')
-    cio.track(user.id, 'account_created', 
-              {subscription_level: 'new_account'})
+    cio.track(user.id, 'account_created', {
+      subscription_level: 'new_account'
+    });
     return user;
   }
 }
@@ -197,11 +197,11 @@ function logout (req, res) {
   res.status(200).send("logged out successfully");
 }
 
-function isAuthenticated(req,res){
+function isAuthenticated (req,res) {
   return res.status(200).send();
 }
 
-function comparePasswords(incoming, current){
+function comparePasswords (incoming, current) {
   return callWithPromise(bcrypt, "compare", incoming, current);
 }
 
@@ -216,21 +216,22 @@ function checkIfMatches(isMatch){
   return deferred.promise;
 }
 
-function hashPassword(newPassword, salt){
+function hashPassword (newPassword, salt) {
   console.log("hashpassword", newPassword, salt);
   return function(){
     return callWithPromise(bcrypt, "hash", newPassword, salt);
   }
 }
 
-function updateUserPassword(id){
+function updateUserPassword (id) {
   return function(hash){
     console.log("HASH: ", hash, id);
     return callWithPromise(User, "findOneAndUpdate", {_id: id}, {$set: {password: hash}}) 
   }
 }
 
-function allowPasswordChange(req,res){
+//TODO: SHOULD THE ANON FUNCTION HERE USE FORMAT BEFORE SENDING??
+function allowPasswordChange (req,res) {
   var incomingPassword = req.body.oldpassword;
   var newPassword = req.body.password;
 
@@ -325,4 +326,7 @@ exports.configure = function (app, passport, cio, options) {
   app.post('/user/pwchange', verifyAuth, allowPasswordChange);
   app.post('/user/pwresetrequest', processPasswordChangeRequest(cio));
   app.get('/user/pwreset/:id', processPasswordChange(cio));
+
+  return app;
+
 }

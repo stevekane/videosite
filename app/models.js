@@ -28,4 +28,19 @@ UserSchema.pre('save', function (next) {
   });
 });
 
+var SubscriberSchema = new mongoose.Schema({
+
+  created_date: {
+    type: Date,
+    require: true
+  },
+
+  _user: {
+    type: Number,
+    ref: "User"
+  }
+
+});
+
 exports.User = mongoose.model("User", UserSchema);
+exports.Subscriber = mongoose.model("Subscriber", SubscriberSchema);
