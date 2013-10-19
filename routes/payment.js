@@ -12,6 +12,7 @@ we return either a resolved promise or a rejected promise depending on whether
 the result of the attempted subscription creation was successful
 */
 function handleCustomerCreation (result) {
+  console.log('handleCustomerCreation');
   var subscriberPromise = Q.defer();
 
   if (result.success) {
@@ -29,6 +30,7 @@ that is associated with the provided user model
 */
 function createSubscriber (user) {
   return function (result) {
+    console.log('createSubscriber');
     var subscriberData = {
       created_date: moment().format("X"),
       _user: user._id
@@ -60,22 +62,22 @@ function handleFailure (res) {
 function processNewSubscriber (gateway) {
   return function (req, res) {
 
+
+    console.log(req.body, "this is req.body");
     var customerDetails = {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
       creditCard: {
         number: req.body.number,
         cvv: req.body.cvv,
-        expirationMonth: req.body.month,
-        expirationYear: req.body.year,
-        billingAddress: {
-          postalCode: req.body.postalCode 
-        }
+        expirationMonth: req.body.expirationMonth,
+        expirationYear: req.body.expirationYear,
       }
     };
-    var user = req.body.user;
 
-    callWithPromse(gateway, "customer.create", customerRequest)
+    var user = req.user;
+
+    callWithPromise(gateway.customer, "create", customerDetails)
     .then(handleCustomerCreation)
     .then(createSubscriber(user))
     .then(sendBillingConfirmation(res))

@@ -1,12 +1,7 @@
-<form class="form-horizontal" role="form">
+<form id="subscribe-form" class="form-horizontal" role="form">
   <legend>Subscribe!</legend>
 
   <fieldset>
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input type="email" disabled class="form-control">{{activeUser.email}}</input>
-    </div>
-
     <div class="row">
       <div class="col-md-6">
         <div class="form-group">
@@ -36,7 +31,8 @@
       {{input type="text"
         classNames="form-control"
         placeholder="--no dashes--"
-        value=newSubscriptionHash.ccNumber}}
+        autocomplete=false
+        value=newSubscriptionHash.number}}
     </div>
 
     <div class="row">
@@ -46,6 +42,7 @@
           {{input type="text"
             classNames="form-control"
             placeholder="XX"
+            maxlength=2
             value=newSubscriptionHash.expirationMonth}}
         </div>
       </div>
@@ -55,7 +52,8 @@
           <label for="year">Year</label>
           {{input type="text"
             classNames="form-control"
-            placeholder="XX"
+            placeholder="XXXX"
+            maxlength=4
             value=newSubscriptionHash.expirationYear}}
         </div>
       </div>
@@ -66,6 +64,7 @@
           {{input type="text"
             classNames="form-control"
             placeholder="XXX"
+            maxlength=3
             value=newSubscriptionHash.ccv}}
         </div>
       </div>
@@ -74,8 +73,8 @@
   </fieldset>
 
   <div class = "form-group">
-    <button class="btn btn-warning" {{action subscribe subscriptionHash}}>
-      Update Email
+    <button class="btn btn-success" {{action subscribe content newSubscriptionHash}}>
+      Subscribe!
     </button>
 
     {{#if error}}

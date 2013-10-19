@@ -36,7 +36,7 @@ var SubscriberSchema = new mongoose.Schema({
   },
 
   _user: {
-    type: Number,
+    type: mongoose.Schema.Types.ObjectId,
     ref: "User"
   }
 
