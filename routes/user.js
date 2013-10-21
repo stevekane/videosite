@@ -1,27 +1,13 @@
 var _ = require('lodash')
   , bcrypt = require('bcrypt')
   , Moment = require('moment')
+  , Q = require('q')
   , User = require('../app/models').User
   , verifyAuth = require('../app/config/passport').verifyAuth
-  , Q = require('q')
+  , formatWithKey = require('../app/utils/database').formatWithKey
+  , format = require('../app/utils/database').format
   , callWithPromise = Q.ninvoke
   , SALT_WORK_FACTOR = 10;
-
-//accepts either Mongo Object or POJO
-function formatWithKey (keyName, hash) {
-  var objectWithKey = {};
-  objectWithKey[keyName] = format(hash);
-  return objectWithKey;
-}
-
-//accepts either Mongo Object or POJO
-function format (hash) {
-  var formatted = hash.toObject ? hash.toObject() : _.clone(hash, true);
-  formatted.id = formatted._id;
-  delete formatted.__v;
-  delete formatted._id;
-  return formatted;
-}
 
 //used to send errors from promise .fail hooks
 function handleFailure (res) {
