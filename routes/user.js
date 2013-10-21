@@ -1,32 +1,27 @@
-var User = require('../app/models').User
+var _ = require('lodash')
+  , bcrypt = require('bcrypt')
+  , Moment = require('moment')
+  , User = require('../app/models').User
   , verifyAuth = require('../app/config/passport').verifyAuth
   , Q = require('q')
   , callWithPromise = Q.ninvoke
-  , bcrypt = require('bcrypt')
-  , SALT_WORK_FACTOR = 10
-  , Moment = require('moment');
+  , SALT_WORK_FACTOR = 10;
 
-function formatResponse (hash) {
-  return response = {
-    user: {
-      id: hash._id,
-      password: hash.password,
-      email: hash.email
-    }
-  };
+//accepts either Mongo Object or POJO
+function formatWithKey (keyName, hash) {
+  var objectWithKey = {};
+  objectWithKey[keyName] = format(hash);
+  return objectWithKey;
 }
 
-function formatDbResponse (model) {
-  var formattedModel = model.toObject();
-
-  formattedModel.id = formattedModel._id;
-  delete formattedModel.password;
-  delete formattedModel.created_at;
-  delete formattedModel._id;
-  delete formattedModel.__v;
-  return {user: formattedModel};
+//accepts either Mongo Object or POJO
+function format (hash) {
+  var formatted = hash.toObject ? hash.toObject() : _.clone(hash, true);
+  formatted.id = formatted._id;
+  delete formatted.__v;
+  delete formatted._id;
+  return formatted;
 }
-
 
 //used to send errors from promise .fail hooks
 function handleFailure (res) {
@@ -57,15 +52,12 @@ function checkForExistingUserById(User, id){
 
 //returns rejected promise if user else returns resolved promise
 function handleExistingUser (user) {
-  console.log('handleExisting', user);
-  var deferred = Q.defer();
+  console.log('handleExistingUser.  User -> ', user);
 
   if (user) { 
-    deferred.reject(new Error('Email already exists.'));
-  } else { 
-    deferred.resolve();
+    throw new Error("User already exists!");
   }
-  return deferred.promise;
+  return user;
 }
 
 function createNewUser (User, data) {
@@ -78,13 +70,13 @@ function createNewUser (User, data) {
 function returnNewUser (req, res) {
   console.log('returnNewUser');
   return function (user) {
-    return res.json(formatDbResponse(user)); 
+    return res.json(formatWithKey("user", user)); 
   }
 }
 
 function returnUpdatedUser(req, res){
   return function(user){
-    return res.json(formatDbResponse(user));
+    return res.json(formatWithKey("user", user));
   }
 }
 
@@ -129,8 +121,10 @@ function updateWithCustomerIO (cio) {
   return function (user) {
     console.log("user: ", user);
     user.updated_at_timestamp("Edit Email");
-    cio.identify(user._id, user.email, {updated_at: user.updated_at,
-                                        last_action: user.last_modified_action});
+    cio.identify(user._id, user.email, {
+      updated_at: user.updated_at,
+      last_action: user.last_modified_action
+    });
     return user;
   }
 }
@@ -159,25 +153,13 @@ function processNewUser (cio) {
   }
 }
 
-function handleExistingEmail(user){
-  var deferred = Q.defer();
-
-  if (user) { 
-    deferred.reject(new Error('Email already exists in system'));
-  } else { 
-    return deferred.resolve();
-  }
-  return deferred.promise;
-
-}
-
 function processEditUser (cio) {
   return function (req, res) {
     
     var data = req.body.user;
    
     callWithPromise(User, "findOne", {email: data.email})
-    .then(handleExistingEmail)
+    .then(handleExistingUser)
     .then(editUserInfo(User, data))
     .then(updateWithCustomerIO(cio))
     .then(sendUpdatedAccountInfoNotification(cio))
@@ -188,7 +170,7 @@ function processEditUser (cio) {
 }
 
 function login (req, res) {
-  return res.json(formatDbResponse(req.user));
+  return res.json(formatWithKey("user", req.user));
 }
 
 function logout (req, res) {
@@ -246,7 +228,7 @@ function allowPasswordChange (req,res) {
 //NOTE: THIS USES FORMAT RESPONSE WHICH IS SLIGHTLY DIFF THAN FORMATDBRESPONSE
 function restoreSession (req, res) {
   if (req.user && req.isAuthenticated()) {
-    res.status(200).json(formatResponse(req.user)); 
+    res.status(200).json(formatWithKey("user", req.user)); 
   } else {
     res.status(204).send(); 
   }
@@ -285,7 +267,6 @@ function sendPasswordChangeNotification(cio, newPassword){
 function processPasswordChangeRequest(cio){
   return function (req, res) {
     var data = req.body;
-    console.log(data);
     checkForExistingUser(User, {email: data.email})
     .then(handleInvalidUser)
     .then(sendPasswordChangeRequest(cio))

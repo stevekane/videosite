@@ -6,21 +6,30 @@ var moment = require('moment')
   , callWithPromise = Q.ninvoke;
 
 
-/**
-after an attempt to setup a customer w/ Braintree, this is called w/ the result
-we return either a resolved promise or a rejected promise depending on whether
-the result of the attempted subscription creation was successful
-*/
-function handleCustomerCreation (result) {
-  console.log('handleCustomerCreation');
-  var subscriberPromise = Q.defer();
+//fired after braintree creates a customer
+function checkForCustomer (result) {
+  console.log('checkForSuccess');
+  var promise = Q.defer();
 
   if (result.success) {
-    subscriberPromise.resolve(result); 
+    promise.resolve(result.customer); 
   } else {
-    subscriberPromise.reject(new Error(result.message)); 
+    promise.reject(new Error("Error while creating customer.")); 
   }
-  return subscriberPromise.promise;
+  return promise.promise;
+}
+
+//fired after braintree creates a customer
+function checkForSubscription (result) {
+  console.log('checkForSubscription');
+  var promise = Q.defer();
+
+  if (result.success) {
+    promise.resolve(result.customer); 
+  } else {
+    promise.reject(new Error("Error while activating subscription.")); 
+  }
+  return promise.promise;
 }
 
 /**
@@ -29,13 +38,27 @@ we will call this function to create a new subscriber model in the DB
 that is associated with the provided user model
 */
 function createSubscriber (user) {
-  return function (result) {
+  return function () {
     console.log('createSubscriber');
     var subscriberData = {
       created_date: moment().format("X"),
       _user: user._id
     };
     return callWithPromise(Subscriber, "create", subscriberData);
+  }
+}
+
+//Braintree's api will return a user.  Use this user to make another
+//API call to activate their subscription
+function activateSubscription (gateway, planId) {
+  return function (customer) {
+    console.log("activateSubscription");
+    var subscriptionRequest = {
+      paymentMethodToken: customer.creditCards[0].token,
+      planId: planId 
+    };
+
+    return callWithPromise(gateway.subscription, "create", subscriptionRequest);
   }
 }
 
@@ -62,8 +85,6 @@ function handleFailure (res) {
 function processNewSubscriber (gateway) {
   return function (req, res) {
 
-
-    console.log(req.body, "this is req.body");
     var customerDetails = {
       firstName: req.body.firstName,
       lastName: req.body.lastName,
@@ -75,10 +96,14 @@ function processNewSubscriber (gateway) {
       }
     };
 
+    //planId could be pulled from request if it will vary
+    var planId = "test_recurring_plan";
     var user = req.user;
 
     callWithPromise(gateway.customer, "create", customerDetails)
-    .then(handleCustomerCreation)
+    .then(checkForCustomer)
+    .then(activateSubscription(gateway, planId))
+    .then(checkForSubscription)
     .then(createSubscriber(user))
     .then(sendBillingConfirmation(res))
     .fail(handleFailure(res))
