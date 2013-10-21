@@ -139,6 +139,7 @@ var updateUserPassword =  _.curry(function (id, hash) {
 });
 
 function restoreSession (req, res) {
+  console.log("restoreSession");
   if (req.user && req.isAuthenticated()) {
     return res.status(200).json(formatUser(req.user)); 
   } else {
@@ -147,13 +148,13 @@ function restoreSession (req, res) {
 }
 
 function handleInvalidUser (user) {
+  console.log("handleInvalidUser");
   if (!user) { 
     throw new Error("No User Found by that name.");
   }
   return user;
 }
 
-//curry to allow partial application in promise chain
 var sendPasswordChangeRequest = _.curry(function (cio, user) {
   console.log("sending pw change req email");
   cio.track(user.id, 'account_modification', {
@@ -162,7 +163,6 @@ var sendPasswordChangeRequest = _.curry(function (cio, user) {
   return user;
 });
 
-//curry to allow partial application in promise chain
 var sendPasswordChangeNotification = _.curry(function (cio, newPassword, user){
   console.log("sending pw changed email", newPassword);
   cio.track(user.id, 'account_modification', {
@@ -199,8 +199,8 @@ var processEditUser = _.curry(function (cio, req, res) {
 });
 
 function processPasswordChange (req, res) {
-  var incomingPassword = req.body.oldpassword;
-  var newPassword = req.body.password;
+  var incomingPassword = req.body.oldpassword
+    , newPassword = req.body.password;
 
   comparePasswords(incomingPassword, req.user.password)
   .then(checkIfMatches)
@@ -221,8 +221,8 @@ var processPasswordReset = _.curry(function (cio, req, res) {
 });
 
 var processPasswordChange = _.curry(function (cio, req, res) {
-  var userId = req.params.id;
-  var newPassword = Math.random().toString(36).slice(-8);
+  var userId = req.params.id
+    , newPassword = Math.random().toString(36).slice(-8);
   
   checkForExistingUserById(User, userId)
   .then(handleInvalidUser)
