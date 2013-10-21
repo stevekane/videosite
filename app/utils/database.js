@@ -1,7 +1,7 @@
-var wu = require('wu');
+var _ = require('lodash');
 
 module.exports = {
-  formatWithKey: wu.wu.autoCurry(formatWithKey),
+  formatWithKey: _.curry(formatWithKey),
   format: format
 }
 

@@ -6,6 +6,7 @@ var _ = require('lodash')
   , verifyAuth = require('../app/config/passport').verifyAuth
   , formatUser = require('../app/utils/database').formatWithKey("user")
   , sendError = require('../app/utils/http').sendError
+  , sendConfirmation = require('../app/utils/http').sendConfirmation
   , format = require('../app/utils/database').format
   , callWithPromise = Q.ninvoke
   , SALT_WORK_FACTOR = 10;
@@ -37,15 +38,8 @@ function createNewUser (User, data) {
   }
 }
 
-function returnNewUser (req, res) {
-  console.log('returnNewUser');
+function returnUser(res) {
   return function (user) {
-    return res.json(formatUser(user)); 
-  }
-}
-
-function returnUpdatedUser(req, res){
-  return function(user){
     return res.json(formatUser(user));
   }
 }
@@ -117,7 +111,7 @@ function processNewUser (cio) {
     .then(registerWithCustomerIO(cio))
     .then(sendNewUserEmail(cio))
     .then(loginUser(req))
-    .then(returnNewUser(req, res))
+    .then(returnUser(res))
     .fail(sendError(res))
     .done();
   }
@@ -133,7 +127,7 @@ function processEditUser (cio) {
     .then(editUserInfo(User, data))
     .then(updateWithCustomerIO(cio))
     .then(sendUpdatedAccountInfoNotification(cio))
-    .then(returnUpdatedUser(req,res))
+    .then(returnUser(res))
     .fail(sendError(res))
     .done();
   }
@@ -148,8 +142,8 @@ function logout (req, res) {
   res.status(200).send("logged out successfully");
 }
 
-function isAuthenticated (req,res) {
-  return res.status(200).send();
+function confirmAuthentication (req, res) {
+  return sendConfirmation(res);
 }
 
 function comparePasswords (incoming, current) {
@@ -157,32 +151,28 @@ function comparePasswords (incoming, current) {
 }
 
 function checkIfMatches(isMatch){
-  var deferred = Q.defer();
-
+  console.log("checkIfMatches");
   if (!isMatch) { 
-    deferred.reject(new Error('Bad password'));
-  } else { 
-    deferred.resolve();
-  }
-  return deferred.promise;
+    throw new Error("Incorrect Password.");
+  } 
+  return isMatch;
 }
 
 function hashPassword (newPassword, salt) {
   console.log("hashpassword", newPassword, salt);
-  return function(){
+  return function () {
     return callWithPromise(bcrypt, "hash", newPassword, salt);
   }
 }
 
 function updateUserPassword (id) {
-  return function(hash){
-    console.log("HASH: ", hash, id);
+  return function (hash) {
     return callWithPromise(User, "findOneAndUpdate", {_id: id}, {$set: {password: hash}}) 
   }
 }
 
 //TODO: SHOULD THE ANON FUNCTION HERE USE FORMAT BEFORE SENDING??
-function allowPasswordChange (req,res) {
+function allowPasswordChange (req, res) {
   var incomingPassword = req.body.oldpassword;
   var newPassword = req.body.password;
 
@@ -190,7 +180,7 @@ function allowPasswordChange (req,res) {
   .then(checkIfMatches)
   .then(hashPassword(newPassword, SALT_WORK_FACTOR))
   .then(updateUserPassword(req.user._id))
-  .then(function(user){res.status(200).send(user)})
+  .then(returnUser(res))
   .fail(sendError(res))
   .done();
 }
@@ -198,60 +188,53 @@ function allowPasswordChange (req,res) {
 //NOTE: THIS USES FORMAT RESPONSE WHICH IS SLIGHTLY DIFF THAN FORMATDBRESPONSE
 function restoreSession (req, res) {
   if (req.user && req.isAuthenticated()) {
-    res.status(200).json(formatUser(req.user)); 
+    return res.status(200).json(formatUser(req.user)); 
   } else {
-    res.status(204).send(); 
+    return sendConfirmation(res);
   }
 }
 
-function handleInvalidUser(user){
-  var deferred = Q.defer();
-  console.log ("USER: ", user);
+function handleInvalidUser (user) {
   if (!user) { 
-    deferred.reject(new Error('Invalid Username'));
-  } else { 
-    deferred.resolve(user);
+    throw new Error("No User Found by that name.");
   }
-  return deferred.promise;
+  return user;
 }
 
+//curry to allow partial application in promise chain
+var sendPasswordChangeRequest = _.curry(function (cio, user) {
+  console.log("sending pw change req email");
+  cio.track(user.id, 'account_modification', {
+    account_action: 'request_pw_change'
+  });
+  return user;
+});
 
-function sendPasswordChangeRequest(cio){
-  return function(user){
-    console.log("sending pw change req email");
-    cio.track(user.id, 'account_modification',
-              {account_action: 'request_pw_change'})
-    return user;
-  }
-}
+//curry to allow partial application in promise chain
+var sendPasswordChangeNotification = _.curry(function (cio, newPassword, user){
+  console.log("sending pw changed email", newPassword);
+  cio.track(user.id, 'account_modification', {
+    account_action: 'pw_change_complete',
+    temp_password: newPassword
+  });
+});
 
-function sendPasswordChangeNotification(cio, newPassword){
-  return function(user){
-    console.log("sending pw changed email", newPassword);
-    cio.track(user.id, 'account_modification',
-              {account_action: 'pw_change_complete',
-               temp_password: newPassword})
-  }
-}
-
-function processPasswordChangeRequest(cio){
+function processPasswordReset (cio) {
   return function (req, res) {
     var data = req.body;
     checkForExistingUser(User, {email: data.email})
     .then(handleInvalidUser)
     .then(sendPasswordChangeRequest(cio))
-    .then(function(){res.status(200).send()})
-    .fail(handleFailure(res))
+    .then(sendConfirmation(res))
+    .fail(sendError(res))
     .done();
   }
 }
 
-function processPasswordChange(cio){
+function processPasswordChange (cio) {
   return function(req, res){
   
     var userId = req.params.id;
-    
-    console.log("id: ", userId);
     var newPassword = Math.random().toString(36).slice(-8);
     
     checkForExistingUserById(User, userId)
@@ -259,8 +242,8 @@ function processPasswordChange(cio){
     .then(hashPassword(newPassword, 10))
     .then(updateUserPassword(userId))
     .then(sendPasswordChangeNotification(cio, newPassword))
-    .then(function(){res.status(200).send()})
-    .fail(handleFailure(res))
+    .then(sendConfirmation(res))
+    .fail(sendError(res))
     .done();
   }  
 }
@@ -271,11 +254,11 @@ exports.configure = function (app, passport, cio, options) {
   app.post('/user/create', processNewUser(cio));
   app.post('/user/login', passport.authenticate('local'), login);
   app.all('/user/logout', logout);
-  app.post('/user/authenticated', verifyAuth, isAuthenticated); 
+  app.post('/user/authenticated', verifyAuth, confirmAuthentication); 
   app.get('/user/restore', restoreSession); 
   app.put('/user/edit', verifyAuth, processEditUser(cio));
   app.post('/user/pwchange', verifyAuth, allowPasswordChange);
-  app.post('/user/pwresetrequest', processPasswordChangeRequest(cio));
+  app.post('/user/pwresetrequest', processPasswordReset(cio));
   app.get('/user/pwreset/:id', processPasswordChange(cio));
 
   return app;
