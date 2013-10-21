@@ -3,33 +3,17 @@ var moment = require('moment')
   , User = require('../app/models').User
   , Subscriber = require('../app/models').Subscriber
   , verifyAuth = require('../app/config/passport').verifyAuth
+  , sendError = require('../app/utils/http').sendError
   , callWithPromise = Q.ninvoke;
 
 
 //fired after braintree creates a customer
-function checkForCustomer (result) {
+function checkForSuccess (result) {
   console.log('checkForSuccess');
-  var promise = Q.defer();
-
-  if (result.success) {
-    promise.resolve(result.customer); 
-  } else {
-    promise.reject(new Error("Error while creating customer.")); 
+  if (!result.success) {
+    throw new Error("Interaction with braintree unsuccessful.");
   }
-  return promise.promise;
-}
-
-//fired after braintree creates a customer
-function checkForSubscription (result) {
-  console.log('checkForSubscription');
-  var promise = Q.defer();
-
-  if (result.success) {
-    promise.resolve(result.customer); 
-  } else {
-    promise.reject(new Error("Error while activating subscription.")); 
-  }
-  return promise.promise;
+  return result;
 }
 
 /**
@@ -69,18 +53,6 @@ function sendBillingConfirmation (res) {
   }
 }
 
-//used to send errors from promise .fail hooks
-function handleFailure (res) {
-  return function (err) {
-    console.log("handleFailure", err);
-    var message = (err instanceof Error)
-      ? err.message
-      : err;
-
-    return res.status(400).send({error: message});
-  }
-}
-
 //create a new customer by registering information with Braintree
 function processNewSubscriber (gateway) {
   return function (req, res) {
@@ -101,12 +73,12 @@ function processNewSubscriber (gateway) {
     var user = req.user;
 
     callWithPromise(gateway.customer, "create", customerDetails)
-    .then(checkForCustomer)
+    .then(checkForSuccess)
     .then(activateSubscription(gateway, planId))
-    .then(checkForSubscription)
+    .then(checkForSuccess)
     .then(createSubscriber(user))
     .then(sendBillingConfirmation(res))
-    .fail(handleFailure(res))
+    .fail(sendError(res))
     .done()
   }
 }

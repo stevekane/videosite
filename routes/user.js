@@ -5,26 +5,10 @@ var _ = require('lodash')
   , User = require('../app/models').User
   , verifyAuth = require('../app/config/passport').verifyAuth
   , formatUser = require('../app/utils/database').formatWithKey("user")
+  , sendError = require('../app/utils/http').sendError
   , format = require('../app/utils/database').format
   , callWithPromise = Q.ninvoke
   , SALT_WORK_FACTOR = 10;
-
-//used to send errors from promise .fail hooks
-function handleFailure (res) {
-  return function (err) {
-    console.log("handleFailure", err);
-    var message = (err instanceof Error)
-      ? err.message
-      : err;
-
-    return res.status(400).send({error: message});
-  }
-}
-
-//utility function to send an error 
-function sendError (res, error) {
-  return res.status(400).send({error: error});
-}
 
 function checkForExistingUser (User, data) {
   console.log('checkForExisting');
@@ -134,7 +118,7 @@ function processNewUser (cio) {
     .then(sendNewUserEmail(cio))
     .then(loginUser(req))
     .then(returnNewUser(req, res))
-    .fail(handleFailure(res))
+    .fail(sendError(res))
     .done();
   }
 }
@@ -150,7 +134,7 @@ function processEditUser (cio) {
     .then(updateWithCustomerIO(cio))
     .then(sendUpdatedAccountInfoNotification(cio))
     .then(returnUpdatedUser(req,res))
-    .fail(handleFailure(res))
+    .fail(sendError(res))
     .done();
   }
 }
@@ -207,7 +191,7 @@ function allowPasswordChange (req,res) {
   .then(hashPassword(newPassword, SALT_WORK_FACTOR))
   .then(updateUserPassword(req.user._id))
   .then(function(user){res.status(200).send(user)})
-  .fail(handleFailure(res))
+  .fail(sendError(res))
   .done();
 }
 
