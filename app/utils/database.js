@@ -1,5 +1,7 @@
+var wu = require('wu');
+
 module.exports = {
-  formatWithKey: formatWithKey,
+  formatWithKey: wu.wu.autoCurry(formatWithKey),
   format: format
 }
 
@@ -8,10 +10,12 @@ function formatWithKey (keyName, hash) {
   var objectWithKey = {};
   objectWithKey[keyName] = format(hash);
   return objectWithKey;
-}
+};
 
 //accepts either Mongo Object or POJO
 function format (hash) {
+  if (!hash) { throw new Error("no hash provided");}
+
   var formatted = hash.toObject ? hash.toObject() : _.clone(hash, true);
   formatted.id = formatted._id;
   delete formatted.__v;

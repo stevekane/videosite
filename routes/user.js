@@ -4,7 +4,7 @@ var _ = require('lodash')
   , Q = require('q')
   , User = require('../app/models').User
   , verifyAuth = require('../app/config/passport').verifyAuth
-  , formatWithKey = require('../app/utils/database').formatWithKey
+  , formatUser = require('../app/utils/database').formatWithKey("user")
   , format = require('../app/utils/database').format
   , callWithPromise = Q.ninvoke
   , SALT_WORK_FACTOR = 10;
@@ -56,13 +56,13 @@ function createNewUser (User, data) {
 function returnNewUser (req, res) {
   console.log('returnNewUser');
   return function (user) {
-    return res.json(formatWithKey("user", user)); 
+    return res.json(formatUser(user)); 
   }
 }
 
 function returnUpdatedUser(req, res){
   return function(user){
-    return res.json(formatWithKey("user", user));
+    return res.json(formatUser(user));
   }
 }
 
@@ -156,7 +156,7 @@ function processEditUser (cio) {
 }
 
 function login (req, res) {
-  return res.json(formatWithKey("user", req.user));
+  return res.json(formatUser(req.user));
 }
 
 function logout (req, res) {
@@ -214,7 +214,7 @@ function allowPasswordChange (req,res) {
 //NOTE: THIS USES FORMAT RESPONSE WHICH IS SLIGHTLY DIFF THAN FORMATDBRESPONSE
 function restoreSession (req, res) {
   if (req.user && req.isAuthenticated()) {
-    res.status(200).json(formatWithKey("user", req.user)); 
+    res.status(200).json(formatUser(req.user)); 
   } else {
     res.status(204).send(); 
   }
