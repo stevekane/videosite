@@ -26,8 +26,13 @@ App.KaneFormComponent = Ember.Component.extend({
   It is recommended that your submitAction set disbaled true while
   inflight and then back to false.  This will disable all inputs
   in the form during flight
+  NOTE: "this" is set to the formComponent in all callbacks
   */
   submitAction: Ember.K,
+
+  handleSuccess: Ember.K,
+
+  handleFailure: Ember.K,
 
   resetFields: function (hash) {
     Object.keys(hash).forEach(function (key) {
@@ -64,8 +69,10 @@ App.KaneFormComponent = Ember.Component.extend({
         , verifications = this.get('verifications')
         , submitAction = this.get('submitAction');
 
-      if (this.clientSideVerify(hash, verifications)) {
-        submitAction.call(self, hash);
+      if (self.clientSideVerify(hash, verifications)) {
+        self.submitAction.call(self, hash)
+        .then(function (response) { self.handleSuccess.call(self, response); })
+        .fail(function (response) { self.handleFailure.call(self, response); })
       }
     },
   }
@@ -86,19 +93,24 @@ function attemptLogin (hash) {
   var self = this;
 
   set(self, "disabled", true);
-  Ember.$.ajax("/user/login", {type: "POST", data: hash})
-  .then(function (response) {
-    set(self, "disabled", false);
-    self.resetFields(hash);
-    self.sendAction("action", response.user);
-  })
-  .fail(function (response) {
-    self.resetFields(hash);
-    set(self, "disabled", false);
-    set(self, "error", "Login Failed");
-  });
+  return Ember.$.ajax("/user/login", {type: "POST", data: hash});
 }
 
+function completeLogin (response) {
+  var hash = this.get('hash');
+
+  set(this, "disabled", false);
+  this.resetFields(hash);
+  this.sendAction("action", response.user);
+}
+
+function declineLogin (response) {
+  var hash = this.get('hash');
+
+  this.resetFields(hash);
+  set(this, "disabled", false);
+  set(this, "error", "Login Failed");
+}
 App.KaneLoginFormComponent = App.KaneFormComponent.extend({
   hash: {
     email: "",
@@ -107,5 +119,10 @@ App.KaneLoginFormComponent = App.KaneFormComponent.extend({
 
   verifications: [isValidEmail],
 
-  submitAction: attemptLogin
+  submitAction: attemptLogin,
+
+  handleSuccess: completeLogin,
+
+  handleFailure: declineLogin,
+
 });

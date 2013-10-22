@@ -8,7 +8,7 @@ App.LoginController = Ember.Controller.extend({
   activeUser: alias('controllers.user.content'),
 
   actions: {
-    loadUser: function (user) {
+    storeAndSetUser: function (user) {
       var storedUser = this.get('store').push('user', user);
       this.set('activeUser', storedUser);
       this.transitionToRoute("index"); 
