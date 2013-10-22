@@ -16,7 +16,7 @@ App.UserController = Ember.ObjectController.extend({
       , url = optionalURL ? optionalURL : "user/restore"
       , method = "GET";
 
-    var sessionPromise = Ember.RSVP.Promise(function (resolve, reject) {
+    return Ember.RSVP.Promise(function (resolve, reject) {
       Ember.$.ajax(url, method)
       .then(function (payload) {
         if (payload) {
@@ -30,7 +30,6 @@ App.UserController = Ember.ObjectController.extend({
         return resolve(null);   
       });
     });
-    return sessionPromise;
   },
 
   logout: function (store, optionalURL) {
@@ -38,7 +37,7 @@ App.UserController = Ember.ObjectController.extend({
       , url = optionalURL ? optionalURL : "user/logout"
       , method = "POST";
 
-    var logoutPromise = Ember.RSVP.Promise(function (resolve, reject) {
+    return Ember.RSVP.Promise(function (resolve, reject) {
       Ember.$.ajax(url, method)
       .then(function () {
         self.set('content', null);
@@ -48,7 +47,6 @@ App.UserController = Ember.ObjectController.extend({
         alert('logout failed!');
       });
     });
-    return logoutPromise;
   }
 
 });
