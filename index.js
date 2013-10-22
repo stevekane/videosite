@@ -14,7 +14,8 @@ var routes = require('./routes')
   , configurePassport = require('./app/config/passport').configure
   , configureMongoose = require('./app/config/mongoose').configure
   , configureUserRoutes = require('./routes/user').configure
-  , configurePaymentRoutes = require('./routes/payment').configure;
+  , configurePaymentRoutes = require('./routes/payment').configure
+  , configureAdminRoute = require('./routes/admin').configure;
 
 var cioConfig = require('./config.json').customerIO
   , cio = customerIO.init(cioConfig.id, cioConfig.token);
@@ -52,6 +53,7 @@ configureMongoose(mongoose);
 configurePassport(passport);
 configureUserRoutes(app, passport, cio);
 configurePaymentRoutes(app, cio, gateway);
+configureAdminRoute(app);
 
 //serve the web app yo
 app.get('/', routes.index);

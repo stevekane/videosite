@@ -8,5 +8,11 @@
     "merchantId":"hthxknsbjjnd99s5",
     "publicKey": "9g52fdwvwt44shnd",
     "privateKey": "0364161f7c67e9f320520afa8ea6535e"
+  },
+  
+  "admin": {
+    "username": "admin",
+    "password": "butterpig"
   }
+  
 }
