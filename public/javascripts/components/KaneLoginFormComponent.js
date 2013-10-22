@@ -2,10 +2,7 @@ var set = Ember.set;
 
 //check if the provided email contains an "@"
 function isValidEmail (hash) {
-  var error = (hash.email.indexOf("@") !== -1) 
-    ? "" 
-    : "Invalid email";
-  return error;
+  return (hash.email.indexOf("@") !== -1) ? "" : "Invalid Email";
 }
 
 //method fired on form submission
