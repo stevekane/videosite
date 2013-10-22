@@ -19,23 +19,10 @@ App.ApplicationRoute = Ember.Route.extend({
   },
 
   model: function (params) {
-    var store = this.get('store')
-      , url = "http://localhost:3000/user/restore"
-      , request = store.adapterFor('user').ajax(url, "GET")
-
-    return request.then(function (payload) {
-      var p = new Ember.RSVP.Promise(function (resolve, reject) {
-        var newUser;
-
-        if (payload) {
-          newUser = store.push("user", payload.user);
-          resolve(newUser);
-        } else {
-          resolve(null); 
-        }
-      }); 
-      return p;
-    });
+    var store = this.get('store');
+    //TODO: figure out how to do goddamn per-model adapters....UGHHH
+    return App.UserAdapter.create().restoreSession(store);
+    //return store.adapterFor('user').restoreSession(store);
   },
 
   setupController: function (controller, model) {

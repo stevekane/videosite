@@ -15,18 +15,17 @@ App.NodeAdapter = DS.RESTAdapter.extend({
   },
 });
 
+require('Router.js');
+require('Models.js');
+require('Controllers.js');
+
 App.Store = DS.Store.extend({
-  adapter: App.NodeAdapter,
-  //adapter: DS.FixtureAdapter
+  adapter: App.NodeAdapter
 });
 
 App.braintree = Braintree.create(
   "MIIBCgKCAQEA2K0yLIBW5LaGHYYYPzqRVkCYDDj7zwy305iTkNmzHgKw3nVOTBc9JFIjTtkxFVKLAU9XhcNByjqMLsr0S0PPsX0pYkufUeMhR0X1TYZ1JLBN4p+5OxvledR0KZvy0fJYEuNF5zZhyft65t83HmWei71Pt3m/u58uMqItwyQ0R1d1h2u1CUQIvGQEQd35pXwu83iIsymE7tKw81W3jm8d4F6LQZMFOctiNQS7TqcQlfgsxMjqJyWJF5vx29X1BGlL6wuKe/0skzdrmVHRQKBqfqAPAo0Y+i0V2epdDGyR9nO6cJYDJSh8axhxU+n/FK1nASYEnwncQMjfgJOk9bDUfQIDAQAB"
 );
-
-require('Router.js');
-require('Models.js');
-require('Controllers.js');
 
 //store.js uses the store variable globally.
 //re-assign it here to avoid naming conflicts throughout app
