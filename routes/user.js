@@ -103,6 +103,7 @@ function editUserInfo(User, data){
 }
 
 function login (req, res) {
+  console.log('login');
   return res.json(formatUser(req.user));
 }
 
