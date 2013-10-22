@@ -1,10 +1,5 @@
 var _ = require('lodash');
 
-module.exports = {
-  formatWithKey: _.curry(formatWithKey),
-  format: format
-}
-
 //accepts either Mongo Object or POJO
 function formatWithKey (keyName, hash) {
   var objectWithKey = {};
@@ -20,5 +15,11 @@ function format (hash) {
   formatted.id = formatted._id;
   delete formatted.__v;
   delete formatted._id;
+  delete formatted.password;
   return formatted;
+}
+
+module.exports = {
+  formatWithKey: _.curry(formatWithKey),
+  format: format
 }

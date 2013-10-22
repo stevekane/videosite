@@ -11,12 +11,14 @@ var _ = require('lodash')
   , callWithPromise = Q.ninvoke
   , SALT_WORK_FACTOR = 10;
 
+console.log(sendError);
+
 function checkForExistingUser (User, data) {
   console.log('checkForExisting');
   return callWithPromise(User, "findOne", data);
 }
 
-function checkForExistingUserById(User, id){
+function checkForExistingUserById (User, id){
   console.log('checkForExistingUserById');
   return callWithPromise(User, "findById", id);
 }
@@ -143,7 +145,7 @@ function restoreSession (req, res) {
   if (req.user && req.isAuthenticated()) {
     return res.status(200).json(formatUser(req.user)); 
   } else {
-    return sendConfirmation(res);
+    return res.send(204);
   }
 }
 

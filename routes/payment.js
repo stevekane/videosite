@@ -1,92 +1,74 @@
 var moment = require('moment')
   , Q = require('q')
+  , _ = require('lodash')
   , User = require('../app/models').User
-  , Subscriber = require('../app/models').Subscriber
   , verifyAuth = require('../app/config/passport').verifyAuth
+  , sendConfirmation = require('../app/utils/http').sendConfirmation
   , sendError = require('../app/utils/http').sendError
   , callWithPromise = Q.ninvoke;
 
-
-//fired after braintree creates a customer
-function checkForSuccess (result) {
-  console.log('checkForSuccess');
+var verifySuccess = _.curry(function (message, result) {
+  console.log('verifySuccess');
   if (!result.success) {
-    throw new Error("Interaction with braintree unsuccessful.");
+    throw new Error(message);
   }
   return result;
-}
+});
 
-/**
-after we have successfully registered this subscriber with braintree,
-we will call this function to create a new subscriber model in the DB
-that is associated with the provided user model
-*/
-function createSubscriber (user) {
-  return function () {
-    console.log('createSubscriber');
-    var subscriberData = {
-      created_date: moment().format("X"),
-      _user: user._id
-    };
-    return callWithPromise(Subscriber, "create", subscriberData);
+//retrive customer (or throw) from response from braintree
+function extractCustomer (result) {
+  console.log('extractCustomer');
+  if (!result.customer) {
+    throw new Error("No customer returned from braintree.");
   }
+  return result.customer;
 }
 
-//Braintree's api will return a user.  Use this user to make another
+//Braintree's api will return a customer.  Use this user to make another
 //API call to activate their subscription
-function activateSubscription (gateway, planId) {
-  return function (customer) {
-    console.log("activateSubscription");
-    var subscriptionRequest = {
-      paymentMethodToken: customer.creditCards[0].token,
-      planId: planId 
-    };
+var activateSubscription = _.curry(function (gateway, planId, customer) {
+  console.log("activateSubscription");
+  var subscriptionRequest = {
+    paymentMethodToken: customer.creditCards[0].token,
+    planId: planId 
+  };
+  return callWithPromise(gateway.subscription, "create", subscriptionRequest);
+});
 
-    return callWithPromise(gateway.subscription, "create", subscriptionRequest);
-  }
-}
-
-function sendBillingConfirmation (res) {
-  console.log('sendBillingConfirmation');
-  return function (subscriber) {
-    return res.status(204).send(); 
-  }
-}
+var createCustomer = _.curry(function (gateway, details, user) {
+  details.id = user._id;
+  callWithPromise(gateway.customer, "create", details);
+});
 
 //create a new customer by registering information with Braintree
-function processNewSubscriber (gateway) {
-  return function (req, res) {
+var processNewActiveSubscription = _.curry(function (gateway, req, res) {
+  var customerDetails = {
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    creditCard: {
+      number: req.body.number,
+      cvv: req.body.cvv,
+      expirationMonth: req.body.expirationMonth,
+      expirationYear: req.body.expirationYear,
+    }
+  };
 
-    var customerDetails = {
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      creditCard: {
-        number: req.body.number,
-        cvv: req.body.cvv,
-        expirationMonth: req.body.expirationMonth,
-        expirationYear: req.body.expirationYear,
-      }
-    };
+  //TODO: planId could be pulled from request if it will vary
+  var planId = "test_recurring_plan";
+  var userId = req.user._id;
 
-    //planId could be pulled from request if it will vary
-    var planId = "test_recurring_plan";
-    var user = req.user;
-
-    callWithPromise(gateway.customer, "create", customerDetails)
-    .then(checkForSuccess)
-    .then(activateSubscription(gateway, planId))
-    .then(checkForSuccess)
-    .then(createSubscriber(user))
-    .then(sendBillingConfirmation(res))
-    .fail(sendError(res))
-    .done()
-  }
-}
+  callWithPromise(User, "findByIdAndUpdate", userId, {$set: {subscribed: true}})
+  .then(createCustomer(gateway, customerDetails))
+  .then(extractCustomer)
+  .then(activateSubscription(gateway, planId))
+  .then(verifySuccess("Subscription activation unsuccessful."))
+  .then(sendConfirmation(res))
+  .fail(sendError(res))
+  .done();
+});
 
 
 exports.configure = function (app, cio, gateway) {
-
-  app.post("/subscriber/create", verifyAuth, processNewSubscriber(gateway));
-
+  app.post("/subscriber/create", verifyAuth, processNewActiveSubscription(gateway));
   return app;
 }

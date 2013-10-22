@@ -21,6 +21,10 @@ var UserSchema = new mongoose.Schema({
   },
   last_modified_action:{
     type: String
+  },
+  subscribed: {
+    type: Boolean,
+    default: false,
   }
 });
 
@@ -50,19 +54,4 @@ UserSchema.methods.updated_at_timestamp = function updated_at_timestamp(action) 
  return timestamp;
 }
 
-var SubscriberSchema = new mongoose.Schema({
-
-  created_date: {
-    type: Date,
-    require: true
-  },
-
-  _user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User"
-  }
-
-});
-
 exports.User = mongoose.model("User", UserSchema);
-exports.Subscriber = mongoose.model("Subscriber", SubscriberSchema);
