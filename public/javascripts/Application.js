@@ -18,6 +18,7 @@ App.NodeAdapter = DS.RESTAdapter.extend({
 require('Router.js');
 require('Models.js');
 require('Controllers.js');
+require('Components.js');
 
 App.Store = DS.Store.extend({
   adapter: App.NodeAdapter

@@ -53,7 +53,7 @@ App.LoginController = Ember.Controller.extend({
         }
       })
     },
-    initiateResetPassword: function(hash){
+    initiateResetPassword: function(hash) {
       var resetConfirm = 
         confirm("Are you sure you would like to initiate the password reset process?");
       if(resetConfirm){
