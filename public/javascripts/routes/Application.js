@@ -19,17 +19,14 @@ App.ApplicationRoute = Ember.Route.extend({
   },
 
   model: function (params) {
-    var store = this.get('store');
-    //TODO: figure out how to do goddamn per-model adapters....UGHHH
-    return App.UserAdapter.create().restoreSession(store);
-    //return store.adapterFor('user').restoreSession(store);
+    var store = this.get('store')
+      , userController = this.controllerFor("user");
+
+    return userController.restoreSession(store);
   },
 
   setupController: function (controller, model) {
-    var store = this.get('store')
     var userController = this.controllerFor('user');
-    console.log('fired');
-
     userController.set('content', model);
   }
 
