@@ -1,0 +1,27 @@
+<legend>Login</legend>
+<div class="form-group">
+  <label for="email">Email</label>
+  {{input type="text"
+    disabled=disabled
+    class="form-control" 
+    placeholder="Your Email" 
+    value = hash.email}}
+</div>
+
+<div class="form-group">
+  <label for="password">Password</label>
+  {{input type="password"
+    disabled=disabled
+    class="form-control" 
+    placeholder="Your Password" 
+    value= hash.password}}
+</div>
+
+<div class="form-group">
+  <button class="btn btn-success" 
+  {{bind-attr disabled="disabled"}}
+  {{action submit hash target="view"}}>
+    Login
+  </button>
+  <small class="text-danger">{{error}}</small>
+</div>

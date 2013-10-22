@@ -1,44 +1,13 @@
 <section class="container page-section">
   <div class="row">
-    <div class="row">
-      <div class="col-md-4 col-md-offset-4">
+    <div class="col-md-4 col-md-offset-4">
 
-        {{#unless activeUser}}
-        {{#kane-form classNames="form-horizontal"}}
-          {{view.disabled}}
-
-          <legend>Login</legend>
-          <div class="form-group">
-            <label for="email">Email</label>
-            {{input type="text"
-              class="form-control" 
-              placeholder="Your Email" 
-              value = loginHash.email}}
-          </div>
-
-          <div class="form-group">
-            <label for="password">Password</label>
-            {{input type="password"
-              class="form-control" 
-              placeholder="Your Password" 
-              value= loginHash.password}}
-          </div>
-
-          <div class="form-group">
-            <button class="btn btn-success" {{action submit target="view"}}>TEST SUB!</button>
-            <small class="text-danger">{{error}}</small>
-          </div>
-
-          <div class="form-group">
-            <button class="btn btn-success" {{action attemptLogin loginHash}}>Login!</button>
-            <small class="text-danger">{{error}}</small>
-          </div>
-          
-        {{/kane-form}}
-      {{else}}
-        <h2> Already logged in as: {{activeUser.email}} </h2>
-      {{/unless}}
-      </div>
+    {{#unless activeUser}}
+      {{kane-login-form classNames="form-horizontal" action="loadUser"}}
+    {{else}}
+      <h2> Already logged in as: {{activeUser.email}} </h2>
+    {{/unless}}
     </div>
   </div>
+</div>
 </section>
