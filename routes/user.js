@@ -173,6 +173,20 @@ var sendPasswordChangeNotification = _.curry(function (cio, newPassword, user){
   });
 });
 
+var refreshSession = _.curry(function (req, user) {
+  var loginPromise = Q.defer();
+
+  req.logout();
+  req.login(user, function (err) {
+    if (err) {
+      loginPromise.reject(new Error("login failed.  ndb bro"));
+    } else {
+      loginPromise.resolve(user); 
+    }
+  });
+  return loginPromise.promise;
+});
+
 var processNewUser = _.curry(function (cio, req, res) {
   var data = req.body.user;
 
@@ -187,14 +201,15 @@ var processNewUser = _.curry(function (cio, req, res) {
   .done();
 });
 
-var processEditUser = _.curry(function (cio, req, res) {
+var processChangeEmail = _.curry(function (cio, req, res) {
   var data = req.body.user;
- 
+
   callWithPromise(User, "findOne", {email: data.email})
   .then(handleExistingUser)
   .then(editUserInfo(User, data))
   .then(updateWithCustomerIO(cio))
   .then(sendUpdatedAccountInfoNotification(cio))
+  .then(refreshSession(req))
   .then(returnUser(res))
   .fail(sendError(res))
   .done();
@@ -244,7 +259,7 @@ exports.configure = function (app, passport, cio, options) {
   app.all('/user/logout', logout);
   app.post('/user/authenticated', verifyAuth, confirmAuthentication); 
   app.get('/user/restore', restoreSession); 
-  app.put('/user/edit', verifyAuth, processEditUser(cio));
+  app.put('/user/edit', verifyAuth, processChangeEmail(cio));
   app.post('/user/pwchange', verifyAuth, processPasswordChange);
   app.post('/user/pwresetrequest', processPasswordReset(cio));
   app.get('/user/pwreset/:id', processPasswordChange(cio));
