@@ -1,41 +1,9 @@
 <section class="container page-section">
   <div class="row">
-    <div class="row">
-      <div class="col-md-4 col-md-offset-4">
-
-        <form class="form-horizontal" role="form">
-          <legend>Create Free Account!</legend>
-          <div class="form-group">
-            <label for="email">Email</label>
-            {{input type="email"
-              class="form-control"
-              placeholder="Your Email"
-              value=newAccountHash.email}}
-          </div>
-
-          <div class="form-group">
-            <label for="password">Password</label>
-            {{input type="password"
-              class="form-control"
-              placeholder="Password"
-              value=newAccountHash.password}}
-          </div>
-
-          <div class="form-group">
-            <label for="confirmPassword">Confirm Password</label>
-            {{input type="password"
-              class="form-control"
-              placeholder="Confirm Password"
-              value=newAccountHash.confirmPassword}}
-          </div>
-
-          <div class="form-group">
-            <button class="btn btn-warning" {{action signUp newAccountHash}}>Create!</button>
-            <small class="text-danger">{{error}}</small>
-          </div>
-        </form> 
-
-      </div>
+    <div class="col-md-4 col-md-offset-4">
+      {{kane-signup-form
+        classNames="form-horizontal"
+        action="storeAndSetUser"}}
     </div>
   </div>
 </section>

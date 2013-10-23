@@ -1,0 +1,34 @@
+<form class="form-horizontal" role="form">
+  <legend>Create Free Account!</legend>
+  <div class="form-group">
+    <label for="email">Email</label>
+    {{input type="email"
+      class="form-control"
+      disabled=disabled
+      placeholder="Your Email"
+      value=hash.email}}
+  </div>
+
+  <div class="form-group">
+    <label for="password">Password</label>
+    {{input type="password"
+      class="form-control"
+      disabled=disabled
+      placeholder="Password"
+      value=hash.password}}
+  </div>
+
+  <div class="form-group">
+    <label for="confirmPassword">Confirm Password</label>
+    {{input type="password"
+      class="form-control"
+      disabled=disabled
+      placeholder="Confirm Password"
+      value=hash.confirmPassword}}
+  </div>
+
+  <div class="form-group">
+    <button class="btn btn-warning" {{action submit hash}}>Signup!</button>
+    <small class="text-danger">{{error}}</small>
+  </div>
+</form> 
