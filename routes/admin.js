@@ -62,12 +62,15 @@ function requestCioUserList(){
 }
 
 var parseCioResults = function(results){  
+    
   var cioResponse = JSON.parse(results[0].body);
+
   var users = cioResponse.customers;
   var cioUserList = [];
   for(var i = 0; i < users.length; i++){
     cioUserList[i] = {id: users[i].id, name: users[i].attributes.email}
   }
+
   return cioUserList;
 }
 
@@ -101,8 +104,7 @@ var parseBtResults = function(results){
   for( var i=0; i < results.ids.length; i++){
     btIdList[i] = {id: results.ids[i]};
   }
-  
-  console.log(btIdList);
+
   return btIdList;
 }
 
@@ -134,10 +136,46 @@ var processValidAdmin = function(req, res){
   .done();
 }
 
+var deleteCioUsers = function(res){
+  return function(users){
+    var cioAuth = 'Basic ' + new Buffer(cioConfig.id + ':' + cioConfig.token).toString('base64');
+    var cioOptionsHash = {
+      url:"https://manage.customer.io/api/v1/customers", 
+      headers: {
+          'Authorization': cioAuth ,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    }
+    // for(var i = 0; i < users.length; i++){
+      // console.log("all cio users", users[i].id);
+      // cioOptionsHash.url = "https://app.customer.io/api/v1/customers/" + users[0].id;
+      // return callWithPromise(request, "del", cioOptionsHash);
+    // }
+
+      cioOptionsHash.url = "https://track.customer.io/api/v1/customers/" + users[0].id;
+      console.log(cioOptionsHash.url);
+      return callWithPromise(request, "del", cioOptionsHash);
+  }
+}
+
+
+// Not complete, currently deletes the top user
+var deleteAllCioUsers = function(req, res){
+  console.log("deleeting");
+  
+  requestCioUserList()
+  .then(parseCioResults)
+  .then(deleteCioUsers(res))
+  .then(function(){res.send(200)})
+  .fail(function(err){console.log("error", err)})
+  .done();
+}
+
 exports.configure = function (app) {
   app.get("/admin", logOnAsAdmin);
   app.post("/admin/login", checkAdminCredentials);
   app.get("/admin/console", processValidAdmin);
+  app.delete("/admin/deleteAllCio", deleteAllCioUsers)
   return app;
 }
 

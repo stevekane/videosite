@@ -47,14 +47,17 @@ var returnUser = _.curry(function (res, user) {
 
 
 var registerWithCustomerIO = _.curry(function (cio, user) {
-  console.log('registerWithCIO');
+  console.log('registerWithCIO', user._id, user.email);
+  
+  
   cio.identify(user._id, user.email, {created_at: user.created_at});
   return user;
 });
 
 
 var sendNewUserEmail = _.curry(function (cio, user) {
-  console.log('sending new user email')
+  console.log('sending new user email', user.id);
+  
   cio.track(user.id, 'account_created', {
     subscription_level: 'new_account'
   });
