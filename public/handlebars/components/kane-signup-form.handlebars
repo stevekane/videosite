@@ -28,7 +28,11 @@
   </div>
 
   <div class="form-group">
-    <button class="btn btn-warning" {{action submit hash}}>Signup!</button>
+    <button class="btn btn-warning"
+    {{bind-attr disabled="disabled"}}
+    {{action submit hash}}>
+      Signup!
+    </button>
     <small class="text-danger">{{error}}</small>
   </div>
 </form> 
