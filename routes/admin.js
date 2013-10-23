@@ -21,19 +21,15 @@ var btConfig = require('./../config.json').braintree
 ;
 
 hbs.registerHelper('list', function(items, options) {
-  // var out = "<div class = 'row'>";
-   
-   var out = "<ul>";
+  var output = "<ul>";
    
   if(items){
     for(var i=0, l=items.length; i<l; i++) {
-      //out = out + "<div class = 'col-md-6'>" + options.fn(items[i]) + "</div>";
-      out = out + "<li>" + options.fn(items[i]) + "</li>";
-      //out = out + options.fn(items[i]);
+      output = output + "<li>" + options.fn(items[i]) + "</li>";
     }
   }
-  out = out + "</ul>";
-  return out;
+  output = output + "</ul>";
+  return output;
 });
 
 function logOnAsAdmin (req, res) {
@@ -66,14 +62,12 @@ function requestCioUserList(){
 }
 
 var parseCioUserList = function(results){  
-  console.log("RESS", results);
   var cioResponse = JSON.parse(results[0].body);
   var users = cioResponse.customers;
   var cioUserList = [];
   for(var i = 0; i < users.length; i++){
     cioUserList[i] = {id: users[i].id, name: users[i].attributes.email}
   }
-  console.log(cioUserList);
   return cioUserList;
 }
 
@@ -82,7 +76,6 @@ var parseMongoResults = function(results){
   var mongoUsers = [];
   
   for(var i = 0; i< results.length; i++){
-    console.log(results[i].id);
     mongoUsers[i] = {name: results[i].email, id: results[i].id};
   }  
   return mongoUsers;
@@ -93,28 +86,19 @@ var processValidAdmin = function(req, res){
   var cioUserList = null
   ,   mongoUserList = null;
   
-  Q.all([requestCioUserList, callWithPromise(User, "find", {})])
+  Q.all([requestCioUserList(), callWithPromise(User, "find", {})])
   .then(function(results){
-    //cioUserList = parseCioUserList(results[0]);
-    console.log(results[0]);
+    cioUserList = parseCioUserList(results[0]);
     mongoUserList = parseMongoResults(results[1]);
-    res.render('adminpage',cioUserList);
+    console.log(cioUserList);
+    res.render('adminpage', {cioUsers: cioUserList,
+                            mongoUsers:mongoUserList});
     
   }).fail(function(err){
     console.log("error", err);
     res.send(404);
   })
   .done();
-  
-  // .then(parseCioUserList())
-  // .then(getMongoDbUserList())
-  //.then(sendResponseToClient(req,res))
-  // .fail(function(err){
-    // console.log("failed", err);
-    // res.send(404);
-    
-  // })
-  // .done();
 }
 
 exports.configure = function (app) {
