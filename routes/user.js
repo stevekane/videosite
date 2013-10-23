@@ -189,7 +189,7 @@ var refreshSession = _.curry(function (req, user) {
 });
 
 var processNewUser = _.curry(function (cio, req, res) {
-  var data = req.body.user;
+  var data = req.body;
 
   checkForExistingUser(User, {email: data.email})
   .then(handleExistingUser)
