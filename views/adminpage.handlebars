@@ -1,0 +1,33 @@
+<!doctype html>
+
+<html>
+
+  <head>
+    <link rel="stylesheet" href="/vendor/reset-css/reset.css">
+    <link rel="stylesheet" href="/vendor/bootstrap/dist/css/bootstrap.min.css">
+  </head>
+
+  <body>
+    <div style = "top: 20px;left:20px;position:absolute;width:100%;">
+      <div class = "row" >
+
+        <div class = "col-md-4">
+          <h1>customer.io users</h1>
+            {{#list cioUsers}} Name: {{name}} id: {{id}} {{/list}}
+        </div>
+
+
+        <div class = "col-md-4">
+          <h1>mongoDB users</h1>
+        </div>
+    
+        <div class = "col-md-4">
+           <h1>braintree users</h1>
+        </div>
+        
+      </div> 
+    </div>
+  
+  </body>
+
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+</head>
+<body>
+  <h1>
+  admin page
+  </h1>
+
+  <h5> Admin: <input type = "text" id = "username"><br> </h5>
+  <h5> Password: <input type = "text" id = "password"><br> </h5>
+
+  <button onClick = "submitAdminCreds()"> submit </button>
+  
+  
+  <script type="text/javascript" src="/vendor/jquery/jquery.js"></script>
+  <script type = "text/javascript">
+    function submitAdminCreds(){
+      var data = {
+        username: $('#username').val(),
+        password: $('#password').val()
+      };
+      
+      $.ajax({
+        url: "http://localhost:3000/admin/login",
+        type: 'POST',
+        data: data,
+        success: function(res){
+          window.location = "/admin/console";
+        },
+        error: function(req,res){
+          alert("Failed Admin Login Attempt!");
+        }
+      })
+    };
+  </script>
+</body>
+</html>
