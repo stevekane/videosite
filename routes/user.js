@@ -232,7 +232,7 @@ function processPasswordChange (req, res) {
   .done();
 }
 
-var processPasswordReset = _.curry(function (cio, req, res) {
+var processPasswordResetRequest = _.curry(function (cio, req, res) {
   checkForExistingUser(User, {email: req.body.email})
   .then(handleInvalidUser)
   .then(sendPasswordChangeRequest(cio))
@@ -241,7 +241,7 @@ var processPasswordReset = _.curry(function (cio, req, res) {
   .done();
 });
 
-var processPasswordChange = _.curry(function (cio, req, res) {
+var processPasswordReset = _.curry(function (cio, req, res) {
   var userId = req.params.id
     , newPassword = Math.random().toString(36).slice(-8);
   
@@ -265,8 +265,8 @@ exports.configure = function (app, passport, cio, options) {
   app.get('/user/restore', restoreSession); 
   app.put('/user/edit', verifyAuth, processChangeEmail(cio));
   app.post('/user/pwchange', verifyAuth, processPasswordChange);
-  app.post('/user/pwresetrequest', processPasswordReset(cio));
-  app.get('/user/pwreset/:id', processPasswordChange(cio));
+  //app.post('/user/pwresetrequest', processPasswordResetRequest(cio));
+  //app.get('/user/pwreset/:id', processPasswordReset(cio));
 
   return app;
 }
