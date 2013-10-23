@@ -6,7 +6,7 @@ function isValidEmail (hash) {
 }
 
 function comparePasswords (hash) {
-  return (hash.password === hash.confirmPassword) ? "" : "Emails do not match";
+  return (hash.password === hash.confirmPassword) ? "" : "Passwords do not match";
 }
 
 //method fired on form submission
