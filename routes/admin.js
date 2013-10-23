@@ -61,7 +61,7 @@ function requestCioUserList(){
   return callWithPromise(request, "get", cioOptionsHash);
 }
 
-var parseCioUserList = function(results){  
+var parseCioResults = function(results){  
   var cioResponse = JSON.parse(results[0].body);
   var users = cioResponse.customers;
   var cioUserList = [];
@@ -81,18 +81,51 @@ var parseMongoResults = function(results){
   return mongoUsers;
 }
 
+var BTSearch = function(){
+  var BTSearchPromise = Q.defer();
+  gateway.customer.search(function (search) {
+    search.email().endsWith("");
+    }, function (err, result) {
+      if(err){
+        BTSearchPromise.reject(new Error("BT fucked up"));
+      } else{
+        BTSearchPromise.resolve(result);
+      }
+  });
+  return BTSearchPromise.promise;
+}
+
+var parseBtResults = function(results){
+  var btIdList = [];
+   
+  for( var i=0; i < results.ids.length; i++){
+    btIdList[i] = {id: results.ids[i]};
+  }
+  
+  console.log(btIdList);
+  return btIdList;
+}
 
 var processValidAdmin = function(req, res){
   var cioUserList = null
-  ,   mongoUserList = null;
+  ,   mongoUserList = null
+  ,   btIdList = null;
   
-  Q.all([requestCioUserList(), callWithPromise(User, "find", {})])
-  .then(function(results){
-    cioUserList = parseCioUserList(results[0]);
+    Q.all([requestCioUserList()
+          , callWithPromise(User, "find", {})
+          , BTSearch()
+      ])
+    .then(function(results){
+
+    cioUserList = parseCioResults(results[0]);
     mongoUserList = parseMongoResults(results[1]);
-    console.log(cioUserList);
+    btIdList = parseBtResults(results[2]);
+    
+    //console.log(cioUserList);
+    
     res.render('adminpage', {cioUsers: cioUserList,
-                            mongoUsers:mongoUserList});
+                             mongoUsers:mongoUserList,
+                             btIds: btIdList});
     
   }).fail(function(err){
     console.log("error", err);
