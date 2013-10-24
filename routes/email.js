@@ -15,8 +15,16 @@ exports.configure = function (app) {
 
   var processTestEmail = function (req, res) {
     console.log('dafuq');
-    sendFromMeToMe("./templates/email/test.handlebars", {name: "Steverino"}); 
-    res.send('YAY!');
+    sendFromMeToMe("./templates/email/test.handlebars", {name: "Steverino"})
+    .then(function (json) {
+      console.log("email sent!", json);
+      res.send("Email sent!");
+    })
+    .fail(function (err) {
+      console.log(err.message);
+      res.send(400, "Email not sent!")
+    })
+    .done();
   };
 
   app.get("/email/test", processTestEmail);   

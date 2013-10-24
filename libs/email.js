@@ -1,32 +1,39 @@
 var fs = require('fs')
   , _ = require('lodash')
   , handlebars = require('handlebars')
-  , Q = require('q');
+  , Q = require('q')
+  , callWithPromise = Q.ninvoke;
 
-var callWithPromise = Q.ninvoke;
+//read a file and return promise
+var readFile = function (fileName) {
+  return callWithPromise(fs, "readFile", fileName, "utf8");
+}
 
-var sendEmailWithTemplate = _.curry(function (sendgrid, config, templateFn, data) {
-  var hash = _.clone(config);
-
-  hash.text = templateFn(data);
-  return callWithPromise(sendgrid, "send", hash);
+//apply a provided template function
+var applyTemplate = _.curry(function (data, fn) {
+  return fn(data); 
 });
 
-var compileEmail = _.curry(function (fileName) {
-  var fileContent = fs.readFileSync(fileName, "utf8");
-  return handlebars.compile(fileContent);
-});
+//send an email with provided text and return a promise
+var sendEmail = function (sendgrid, config, text) {
+  config.text = text;
+  return callWithPromise(sendgrid, "send", config)
+}
 
 var compileAndSendEmail = _.curry(function (sendgrid, config, fileName, data) {
-  var templateFn = compileEmail(fileName);
-  sendEmailWithTemplate(sendgrid, config, templateFn, data)
-  .then(function () {console.log("email sent!");})
-  .fail(function (err) {console.log(err.message);})
-  .done();
+  var prom = Q.defer();
+
+  readFile(fileName)
+  .then(handlebars.compile)
+  .then(applyTemplate(data))
+  .then(sendEmail(sendgrid, config))
+  .then(function (json) { return prom.resolve(json); })
+  .fail(function (err) { return prom.reject(err); })
+
+  return prom.promise;
 });
 
 module.exports = {
-  compileEmail: compileEmail,
+  sendEmail: sendEmail,
   compileAndSendEmail: compileAndSendEmail,
-  sendEmailWithTemplate: sendEmailWithTemplate
 }
