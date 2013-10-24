@@ -15,10 +15,10 @@ var applyTemplate = _.curry(function (data, fn) {
 });
 
 //send an email with provided text and return a promise
-var sendEmail = function (sendgrid, config, text) {
+var sendEmail = _.curry(function (sendgrid, config, text) {
   config.text = text;
   return callWithPromise(sendgrid, "send", config)
-}
+});
 
 var compileAndSendEmail = _.curry(function (sendgrid, config, fileName, data) {
   var prom = Q.defer();
@@ -27,7 +27,7 @@ var compileAndSendEmail = _.curry(function (sendgrid, config, fileName, data) {
   .then(handlebars.compile)
   .then(applyTemplate(data))
   .then(sendEmail(sendgrid, config))
-  .then(function (json) { return prom.resolve(json); })
+  .then(function (json) { return prom.resolve("email sent!"); })
   .fail(function (err) { return prom.reject(err); })
 
   return prom.promise;

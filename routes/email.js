@@ -14,10 +14,9 @@ exports.configure = function (app) {
   var sendFromMeToMe = email.compileAndSendEmail(sendgrid, config);
 
   var processTestEmail = function (req, res) {
-    console.log('dafuq');
     sendFromMeToMe("./templates/email/test.handlebars", {name: "Steverino"})
-    .then(function (json) {
-      console.log("email sent!", json);
+    .then(function (message) {
+      console.log(message);
       res.send("Email sent!");
     })
     .fail(function (err) {
