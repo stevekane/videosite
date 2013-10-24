@@ -3,10 +3,10 @@ var http = require('http')
   , fs = require('fs')
   , express = require('express')
   , cons = require('consolidate')
+  , handlebars = require('handlebars')
   , passport = require('passport')
   , mongoose = require('mongoose')
   , braintree = require('braintree')
-  , customerIO = require('customer.io')
   , Q = require('q')
   , callWithPromise = Q.ninvoke
 
@@ -15,7 +15,9 @@ var routes = require('./routes')
   , configureMongoose = require('./app/config/mongoose').configure
   , configureUserRoutes = require('./routes/user').configure
   , configurePaymentRoutes = require('./routes/payment').configure
-  , configureAdminRoute = require('./routes/admin').configure;
+  , configureAdminRoutes = require('./routes/admin').configure
+  , configureTestRoutes = require('./routes/test').configure
+  , configureEmailRoutes = require('./routes/email').configure;
 
 var btConfig = require('./config.json').braintree
   , gateway = braintree.connect({
@@ -24,6 +26,9 @@ var btConfig = require('./config.json').braintree
       publicKey: btConfig.publicKey,
       privateKey: btConfig.privateKey
   });
+
+var sgConfig = require('./config.json').sendgrid
+  , sendgrid = require('sendgrid')(sgConfig.api_user, sgConfig.api_key);
 
 
 var app = express()
@@ -35,7 +40,8 @@ app.engine('handlebars', cons.handlebars);
 
 app.set('port', process.env.PORT || 3000)
   .set('views', path.join(__dirname + "/views/"))
-  .set('view engine', 'handlebars');
+  .set('view engine', 'handlebars')
+  .set('sendgrid', sendgrid);
 
 app.use(express.favicon())
   .use(express.methodOverride())
@@ -46,11 +52,17 @@ app.use(express.favicon())
   .use(passport.session())
   .use(express.static(__dirname + "/public"));
 
+
 configureMongoose(mongoose);
 configurePassport(passport);
 configureUserRoutes(app, passport);
 configurePaymentRoutes(app, gateway);
-configureAdminRoute(app);
+configureAdminRoutes(app);
+//TODO: FOR TESTING
+configureTestRoutes(app);
+configureEmailRoutes(app);
+//TODO: FOR TESTING
+
 
 //serve the web app yo
 app.get('/', routes.index);

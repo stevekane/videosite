@@ -102,9 +102,9 @@ function hashPassword (newPassword, salt) {
   }
 }
 
-var updateUserPassword =  _.curry(function (id, hash) {
+var updateUserPassword =  _.curry(function (id, password) {
   console.log("updateUserPassword");
-  return callWithPromise(User, "findOneAndUpdate", {_id: id}, {$set: {password: hash}}) 
+  return callWithPromise(User, "findOneAndUpdate", {_id: id}, {$set: {password: password}}) 
 });
 
 function restoreSession (req, res) {
@@ -130,7 +130,7 @@ var refreshSession = _.curry(function (req, user) {
   req.logout();
   req.login(user, function (err) {
     if (err) {
-      loginPromise.reject(new Error("login failed.  ndb bro"));
+      loginPromise.reject(new Error("Login Failed."));
     } else {
       loginPromise.resolve(user); 
     }
@@ -162,7 +162,7 @@ var processChangeEmail = _.curry(function (req, res) {
   .done();
 });
 
-function processPasswordChange (req, res) {
+var processPasswordChange = _.curry(function (req, res) {
   var incomingPassword = req.body.oldpassword
     , newPassword = req.body.password;
 
@@ -173,7 +173,7 @@ function processPasswordChange (req, res) {
   .then(returnUser(res))
   .fail(sendError(res))
   .done();
-}
+});
 
 var processPasswordResetRequest = _.curry(function (req, res) {
   checkForExistingUser(User, {email: req.body.email})
@@ -189,7 +189,7 @@ var processPasswordReset = _.curry(function (req, res) {
   
   checkForExistingUserById(User, userId)
   .then(handleInvalidUser)
-  .then(hashPassword(newPassword, 10))
+  .then(hashPassword(newPassword, SALT_WORK_FACTOR))
   .then(updateUserPassword(userId))
   .then(sendConfirmation(res))
   .fail(sendError(res))

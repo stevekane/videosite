@@ -13,6 +13,10 @@
   "admin": {
     "username": "admin",
     "password": "butterpig"
-  }
+  },
   
+  "sendgrid": {
+    "api_user": "BEEP",
+    "api_key": "BOOP"
+  }
 }
