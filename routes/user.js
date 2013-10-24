@@ -11,8 +11,6 @@ var _ = require('lodash')
   , callWithPromise = Q.ninvoke
   , SALT_WORK_FACTOR = 10;
 
-console.log(sendError);
-
 function checkForExistingUser (User, data) {
   console.log('checkForExisting');
   return callWithPromise(User, "findOne", data);
@@ -46,30 +44,6 @@ var returnUser = _.curry(function (res, user) {
 });
 
 
-var registerWithCustomerIO = _.curry(function (cio, user) {
-  console.log('registerWithCIO', user._id, user.email);
-  
-  
-  cio.identify(user._id, user.email, {created_at: user.created_at});
-  return user;
-});
-
-
-var sendNewUserEmail = _.curry(function (cio, user) {
-  console.log('sending new user email', user.id);
-  
-  cio.track(user.id, 'account_created', {
-    subscription_level: 'new_account'
-  });
-  return user;
-});
-
-var sendUpdatedAccountInfoNotification = _.curry(function (cio, user) {
-  console.log('sending user email notifying acct change')
-  cio.track(user.id, 'email_changed')
-  return user;
-});
-
 //We use a Q.defer here to allow us to throw or resolve the callback from login
 var loginUser = _.curry(function (req, user) {
   console.log('loginUser');
@@ -85,17 +59,6 @@ var loginUser = _.curry(function (req, user) {
   return loginPromise.promise;
 });
 
-
-//update and create w customer.io are actually the same
-var updateWithCustomerIO = _.curry(function (cio, user) {
-  console.log("user: ", user);
-  user.updated_at_timestamp("Edit Email");
-  cio.identify(user._id, user.email, {
-    updated_at: user.updated_at,
-    last_action: user.last_modified_action
-  });
-  return user;
-});
 
 //Not curried as inner function takes no params
 function editUserInfo(User, data){
@@ -161,22 +124,6 @@ function handleInvalidUser (user) {
   return user;
 }
 
-var sendPasswordChangeRequest = _.curry(function (cio, user) {
-  console.log("sending pw change req email");
-  cio.track(user.id, 'account_modification', {
-    account_action: 'request_pw_change'
-  });
-  return user;
-});
-
-var sendPasswordChangeNotification = _.curry(function (cio, newPassword, user){
-  console.log("sending pw changed email", newPassword);
-  cio.track(user.id, 'account_modification', {
-    account_action: 'pw_change_complete',
-    temp_password: newPassword
-  });
-});
-
 var refreshSession = _.curry(function (req, user) {
   var loginPromise = Q.defer();
 
@@ -191,28 +138,24 @@ var refreshSession = _.curry(function (req, user) {
   return loginPromise.promise;
 });
 
-var processNewUser = _.curry(function (cio, req, res) {
+var processNewUser = _.curry(function (req, res) {
   var data = req.body;
 
   checkForExistingUser(User, {email: data.email})
   .then(handleExistingUser)
   .then(createNewUser(User, data))
-  .then(registerWithCustomerIO(cio))
-  .then(sendNewUserEmail(cio))
   .then(loginUser(req))
   .then(returnUser(res))
   .fail(sendError(res))
   .done();
 });
 
-var processChangeEmail = _.curry(function (cio, req, res) {
+var processChangeEmail = _.curry(function (req, res) {
   var data = req.body.user;
 
   callWithPromise(User, "findOne", {email: data.email})
   .then(handleExistingUser)
   .then(editUserInfo(User, data))
-  .then(updateWithCustomerIO(cio))
-  .then(sendUpdatedAccountInfoNotification(cio))
   .then(refreshSession(req))
   .then(returnUser(res))
   .fail(sendError(res))
@@ -232,16 +175,15 @@ function processPasswordChange (req, res) {
   .done();
 }
 
-var processPasswordResetRequest = _.curry(function (cio, req, res) {
+var processPasswordResetRequest = _.curry(function (req, res) {
   checkForExistingUser(User, {email: req.body.email})
   .then(handleInvalidUser)
-  .then(sendPasswordChangeRequest(cio))
   .then(sendConfirmation(res))
   .fail(sendError(res))
   .done();
 });
 
-var processPasswordReset = _.curry(function (cio, req, res) {
+var processPasswordReset = _.curry(function (req, res) {
   var userId = req.params.id
     , newPassword = Math.random().toString(36).slice(-8);
   
@@ -249,24 +191,23 @@ var processPasswordReset = _.curry(function (cio, req, res) {
   .then(handleInvalidUser)
   .then(hashPassword(newPassword, 10))
   .then(updateUserPassword(userId))
-  .then(sendPasswordChangeNotification(cio, newPassword))
   .then(sendConfirmation(res))
   .fail(sendError(res))
   .done();
 });
 
 
-exports.configure = function (app, passport, cio, options) {
-  app.post('/users', processNewUser(cio));
-  app.post('/user/create', processNewUser(cio));
+exports.configure = function (app, passport, options) {
+  app.post('/users', processNewUser);
+  app.post('/user/create', processNewUser);
   app.post('/user/login', passport.authenticate('local'), login);
   app.all('/user/logout', logout);
   app.post('/user/authenticated', verifyAuth, confirmAuthentication); 
   app.get('/user/restore', restoreSession); 
-  app.put('/user/edit', verifyAuth, processChangeEmail(cio));
+  app.put('/user/edit', verifyAuth, processChangeEmail);
   app.post('/user/pwchange', verifyAuth, processPasswordChange);
-  //app.post('/user/pwresetrequest', processPasswordResetRequest(cio));
-  //app.get('/user/pwreset/:id', processPasswordReset(cio));
+  //app.post('/user/pwresetrequest', processPasswordResetRequest);
+  //app.get('/user/pwreset/:id', processPasswordReset);
 
   return app;
 }

@@ -17,9 +17,6 @@ var routes = require('./routes')
   , configurePaymentRoutes = require('./routes/payment').configure
   , configureAdminRoute = require('./routes/admin').configure;
 
-var cioConfig = require('./config.json').customerIO
-  , cio = customerIO.init(cioConfig.id, cioConfig.token);
-
 var btConfig = require('./config.json').braintree
   , gateway = braintree.connect({
       environment: braintree.Environment.Sandbox,
@@ -51,18 +48,14 @@ app.use(express.favicon())
 
 configureMongoose(mongoose);
 configurePassport(passport);
-configureUserRoutes(app, passport, cio);
-configurePaymentRoutes(app, cio, gateway);
+configureUserRoutes(app, passport);
+configurePaymentRoutes(app, gateway);
 configureAdminRoute(app);
 
 //serve the web app yo
 app.get('/', routes.index);
 
 callWithPromise(server, "listen", app.get('port'))
-.then(function () {
-  console.log('server connected on', app.get('port'));
-})
-.fail(function () {
-  console.log('failed to connect on port', app.get('port'));
-})
+.then(function () { console.log('server connected on', app.get('port'));})
+.fail(function () { console.log('failed to connect on port', app.get('port'));})
 .done();
