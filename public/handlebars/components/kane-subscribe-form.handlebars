@@ -1,0 +1,74 @@
+<legend>Subscribe!</legend>
+
+<fieldset>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="form-group">
+        <label for="name">Name On Card</label>
+        {{input type="text"
+          classNames="form-control"
+          placeholder="As appears on card"
+          value=hash.name}}
+      </div>
+      <div class="form-group">
+        <label for="ccnumber">Credit Card Number</label>
+        {{input type="text"
+          classNames="form-control"
+          placeholder="--no dashes--"
+          disabled=disabled
+          autocomplete=true
+          value=hash.number}}
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-2">
+      <div class="form-group">
+        <label for="month">Month</label>
+        {{input type="text"
+          classNames="form-control"
+          placeholder="MM"
+          disabled=disabled
+          maxlength=2
+          value=hash.exp_month}}
+      </div>
+    </div>
+
+    <div class="col-md-2">
+      <div class="form-group">
+        <label for="year">Year</label>
+        {{input type="text"
+          classNames="form-control"
+          placeholder="YY"
+          disabled=disabled
+          maxlength=2
+          value=hash.exp_year}}
+      </div>
+    </div>
+
+    <div class="col-md-2">
+      <div class="form-group">
+        <label for="ccv">CCV</label>
+        {{input type="text"
+          classNames="form-control"
+          placeholder="XXX"
+          disabled=disabled
+          maxlength=3
+          value=hash.cvc}}
+      </div>
+    </div>
+
+  </div>
+</fieldset>
+
+<div class = "form-group">
+  <button class="btn btn-success"
+  {{bind-attr disabled="disabled"}}
+  {{action submit hash}}>
+    Subscribe!
+  </button>
+
+  {{#if error}}
+    <small class="text-danger">{{error}}</small>
+  {{/if}}
+</div>
