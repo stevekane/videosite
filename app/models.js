@@ -22,6 +22,10 @@ var UserSchema = new mongoose.Schema({
   last_modified_action:{
     type: String
   },
+  stripeId: {
+    type: String,
+    unique: true
+  },
   subscribed: {
     type: Boolean,
     default: false,

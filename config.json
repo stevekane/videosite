@@ -18,5 +18,15 @@
   "sendgrid": {
     "api_user": "stevekane",
     "api_key": "jibob682"
+  },
+  
+  "stripe": {
+    "test_api_key": "sk_test_pPlHCwogZe4NsYKqGEOhwd2K",
+    "live_api_key": ""
+  },
+
+  "session": {
+    "secret": "yiss" 
   }
+
 }

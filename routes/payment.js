@@ -5,70 +5,66 @@ var moment = require('moment')
   , verifyAuth = require('../app/config/passport').verifyAuth
   , sendConfirmation = require('../app/utils/http').sendConfirmation
   , sendError = require('../app/utils/http').sendError
+  , email = require('../libs/email')
   , callWithPromise = Q.ninvoke;
 
-var verifySuccess = _.curry(function (message, result) {
-  console.log('verifySuccess');
-  if (!result.success) {
-    throw new Error(message);
-  }
-  return result;
+//user is an existing user in mongo, customer is returned from stripe
+var saveCustomerInDb = _.curry(function (user, customer) {
+  console.log('saving customer to db');
+  var id = user._id
+    , mongoChangeObject = {
+      $set: {
+        stripeId: customer.id,
+        subscribed: true
+      }
+    };
+
+  return callWithPromise(User, "findByIdAndUpdate", id, mongoChangeObject);
 });
 
-//retrive customer (or throw) from response from braintree
-function extractCustomer (result) {
-  console.log('extractCustomer');
-  if (!result.customer) {
-    throw new Error("No customer returned from braintree.");
-  }
-  return result.customer;
-}
+/*
+Extract the token from the body and user from session
+Send the information to Stripe to create a customer with a plan
+Create subscription status in mongo
+Send an email to the customer thanking them for being fucking awesome
+return the updated user object
+*/
+var processNewSubscription = _.curry(function (stripe, sendgrid, req, res) {
+  var user = req.user
+    , token = req.body.token;
 
-//Braintree's api will return a customer.  Use this user to make another
-//API call to activate their subscription
-var activateSubscription = _.curry(function (gateway, planId, customer) {
-  console.log("activateSubscription");
-  var subscriptionRequest = {
-    paymentMethodToken: customer.creditCards[0].token,
-    planId: planId 
-  };
-  return callWithPromise(gateway.subscription, "create", subscriptionRequest);
-});
+  //early return if missing key data
+  if (!user) { return sendError(res, "No valid user session.");}
+  if (!user) { return sendError(res, "No valid token.");}
 
-var createCustomer = _.curry(function (gateway, details, user) {
-  details.id = user._id;
-  callWithPromise(gateway.customer, "create", details);
-});
+  //vars for use with stripe
+  var plan = req.body.plan || "silver"
+    , data = {
+       email: user.email,
+       plan: plan,
+       card: token
+    };
 
-//create a new customer by registering information with Braintree
-var processNewActiveSubscription = _.curry(function (gateway, req, res) {
-  var customerDetails = {
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    creditCard: {
-      number: req.body.number,
-      cvv: req.body.cvv,
-      expirationMonth: req.body.expirationMonth,
-      expirationYear: req.body.expirationYear,
-    }
-  };
+  //vars for sending email
+  var templateName = "./templates/email/subscribe.handlebars"
+    , config = {
+        from: "kanesteven@gmail.com",
+        to: user.email,
+        subject: "Thanks for subscribing!"
+    };
 
-  //TODO: planId could be pulled from request if it will vary
-  var planId = "test_recurring_plan";
-  var userId = req.user._id;
-
-  callWithPromise(User, "findByIdAndUpdate", userId, {$set: {subscribed: true}})
-  .then(createCustomer(gateway, customerDetails))
-  .then(extractCustomer)
-  .then(activateSubscription(gateway, planId))
-  .then(verifySuccess("Subscription activation unsuccessful."))
+  console.log('inside process');
+  stripe.customers.create(data)
+  .then(saveCustomerInDb(user))
+  .then(email.compileAndSendEmail(sendgrid, config, templateName, user))
   .then(sendConfirmation(res))
-  .fail(sendError(res))
-  .done();
+  .then(null, sendError(res));
 });
 
+exports.configure = function (app) {
+  var stripe = app.get('stripe')
+    , sendgrid = app.get('sendgrid');
 
-exports.configure = function (app, cio, gateway) {
-  app.post("/subscriber/create", verifyAuth, processNewActiveSubscription(gateway));
+  app.post("/subscriber/create", verifyAuth, processNewSubscription(stripe, sendgrid));
   return app;
 }

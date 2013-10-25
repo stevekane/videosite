@@ -1,5 +1,11 @@
 var set = Ember.set;
 
+/*
+We return a promise as specicified by the requirements for this hook
+We first create a token on Stripe's server
+We then send that token along to our own server for processing 
+With the stripe API
+*/
 var attemptSubscribe = function (hash) {
   var self = this;
 
@@ -14,9 +20,9 @@ var attemptSubscribe = function (hash) {
       } else {
         //returned reponse object contains an "id".
         //set this as hash.token and send to node server
-        hash.token = response.id;
+        var serverHash = {token: response.id};
 
-        Ember.$.ajax("/subscriber/create", {type: "POST", data: hash})
+        Ember.$.ajax("/subscriber/create", {type: "POST", data: serverHash})
         .then(function (result) {
           resolve(result);  
         })
@@ -25,19 +31,22 @@ var attemptSubscribe = function (hash) {
         });
       }
     });
-  })
+  });
 }
 
 var completeSubscribe = function (response) {
+  var hash = this.get('hash');
+
   console.log("subscription successful!", response);
   set(this, "disabled", false);
   this.resetFields(hash);
 }
 
 var declineSubscribe = function (response) {
-  console.log("subscription failed  :( !", response);
-  this.resetFields(hash);
+  var hash = this.get('hash');
+
   set(this, "disabled", false);
+  this.resetFields(hash);
   set(this, "error", "Subscription Failed.");
 }
 
@@ -46,9 +55,9 @@ App.KaneSubscribeFormComponent = App.KaneFormComponent.extend({
   hash: {
     name: "",
     number: "",
-    expirationMonth: "",
-    expirationYear: "",
-    ccv: "",
+    exp_month: "",
+    exp_year: "",
+    cvc: "",
   },
 
   verifications: [],
