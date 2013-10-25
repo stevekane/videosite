@@ -7,7 +7,16 @@
 
     <ul class="nav navbar-nav pull-right">
       {{#if activeUser}}
-        <span class="navbar-text">Signed in as {{activeUser.email}}</span>
+
+          <span class="navbar-text">
+            {{#if activeUser.subscribed}}
+              Signed in as
+            {{else}}
+              Subscribed as 
+            {{/if}}
+            {{activeUser.email}}
+          </span> 
+
         <li>{{#link-to "account"}}View Account{{/link-to}}</li>
         <li><a {{action logout}}>Logout</a></li>
       {{else}}
