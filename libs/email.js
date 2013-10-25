@@ -15,8 +15,8 @@ var applyTemplate = _.curry(function (data, fn) {
 });
 
 //send an email with provided text and return a promise
-var sendEmail = _.curry(function (sendgrid, config, text) {
-  config.text = text;
+var sendEmail = _.curry(function (sendgrid, config, html) {
+  config.html = html;
   return callWithPromise(sendgrid, "send", config)
 });
 

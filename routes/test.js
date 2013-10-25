@@ -32,14 +32,9 @@ var streamFile = _.curry(function (req, res) {
   
 });
 
-var sendTestEmail = _.curry(function (req, res) {
-});
-
-
 exports.configure = function (app) {
  
   app.get('/test', streamIndex);
   app.post('/peek', streamFile);
-  app.post('/email/test', sendTestEmail);
 
 }
