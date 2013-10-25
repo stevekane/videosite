@@ -10,6 +10,16 @@ App.UserController = Ember.ObjectController.extend({
     App.localStore.set('user', localStoredUser);
   }.observes('content', 'content.email'),
 
+  //this stored value is NOT overwritten and is used to store login info 
+  //even when a user logs out.  This is used to pre-populate the login form
+  storeLastKnownSession: function () {
+    var user = this.get('content');
+
+    if (user) {
+      App.localStore.set('loginCredentials', {email: user.get('email')}); 
+    }
+  }.observes('content', 'content.email'),
+
   //fired on app bootup.  used to verify if a user should still be logged in
   restoreSession: function (store, optionalURL) {
     var self = this

@@ -1,4 +1,5 @@
-var set = Ember.set;
+var set = Ember.set
+  , alias = Ember.computed.alias;
 
 //check if the provided email contains an "@"
 function isValidEmail (hash) {
@@ -29,10 +30,19 @@ function declineLogin (response) {
   set(this, "error", "Login Failed");
 }
 App.KaneLoginFormComponent = App.KaneFormComponent.extend({
+
   hash: {
     email: "",
     password: "",
   },
+
+  retrieveStoredCredentials: function () {
+    var loginCredentials = App.localStore.get('loginCredentials');
+
+    if (loginCredentials) {
+      this.set('hash.email', loginCredentials.email);
+    }
+  }.on("init"),
 
   verifications: [isValidEmail],
 
