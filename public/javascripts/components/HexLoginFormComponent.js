@@ -40,11 +40,6 @@ var validateForm = function (form) {
   }
 }
 
-//jquery implementation of submit
-var $submit = function (form) {
-  return Ember.$.ajax("/user/login", {type: "POST", data: form});
-}
-
 //test of local submit function
 var localSubmit = function (form) {
   return Ember.RSVP.Promise(function (resolve, reject) {
@@ -75,12 +70,34 @@ var submit = function (context, form, submitFn, errorFn, successFn, failFn) {
 
   submitFn.call(context, form)
   .then(function (result) {successFn.call(context, result);})
-  .then(function (error) {failFn.call(context, error);});
+  .then(null, function (error) {failFn.call(context, error);});
 }
 
-submit(this, badEmailForm, localSubmit, localHandleError, localHandleSuccess, localHandleFailure);
-submit(this, noPwForm, localSubmit, localHandleError, localHandleSuccess, localHandleFailure);
-submit(this, goodForm, localSubmit, localHandleError, localHandleSuccess, localHandleFailure);
+//TESTS OF LOCAL STUFF
+//submit(this, badEmailForm, localSubmit, localHandleError, localHandleSuccess, localHandleFailure);
+//submit(this, noPwForm, localSubmit, localHandleError, localHandleSuccess, localHandleFailure);
+//submit(this, goodForm, localSubmit, localHandleError, localHandleSuccess, localHandleFailure);
+//
+
+//jquery implementation of submit
+var $submit = function (form) {
+  return Ember.$.ajax("/user/login", {type: "POST", data: form});
+}
+
+var handleErrorEmber = function (error) {
+  set(this, "disabled", false);
+  set(this, "error", error.message);
+}
+
+var handleSuccessEmber = function (result) {
+  set(this, "disabled", false);
+  this.sendAction("action", result.user);
+}
+
+var handleFailureEmber = function (error) {
+  set(this, "disabled", false);
+  set(this, "error", "Invalid Login Credentials.");
+}
 
 App.HexLoginFormComponent = Ember.Component.extend({
   
@@ -91,9 +108,10 @@ App.HexLoginFormComponent = Ember.Component.extend({
 
   actions: {
     submit: function (hash) {
-      submit( this, hash, localSubmit, localHandleError, 
-              localHandleSuccess, localHandleFailure);
-      
+      set(this, "disabled", true);
+      //submit( this, hash, localSubmit, localHandleError, 
+      //        localHandleSuccess, localHandleFailure);
+      submit(this, hash, $submit, handleErrorEmber, handleSuccessEmber, handleFailureEmber);
     }
   }
 });
