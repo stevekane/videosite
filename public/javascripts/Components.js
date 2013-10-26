@@ -4,3 +4,6 @@ require('components/KaneSignupFormComponent.js');
 require('components/KaneChangeEmailFormComponent.js');
 require('components/KaneChangePasswordFormComponent.js');
 require('components/KaneSubscribeFormComponent.js');
+
+//TESTING NEW STRUCTURE
+require('components/HexLoginFormComponent.js');
