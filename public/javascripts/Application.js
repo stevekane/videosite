@@ -1,6 +1,9 @@
 var get = Ember.get;
 
 window.App = Ember.Application.create();
+window.Behaviors = {};
+
+require('behaviors/login.js');
 
 require('Router.js');
 require('Models.js');
