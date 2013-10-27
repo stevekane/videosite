@@ -9,19 +9,19 @@ var $submit = function (form) {
 }
 
 //handleErrors w/ Ember
-var handleErrorEmber = function (error) {
+var handleError = function (error) {
   set(this, "disabled", false);
   set(this, "error", error.message);
 }
 
 //handle success w/ Ember
-var handleSuccessEmber = function (result) {
+var handleSuccess = function (result) {
   set(this, "disabled", false);
   this.sendAction("action", result.user);
 }
 
 //handleFailure w/ Ember
-var handleFailureEmber = function (error) {
+var handleFailure = function (error) {
   set(this, "disabled", false);
   set(this, "error", "Invalid Login Credentials");
 }
@@ -41,9 +41,9 @@ App.HexLoginFormComponent = Ember.Component.extend({
         this, 
         hash, 
         $submit, 
-        handleErrorEmber, 
-        handleSuccessEmber, 
-        handleFailureEmber
+        handleError, 
+        handleSuccess, 
+        handleFailure
       );
     }
   }
