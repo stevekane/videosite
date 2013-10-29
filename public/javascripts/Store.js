@@ -1,3 +1,5 @@
+var get = Ember.get;
+
 App.NodeAdapter = DS.RESTAdapter.extend({
   updateRecord: function(store, type, record){
     var data = {}

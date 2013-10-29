@@ -1,5 +1,3 @@
-var get = Ember.get;
-
 window.App = Ember.Application.create();
 
 require('validations/Validations.js');
