@@ -1,5 +1,20 @@
 var set = Ember.set;
 
+var setForDuration = _.curry(function (key, value, duration, context) {
+  set(context, key, value);
+  Ember.run.later(context, function () {
+    set(context, key, ""); 
+  }, duration);
+});
+
+var resetFields = _.curry(function (fieldNames, hash) {
+  _.each(fieldNames, function (fieldName) {
+    set(hash, fieldName, "");
+  });
+
+  return hash;
+});
+
 App.KaneBaseFormComponent = Ember.Component.extend({
 
   hash: {},
@@ -19,7 +34,7 @@ App.KaneBaseFormComponent = Ember.Component.extend({
   //handleErrors w/ Ember
   handleInvalid: function (error) {
     set(this, "disabled", false);
-    set(this, "error", error.message);
+    setForDuration("error", error.message, 5000, this);
   },
 
   //handle success w/ Ember
@@ -30,8 +45,10 @@ App.KaneBaseFormComponent = Ember.Component.extend({
 
   //handleFailure w/ Ember
   handleFailure: function (error) {
+    var message = error.message || "Submit unsuccessful";
+
     set(this, "disabled", false);
-    set(this, "error", error.message || "Submit unsuccessful");
+    setForDuration("error", message, 5000, this);
   },
 
   actions: {
