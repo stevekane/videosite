@@ -6,10 +6,9 @@ We first create a token on Stripe's server
 We then send that token along to our own server for processing 
 With the stripe API
 */
-var attemptSubscribe = function (hash) {
+var attemptSubscribe = function (url, hash) {
   var self = this;
 
-  set(self, "disabled", true);
   return Ember.RSVP.Promise(function (resolve, reject) {
 
     //create a token w/ Stripe's server
@@ -22,7 +21,7 @@ var attemptSubscribe = function (hash) {
         //set this as hash.token and send to node server
         var serverHash = {token: response.id};
 
-        Ember.$.ajax("/subscriber/create", {type: "POST", data: serverHash})
+        Ember.$.ajax(url, serverHash)
         .then(function (result) {
           resolve(result);  
         })
@@ -34,24 +33,8 @@ var attemptSubscribe = function (hash) {
   });
 }
 
-var completeSubscribe = function (response) {
-  var hash = this.get('hash');
+App.KaneSubscribeFormComponent = App.KaneBaseFormComponent.extend({
 
-  console.log("subscription successful!", response);
-  set(this, "disabled", false);
-  this.resetFields(hash);
-}
-
-var declineSubscribe = function (response) {
-  var hash = this.get('hash');
-
-  set(this, "disabled", false);
-  this.resetFields(hash);
-  set(this, "error", "Subscription Failed.");
-}
-
-App.KaneSubscribeFormComponent = App.KaneFormComponent.extend({
-  
   hash: {
     name: "",
     number: "",
@@ -60,12 +43,6 @@ App.KaneSubscribeFormComponent = App.KaneFormComponent.extend({
     cvc: "",
   },
 
-  verifications: [],
-
-  submitAction: attemptSubscribe,
-
-  handleSuccess: completeSubscribe,
-
-  handleFailure: declineSubscribe,
+  submit: attemptSubscribe
 
 });
