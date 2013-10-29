@@ -9,6 +9,7 @@
     "moment": "~2.3.1",
     "reset-css": "~2.0.20110126",
     "store": "~1.3.14",
-    "braintree.js": "~1.3.6"
+    "braintree.js": "~1.3.6",
+    "lodash": "~2.2.1"
   }
 }
