@@ -24,7 +24,6 @@ var UserSchema = new mongoose.Schema({
   },
   stripeId: {
     type: String,
-    unique: true
   },
   subscribed: {
     type: Boolean,
