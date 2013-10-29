@@ -1,3 +1,6 @@
+var validateEmail = Validations.validateEmail("email")
+  , checkIfBlank = Validations.checkIfBlank;
+
 //Ember form component that uses our form functionality 
 App.KaneLoginFormComponent = App.KaneBaseFormComponent.extend({
   
@@ -9,9 +12,9 @@ App.KaneLoginFormComponent = App.KaneBaseFormComponent.extend({
   url: "/user/login",
 
   fieldValidations: [
-    Validations.validateEmail("email"),
-    Validations.checkIfBlank("email"),
-    Validations.checkIfBlank("password")
+    validateEmail,
+    checkIfBlank("email"),
+    checkIfBlank("password")
   ],
 
 });
