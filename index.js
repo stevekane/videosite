@@ -9,12 +9,12 @@ var http = require('http')
   , callWithPromise = Q.ninvoke
 
 //TODO: change to configureApplicationRoutes?  routes is kinda weird
-var routes = require('./routes')
-  , configurePassport = require('./config/passport').configure
+var configurePassport = require('./config/passport').configure
   , configureMongoose = require('./config/mongoose').configure
   , configureUserRoutes = require('./routes/user').configure
   , configurePaymentRoutes = require('./routes/payment').configure
   , configureIndexRoutes = require('./routes/index').configure
+  , configureEmailRoutes = require('./routes/email').configure;
 
 //load configurations
 var config = require('./config.json');
@@ -62,6 +62,7 @@ configurePassport(passport);
 configureUserRoutes(app);
 configurePaymentRoutes(app);
 configureIndexRoutes(app);
+configureEmailRoutes(app);
 
 //start the server
 callWithPromise(server, "listen", app.get('port'))

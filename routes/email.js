@@ -1,10 +1,10 @@
 var _ = require('lodash')
-  , email = require('./../libs/email');
+  , email = require('./../libs/email')
+  , handlebars = require('handlebars')
+  , emailTemplates = require('../compiledEmails')(handlebars);
 
 exports.configure = function (app) {
-  var sendgrid = app.get('sendgrid')
-    , tmplName = "./templates/email/bootstrap-test.handlebars";
-    
+  var sendgrid = app.get('sendgrid');
 
   var sendEmailSuccess = _.curry(function (res, message) {
     console.log(message);
@@ -16,27 +16,21 @@ exports.configure = function (app) {
     res.send(400, "Email not send!");
   });
 
-  var sendUserAnEmail = _.curry(function (sendgrid, req, res) {
-    var target = req.body.email
-      , data = {name: req.body.name}
-      , config = {
+  var sendMeAnEmail = _.curry(function (sendgrid, req, res) {
+    var config = {
         from: "kanesteven@gmail.com",
-        to: target,
-        subject: "This is a targetted email"
+        to: "kanesteven@gmail.com",
+        subject: "This is a targetted email",
+        html: emailTemplates['subscribe']({})
       };
 
-    if (!email) { res.send(400, "No email provided."); }
-
-    email.compileAndSendEmail(sendgrid, config, tmplName, data)
+    email.sendEmail(sendgrid, config)
     .then(sendEmailSuccess(res))
     .fail(sendEmailFailure(res))
     .done()
   });
 
-  app.post("/email/user", sendUserAnEmail(sendgrid));   
-  app.post("/email/test", function (req, res) {
-    res.send("i got it"); 
-  });
+  app.post("/email/test", sendMeAnEmail(sendgrid));   
 
   return app;
 }
