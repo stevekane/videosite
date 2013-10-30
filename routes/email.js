@@ -1,10 +1,10 @@
 var _ = require('lodash')
-  , email = require('./../libs/email')
-  , handlebars = require('handlebars')
-  , emailTemplates = require('../compiledEmails')(handlebars);
+  , sendEmail = require('./../libs/email').sendEmail;
 
 exports.configure = function (app) {
-  var sendgrid = app.get('sendgrid');
+  var sendgrid = app.get('sendgrid')
+    , emailTemplates = app.get('emailTemplates')
+    , subscribeTemplate = emailTemplates['subscribe'];
 
   var sendEmailSuccess = _.curry(function (res, message) {
     console.log(message);
@@ -21,10 +21,10 @@ exports.configure = function (app) {
         from: "kanesteven@gmail.com",
         to: "kanesteven@gmail.com",
         subject: "This is a targetted email",
-        html: emailTemplates['subscribe']({})
+        html: subscribeTemplate()
       };
 
-    email.sendEmail(sendgrid, config)
+    sendEmail(sendgrid, config)
     .then(sendEmailSuccess(res))
     .fail(sendEmailFailure(res))
     .done()

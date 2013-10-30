@@ -4,7 +4,8 @@ var _ = require('lodash')
   , handleExistingUser = utilities.handleExistingUser
   , loginUser = utilities.loginUser
   , returnUser = utilities.returnUser
-  , sendError = require('../../utils/http').sendError;
+  , sendError = require('../../utils/http').sendError
+  , sendEmail = require('../../libs/email').sendEmail;
 
 //delay execution till this is called in the promise chain
 var createNewUser = function (hash) {
@@ -13,15 +14,21 @@ var createNewUser = function (hash) {
   }
 }
 
-exports.processNewUser = _.curry(function (sendgrid, req, res) {
+exports.processNewUser = _.curry(function (sendgrid, emailTemplate, req, res) {
   var data = req.body;
-  console.log(data);
+  var config = {
+    from: "kanesteven@gmail.com",
+    to: data.email,
+    subject: "Welcome to embercasts!",
+    html: emailTemplate()
+  };
 
   User.findOnePromised({email: data.email})
   .then(handleExistingUser)
   .then(createNewUser(data))
   .then(loginUser(req))
-  //.then(sendSignupEmail(sendgrid))
+  .then(function () { return config; })
+  .then(sendEmail(sendgrid))
   .then(returnUser(res))
   .fail(sendError(res))
   .done();

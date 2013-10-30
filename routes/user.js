@@ -161,10 +161,11 @@ var processPasswordReset = _.curry(function (req, res) {
 
 exports.configure = function (app, options) {
   var sendgrid = app.get('sendgrid')
-    , passport = app.get('passport');
+    , passport = app.get('passport')
+    , emailTemplates = app.get('emailTemplates');
 
-  app.post('/users', processNewUser(sendgrid));
-  app.post('/user/create', processNewUser(sendgrid));
+  app.post('/users', processNewUser(sendgrid, emailTemplates['subscribe']));
+  app.post('/user/create', processNewUser(sendgrid, emailTemplates['subscribe']));
   app.post('/user/login', passport.authenticate('local'), login);
   app.all('/user/logout', logout);
   app.post('/user/authenticated', verifyAuth, confirmAuthentication); 

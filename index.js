@@ -3,15 +3,19 @@ var http = require('http')
   , fs = require('fs')
   , express = require('express')
   , cons = require('consolidate')
+  , handlebars = require('handlebars')
   , passport = require('passport')
   , mongoose = require('mongoose')
   , Q = require('q')
-  , callWithPromise = Q.ninvoke
+  , callWithPromise = Q.ninvoke;
 
-//TODO: change to configureApplicationRoutes?  routes is kinda weird
+//here we create our emailTemplates
+var emailTemplates = require('./compiledEmails')(handlebars);
+
 var configurePassport = require('./config/passport').configure
-  , configureMongoose = require('./config/mongoose').configure
-  , configureUserRoutes = require('./routes/user').configure
+  , configureMongoose = require('./config/mongoose').configure;
+
+var configureUserRoutes = require('./routes/user').configure
   , configurePaymentRoutes = require('./routes/payment').configure
   , configureIndexRoutes = require('./routes/index').configure
   , configureEmailRoutes = require('./routes/email').configure;
@@ -41,7 +45,8 @@ app.set('port', process.env.PORT || 3000)
   .set('view engine', 'handlebars')
   .set('sendgrid', sendgrid)
   .set('stripe', stripe)
-  .set('passport', passport);
+  .set('passport', passport)
+  .set('emailTemplates', emailTemplates);
 
 //configure middleware stack for express
 app.use(express.favicon())

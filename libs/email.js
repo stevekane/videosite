@@ -3,7 +3,6 @@ var _ = require('lodash')
   , callWithPromise = Q.ninvoke;
 
 //send an email with provided text and return a promise
-
 var sendEmail = _.curry(function (sendgrid, config) {
   return callWithPromise(sendgrid, "send", config)
 });
@@ -11,4 +10,3 @@ var sendEmail = _.curry(function (sendgrid, config) {
 module.exports = {
   sendEmail: sendEmail,
 }
-
