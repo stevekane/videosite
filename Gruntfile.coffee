@@ -1,8 +1,13 @@
 'use strict'
+path = require('path')
 
 module.exports = (grunt) ->
   
   grunt.initConfig
+
+    #SERVER SIDE STUFF
+    emailTemplatesCompiled: "compiledEmails.js"
+    emailDir: "templates/email/"
 
     #vendor directory and specific dependencies
     vendor: "public/vendor"
@@ -56,6 +61,16 @@ module.exports = (grunt) ->
         files:
           "<%= distDir%>/<%= hbCompiled %>": "<%= hbDir %>/**/*.handlebars"
 
+    handlebars:
+      compile:
+        options:
+          commonjs: true
+          processName: (filePath) ->
+            return path.basename filePath, ".handlebars"
+        files:
+          "compiledEmails.js": "<%= emailDir %>/**/*.handlebars"
+
+
     #FILE WATCHING
     watch:
       js:
@@ -71,10 +86,14 @@ module.exports = (grunt) ->
           livereload: true
 
       emberTemplates:
-        files: ['<%= hbDir%>/**/*.handlebars']
+        files: ['<%= hbDir %>/**/*.handlebars']
         tasks: ['emberTemplates']
         options:
           livereload: true
+
+      emailTemplates:
+        files: ['<%= emailDir %>/**/*.handlebars']
+        tasks: ['handlebars']
 
       indexhtml:
         files: ['index.html']
@@ -86,10 +105,12 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks('grunt-contrib-sass')
   grunt.loadNpmTasks('grunt-ember-templates')
   grunt.loadNpmTasks('grunt-contrib-watch')
+  grunt.loadNpmTasks('grunt-contrib-handlebars')
 
   grunt.registerTask('default',
     [
-     'emberTemplates',
+      'emberTemplates',
+      'handlebars',
       'sass',
       'minispade',
       'watch'

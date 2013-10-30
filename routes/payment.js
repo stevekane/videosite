@@ -56,7 +56,7 @@ var processNewSubscription = _.curry(function (stripe, sendgrid, req, res) {
   console.log('inside process');
   stripe.customers.create(data)
   .then(saveCustomerInDb(user))
-  .then(email.compileAndSendEmail(sendgrid, config, templateName, user))
+  //.then(email.compileAndSendEmail(sendgrid, config, templateName, user))
   .then(sendConfirmation(res))
   .then(null, sendError(res));
 });
