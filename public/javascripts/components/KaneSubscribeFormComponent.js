@@ -15,18 +15,19 @@ var attemptSubscribe = function (url, hash) {
     Stripe.card.createToken(hash, function (status, response) {
       if (response.error) {
         set(self, "error", response.error.message);
-        reject(response.error);
+        return reject(response.error);
       } else {
+
         //returned reponse object contains an "id".
         //set this as hash.token and send to node server
         var serverHash = {token: response.id};
 
-        Ember.$.ajax(url, serverHash)
+        Ember.$.post(url, serverHash)
         .then(function (result) {
-          resolve(result);  
+          return resolve(result);  
         })
         .fail(function (err) {
-          reject(err); 
+          return reject(err); 
         });
       }
     });
@@ -42,6 +43,8 @@ App.KaneSubscribeFormComponent = App.KaneBaseFormComponent.extend({
     exp_year: "",
     cvc: "",
   },
+
+  url: "/subscriber/create",
 
   submit: attemptSubscribe
 

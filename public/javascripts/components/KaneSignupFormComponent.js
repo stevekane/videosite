@@ -1,3 +1,8 @@
+var validateEmail = Validations.validateEmail("email")
+  , checkIfBlank = Validations.checkIfBlank
+  , passwordsMatch = Validations.fieldsMatch("password", "confirmPassword");
+  
+
 App.KaneSignupFormComponent = App.KaneBaseFormComponent.extend({
   
   hash: {
@@ -9,14 +14,14 @@ App.KaneSignupFormComponent = App.KaneBaseFormComponent.extend({
   url: "/user/create",
 
   fieldValidations: [
-    Validations.validateEmail("email"),
-    Validations.checkIfBlank("email"),
-    Validations.checkIfBlank("password"),
-    Validations.checkIfBlank("confirmPassword"),
+    validateEmail,
+    checkIfBlank("email"),
+    checkIfBlank("password"),
+    checkIfBlank("confirmPassword"),
   ],
 
   formValidations: [
-    Validations.fieldsMatch("password", "confirmPassword") 
+    passwordsMatch
   ]
 
 });

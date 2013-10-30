@@ -7,9 +7,12 @@ var _ = require('lodash')
   , formatUser = require('../app/utils/database').formatWithKey("user")
   , sendError = require('../app/utils/http').sendError
   , sendConfirmation = require('../app/utils/http').sendConfirmation
+  , compileAndSendEmail = require('../libs/email').compileAndSendEmail
   , format = require('../app/utils/database').format
   , callWithPromise = Q.ninvoke
   , SALT_WORK_FACTOR = 10;
+
+var sendSignupEmail = 
 
 function checkForExistingUser (User, data) {
   console.log('checkForExisting');
@@ -138,13 +141,14 @@ var refreshSession = _.curry(function (req, user) {
   return loginPromise.promise;
 });
 
-var processNewUser = _.curry(function (req, res) {
+var processSignup = _.curry(function (sendgrid, req, res) {
   var data = req.body;
 
   checkForExistingUser(User, {email: data.email})
   .then(handleExistingUser)
   .then(createNewUser(User, data))
   .then(loginUser(req))
+  //.then(sendSignupEmail(sendgrid))
   .then(returnUser(res))
   .fail(sendError(res))
   .done();
@@ -198,8 +202,8 @@ var processPasswordReset = _.curry(function (req, res) {
 
 
 exports.configure = function (app, passport, options) {
-  app.post('/users', processNewUser);
-  app.post('/user/create', processNewUser);
+  app.post('/users', processSignup);
+  app.post('/user/create', processSignup);
   app.post('/user/login', passport.authenticate('local'), login);
   app.all('/user/logout', logout);
   app.post('/user/authenticated', verifyAuth, confirmAuthentication); 
