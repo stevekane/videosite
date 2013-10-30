@@ -10,13 +10,11 @@ var http = require('http')
 
 //TODO: change to configureApplicationRoutes?  routes is kinda weird
 var routes = require('./routes')
-  , configurePassport = require('./app/config/passport').configure
-  , configureMongoose = require('./app/config/mongoose').configure
+  , configurePassport = require('./config/passport').configure
+  , configureMongoose = require('./config/mongoose').configure
   , configureUserRoutes = require('./routes/user').configure
   , configurePaymentRoutes = require('./routes/payment').configure
-  , configureAdminRoutes = require('./routes/admin').configure
-  , configureTestRoutes = require('./routes/test').configure
-  , configureEmailRoutes = require('./routes/email').configure;
+  , configureIndexRoutes = require('./routes/index').configure
 
 //load configurations
 var config = require('./config.json');
@@ -42,7 +40,8 @@ app.set('port', process.env.PORT || 3000)
   .set('views', path.join(__dirname + "/views/"))
   .set('view engine', 'handlebars')
   .set('sendgrid', sendgrid)
-  .set('stripe', stripe);
+  .set('stripe', stripe)
+  .set('passport', passport);
 
 //configure middleware stack for express
 app.use(express.favicon())
@@ -60,16 +59,9 @@ configureMongoose(mongoose);
 configurePassport(passport);
 
 //load all api route handlers
-configureUserRoutes(app, passport);
-configurePaymentRoutes(app, stripe);
-configureAdminRoutes(app);
-//TODO: FOR TESTING
-configureTestRoutes(app);
-configureEmailRoutes(app);
-//TODO: FOR TESTING
-
-//serve the web app yo
-app.get('/', routes.index);
+configureUserRoutes(app);
+configurePaymentRoutes(app);
+configureIndexRoutes(app);
 
 //start the server
 callWithPromise(server, "listen", app.get('port'))

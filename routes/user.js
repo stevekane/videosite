@@ -1,50 +1,21 @@
 var _ = require('lodash')
   , bcrypt = require('bcrypt')
-  , Moment = require('moment')
   , Q = require('q')
-  , User = require('../app/models').User
-  , verifyAuth = require('../app/config/passport').verifyAuth
-  , formatUser = require('../app/utils/database').formatWithKey("user")
-  , sendError = require('../app/utils/http').sendError
-  , sendConfirmation = require('../app/utils/http').sendConfirmation
+  , User = require('../data_models/user').User
+  , verifyAuth = require('../config/passport').verifyAuth
+  , formatUser = require('../data_models/utilities').formatWithKey("user")
+  , sendError = require('../utils/http').sendError
+  , sendConfirmation = require('../utils/http').sendConfirmation
   , compileAndSendEmail = require('../libs/email').compileAndSendEmail
-  , format = require('../app/utils/database').format
   , callWithPromise = Q.ninvoke
   , SALT_WORK_FACTOR = 10;
 
-var sendSignupEmail = 
-
-function checkForExistingUser (User, data) {
-  console.log('checkForExisting');
-  return callWithPromise(User, "findOne", data);
-}
+var processNewUser = require('../system_behaviors/manage_users/process_new_user').processNewUser;
 
 function checkForExistingUserById (User, id){
   console.log('checkForExistingUserById');
   return callWithPromise(User, "findById", id);
 }
-
-
-//returns rejected promise if user else returns resolved promise
-function handleExistingUser (user) {
-  console.log('handleExistingUser.  User -> ', user);
-  if (user) { 
-    throw new Error("User already exists!");
-  }
-  return user;
-}
-
-//not curried since inner function takes no parameters
-function createNewUser (User, data) {
-  return function () {
-    console.log('createNewUser');
-    return callWithPromise(User, "create", data);
-  }
-}
-
-var returnUser = _.curry(function (res, user) {
-  return res.json(formatUser(user));
-});
 
 
 //We use a Q.defer here to allow us to throw or resolve the callback from login
@@ -141,19 +112,6 @@ var refreshSession = _.curry(function (req, user) {
   return loginPromise.promise;
 });
 
-var processSignup = _.curry(function (sendgrid, req, res) {
-  var data = req.body;
-
-  checkForExistingUser(User, {email: data.email})
-  .then(handleExistingUser)
-  .then(createNewUser(User, data))
-  .then(loginUser(req))
-  //.then(sendSignupEmail(sendgrid))
-  .then(returnUser(res))
-  .fail(sendError(res))
-  .done();
-});
-
 var processChangeEmail = _.curry(function (req, res) {
   var data = req.body.user;
 
@@ -201,9 +159,12 @@ var processPasswordReset = _.curry(function (req, res) {
 });
 
 
-exports.configure = function (app, passport, options) {
-  app.post('/users', processSignup);
-  app.post('/user/create', processSignup);
+exports.configure = function (app, options) {
+  var sendgrid = app.get('sendgrid')
+    , passport = app.get('passport');
+
+  app.post('/users', processNewUser(sendgrid));
+  app.post('/user/create', processNewUser(sendgrid));
   app.post('/user/login', passport.authenticate('local'), login);
   app.all('/user/logout', logout);
   app.post('/user/authenticated', verifyAuth, confirmAuthentication); 

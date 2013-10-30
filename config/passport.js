@@ -1,6 +1,6 @@
 var bcrypt = require('bcrypt')
   , LocalStrategy = require('passport-local').Strategy
-  , User = require('../models').User
+  , User = require('../data_models/user').User
   , Q = require('q')
   , callWithPromise = Q.ninvoke;
 

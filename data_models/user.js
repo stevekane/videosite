@@ -1,7 +1,8 @@
 var bcrypt = require('bcrypt')
   , mongoose = require('mongoose')
-  , SALT_WORK_FACTOR = 10
-  , timestamps = require('mongoose-timestamp');
+  , timestamps = require('mongoose-timestamp')
+  , promisify = require('../libs/mongoose-promises')
+  , SALT_WORK_FACTOR = 10;
 
 var UserSchema = new mongoose.Schema({
 
@@ -44,5 +45,7 @@ UserSchema.pre('save', function (next) {
 });
 
 UserSchema.plugin(timestamps);
+UserSchema.plugin(promisify);
 
-exports.User = mongoose.model("User", UserSchema);
+var User = mongoose.model("User", UserSchema);
+exports.User = User;

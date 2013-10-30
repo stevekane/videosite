@@ -1,10 +1,10 @@
 var moment = require('moment')
   , Q = require('q')
   , _ = require('lodash')
-  , User = require('../app/models').User
-  , verifyAuth = require('../app/config/passport').verifyAuth
-  , sendConfirmation = require('../app/utils/http').sendConfirmation
-  , sendError = require('../app/utils/http').sendError
+  , User = require('../data_models/user').User
+  , verifyAuth = require('../config/passport').verifyAuth
+  , sendConfirmation = require('../utils/http').sendConfirmation
+  , sendError = require('../utils/http').sendError
   , email = require('../libs/email')
   , callWithPromise = Q.ninvoke;
 

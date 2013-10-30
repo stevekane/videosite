@@ -1,11 +1,11 @@
 var _ = require('lodash');
 
 //accepts either Mongo Object or POJO
-function formatWithKey (keyName, hash) {
+var formatWithKey = _.curry(function (keyName, hash) {
   var objectWithKey = {};
   objectWithKey[keyName] = format(hash);
   return objectWithKey;
-};
+});
 
 //accepts either Mongo Object or POJO
 function format (hash) {
@@ -20,6 +20,6 @@ function format (hash) {
 }
 
 module.exports = {
-  formatWithKey: _.curry(formatWithKey),
+  formatWithKey: formatWithKey,
   format: format
 }
