@@ -10,17 +10,16 @@ var _ = require('lodash')
   , callWithPromise = Q.ninvoke
   , SALT_WORK_FACTOR = 10;
 
-var processNewUser = require('../system_behaviors/manage_users/process_new_user').processNewUser;
+var processNewUser = require('../system_behaviors/manage_users/process_new_user');
+var login = require('../system_behaviors/manage_sessions/login');
 
 function checkForExistingUserById (User, id){
-  console.log('checkForExistingUserById');
   return callWithPromise(User, "findById", id);
 }
 
 
 //We use a Q.defer here to allow us to throw or resolve the callback from login
 var loginUser = _.curry(function (req, user) {
-  console.log('loginUser');
   var loginPromise = Q.defer();
 
   req.login(user, function (err) {
@@ -42,11 +41,6 @@ function editUserInfo(User, data){
   }
 }
 
-function login (req, res) {
-  console.log('login');
-  return res.json(formatUser(req.user));
-}
-
 function logout (req, res) {
   req.logout();
   res.status(200).send("logged out successfully");
@@ -61,7 +55,6 @@ function comparePasswords (incoming, current) {
 }
 
 function checkIfMatches(isMatch){
-  console.log("checkIfMatches");
   if (!isMatch) { 
     throw new Error("Incorrect Password.");
   } 
@@ -70,19 +63,16 @@ function checkIfMatches(isMatch){
 
 //not curried as the inner function takes no args
 function hashPassword (newPassword, salt) {
-  console.log("hashpassword", newPassword, salt);
   return function () {
     return callWithPromise(bcrypt, "hash", newPassword, salt);
   }
 }
 
 var updateUserPassword =  _.curry(function (id, password) {
-  console.log("updateUserPassword");
   return callWithPromise(User, "findOneAndUpdate", {_id: id}, {$set: {password: password}}) 
 });
 
 function restoreSession (req, res) {
-  console.log("restoreSession");
   if (req.user && req.isAuthenticated()) {
     return res.status(200).json(formatUser(req.user)); 
   } else {
@@ -91,7 +81,6 @@ function restoreSession (req, res) {
 }
 
 function handleInvalidUser (user) {
-  console.log("handleInvalidUser");
   if (!user) { 
     throw new Error("No User Found by that name.");
   }
@@ -164,8 +153,8 @@ exports.configure = function (app, options) {
     , passport = app.get('passport')
     , emailTemplates = app.get('emailTemplates');
 
-  app.post('/users', processNewUser(sendgrid, emailTemplates['subscribe']));
-  app.post('/user/create', processNewUser(sendgrid, emailTemplates['subscribe']));
+  app.post('/users', processNewUser(sendgrid, emailTemplates.subscribe));
+  app.post('/user/create', processNewUser(sendgrid, emailTemplates.subscribe));
   app.post('/user/login', passport.authenticate('local'), login);
   app.all('/user/logout', logout);
   app.post('/user/authenticated', verifyAuth, confirmAuthentication); 

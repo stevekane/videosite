@@ -14,7 +14,7 @@ var createNewUser = function (hash) {
   }
 }
 
-exports.processNewUser = _.curry(function (sendgrid, emailTemplate, req, res) {
+var processNewUser = _.curry(function (sendgrid, emailTemplate, req, res) {
   var data = req.body;
   var config = {
     from: "kanesteven@gmail.com",
@@ -33,3 +33,5 @@ exports.processNewUser = _.curry(function (sendgrid, emailTemplate, req, res) {
   .fail(sendError(res))
   .done();
 });
+
+module.exports = processNewUser;
