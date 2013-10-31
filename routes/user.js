@@ -2,7 +2,6 @@ var _ = require('lodash')
   , bcrypt = require('bcrypt')
   , Q = require('q')
   , User = require('../data_models/user').User
-  , verifyAuth = require('../config/passport').verifyAuth
   , formatUser = require('../data_models/utilities').formatWithKey("user")
   , sendError = require('../utils/http').sendError
   , sendConfirmation = require('../utils/http').sendConfirmation
@@ -11,12 +10,9 @@ var _ = require('lodash')
   , SALT_WORK_FACTOR = 10;
 
 var processNewUser = require('../system_behaviors/manage_users/process_new_user');
+var processChangeEmail = require('../system_behaviors/manage_users/process_change_email');
 var login = require('../system_behaviors/manage_sessions/login');
-
-function checkForExistingUserById (User, id){
-  return callWithPromise(User, "findById", id);
-}
-
+var logout = require('../system_behaviors/manage_sessions/logout');
 
 //We use a Q.defer here to allow us to throw or resolve the callback from login
 var loginUser = _.curry(function (req, user) {
@@ -27,24 +23,10 @@ var loginUser = _.curry(function (req, user) {
       loginPromise.reject(new Error("Login Unsuccessful."));
     } else {
       loginPromise.resolve(user); 
-    }
-  });
+    } });
   return loginPromise.promise;
 });
 
-
-//Not curried as inner function takes no params
-function editUserInfo(User, data){
-  return function () {
-    var updatedInfo = {email: data.email};
-    return callWithPromise(User, "findOneAndUpdate", {_id: data.id}, {$set: updatedInfo});
-  }
-}
-
-function logout (req, res) {
-  req.logout();
-  res.status(200).send("logged out successfully");
-}
 
 function confirmAuthentication (req, res) {
   return sendConfirmation(res);
@@ -87,32 +69,6 @@ function handleInvalidUser (user) {
   return user;
 }
 
-var refreshSession = _.curry(function (req, user) {
-  var loginPromise = Q.defer();
-
-  req.logout();
-  req.login(user, function (err) {
-    if (err) {
-      loginPromise.reject(new Error("Login Failed."));
-    } else {
-      loginPromise.resolve(user); 
-    }
-  });
-  return loginPromise.promise;
-});
-
-var processChangeEmail = _.curry(function (req, res) {
-  var data = req.body.user;
-
-  callWithPromise(User, "findOne", {email: data.email})
-  .then(handleExistingUser)
-  .then(editUserInfo(User, data))
-  .then(refreshSession(req))
-  .then(returnUser(res))
-  .fail(sendError(res))
-  .done();
-});
-
 var processPasswordChange = _.curry(function (req, res) {
   var incomingPassword = req.body.oldpassword
     , newPassword = req.body.password;
@@ -153,14 +109,17 @@ exports.configure = function (app, options) {
     , passport = app.get('passport')
     , emailTemplates = app.get('emailTemplates');
 
-  app.post('/users', processNewUser(sendgrid, emailTemplates.subscribe));
-  app.post('/user/create', processNewUser(sendgrid, emailTemplates.subscribe));
+  //sessions
   app.post('/user/login', passport.authenticate('local'), login);
   app.all('/user/logout', logout);
-  app.post('/user/authenticated', verifyAuth, confirmAuthentication); 
+  app.post('/user/authenticated', passport.verifyAuth, confirmAuthentication); 
   app.get('/user/restore', restoreSession); 
-  app.put('/user/edit', verifyAuth, processChangeEmail);
-  app.post('/user/pwchange', verifyAuth, processPasswordChange);
+
+  //user crud/lifecycle
+  app.post('/users', processNewUser(sendgrid, emailTemplates.subscribe));
+  app.post('/user/create', processNewUser(sendgrid, emailTemplates.subscribe));
+  app.put('/user/edit', passport.verifyAuth, processChangeEmail);
+  app.post('/user/pwchange', passport.verifyAuth, processPasswordChange);
   //app.post('/user/pwresetrequest', processPasswordResetRequest);
   //app.get('/user/pwreset/:id', processPasswordReset);
 

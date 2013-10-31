@@ -2,7 +2,6 @@ var moment = require('moment')
   , Q = require('q')
   , _ = require('lodash')
   , User = require('../data_models/user').User
-  , verifyAuth = require('../config/passport').verifyAuth
   , sendConfirmation = require('../utils/http').sendConfirmation
   , sendError = require('../utils/http').sendError
   , email = require('../libs/email')
@@ -63,8 +62,9 @@ var processNewSubscription = _.curry(function (stripe, sendgrid, req, res) {
 
 exports.configure = function (app) {
   var stripe = app.get('stripe')
+    , passport = app.get('passport')
     , sendgrid = app.get('sendgrid');
 
-  app.post("/subscriber/create", verifyAuth, processNewSubscription(stripe, sendgrid));
+  app.post("/subscriber/create", passport.verifyAuth, processNewSubscription(stripe, sendgrid));
   return app;
 }
