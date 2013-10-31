@@ -4,8 +4,9 @@
 
     {{#unless activeUser}}
       {{kane-login-form
-        classNames="form-horizontal"
         action="storeAndSetUser"}}
+
+      {{kane-reset-password-form}}
     {{else}}
       <h2> Already logged in as: {{activeUser.email}} </h2>
     {{/unless}}
