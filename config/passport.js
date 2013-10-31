@@ -18,32 +18,18 @@ function mongoStrategy (email, password, passportDone) {
   User.findOnePromised({email: email})
   .then(handleNoUser)
   .then(function (user) {
-    var passwordPromise = Q.defer()
-      , invalidCredentials = new Error("Invalid credentials");
-
-    mustMatchPromised(password, user.password)
-    .then(function (match) {
-      passwordPromise.resolve(user);
+    
+    user.matchPasswordOrTemporaryPromised(password)
+    .then(function (user) {
+      passportDone(null, user);
     })
     .fail(function (err) {
-      //we MUST check if temp is blank, this would be big security hole!
-      if (user.temporary_password === "" || user.temporary_password === null) {
-        return passwordPromise.reject(invalidCredentials);
-      }
-      if (user.temporary_password === password) {
-        //TODO: perhaps reset the temporary_password ??
-        return passwordPromise.resolve(user);
-      } else {
-        return passwordPromise.reject(invalidCredentials);
-      }
-    });
-
-    return passwordPromise.promise;
+      console.log(err);
+      passportDone(null, false, err.message);
+    })
+    .done();
   })
-  .then(function (user) {
-    passportDone(null, user);
-  })
-  .fail(function(err){
+  .fail(function (err) {
     console.log(err);
     passportDone(null, false, err.message)})
   .done();
