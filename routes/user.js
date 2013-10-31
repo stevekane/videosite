@@ -1,5 +1,4 @@
 var _ = require('lodash')
-  , bcrypt = require('bcrypt')
   , Q = require('q')
   , User = require('../data_models/user').User
   , formatUser = require('../data_models/utilities').formatWithKey("user")
@@ -9,10 +8,11 @@ var _ = require('lodash')
   , callWithPromise = Q.ninvoke
   , SALT_WORK_FACTOR = 10;
 
-var processNewUser = require('../system_behaviors/manage_users/process_new_user');
-var processChangeEmail = require('../system_behaviors/manage_users/process_change_email');
-var login = require('../system_behaviors/manage_sessions/login');
-var logout = require('../system_behaviors/manage_sessions/logout');
+var processNewUser = require('../system_behaviors/manage_users/process_new_user')
+  , processChangeEmail = require('../system_behaviors/manage_users/process_change_email')
+  , processChangePassword = require('../system_behaviors/manage_users/process_change_password')
+  , login = require('../system_behaviors/manage_sessions/login')
+  , logout = require('../system_behaviors/manage_sessions/logout');
 
 //We use a Q.defer here to allow us to throw or resolve the callback from login
 var loginUser = _.curry(function (req, user) {
@@ -23,36 +23,14 @@ var loginUser = _.curry(function (req, user) {
       loginPromise.reject(new Error("Login Unsuccessful."));
     } else {
       loginPromise.resolve(user); 
-    } });
+    } 
+  });
   return loginPromise.promise;
 });
-
 
 function confirmAuthentication (req, res) {
   return sendConfirmation(res);
 }
-
-function comparePasswords (incoming, current) {
-  return callWithPromise(bcrypt, "compare", incoming, current);
-}
-
-function checkIfMatches(isMatch){
-  if (!isMatch) { 
-    throw new Error("Incorrect Password.");
-  } 
-  return isMatch;
-}
-
-//not curried as the inner function takes no args
-function hashPassword (newPassword, salt) {
-  return function () {
-    return callWithPromise(bcrypt, "hash", newPassword, salt);
-  }
-}
-
-var updateUserPassword =  _.curry(function (id, password) {
-  return callWithPromise(User, "findOneAndUpdate", {_id: id}, {$set: {password: password}}) 
-});
 
 function restoreSession (req, res) {
   if (req.user && req.isAuthenticated()) {
@@ -68,19 +46,6 @@ function handleInvalidUser (user) {
   }
   return user;
 }
-
-var processPasswordChange = _.curry(function (req, res) {
-  var incomingPassword = req.body.oldpassword
-    , newPassword = req.body.password;
-
-  comparePasswords(incomingPassword, req.user.password)
-  .then(checkIfMatches)
-  .then(hashPassword(newPassword, SALT_WORK_FACTOR))
-  .then(updateUserPassword(req.user._id))
-  .then(returnUser(res))
-  .fail(sendError(res))
-  .done();
-});
 
 var processPasswordResetRequest = _.curry(function (req, res) {
   checkForExistingUser(User, {email: req.body.email})
@@ -119,7 +84,7 @@ exports.configure = function (app, options) {
   app.post('/users', processNewUser(sendgrid, emailTemplates.subscribe));
   app.post('/user/create', processNewUser(sendgrid, emailTemplates.subscribe));
   app.put('/user/edit', passport.verifyAuth, processChangeEmail);
-  app.post('/user/pwchange', passport.verifyAuth, processPasswordChange);
+  app.post('/user/pwchange', passport.verifyAuth, processChangePassword);
   //app.post('/user/pwresetrequest', processPasswordResetRequest);
   //app.get('/user/pwreset/:id', processPasswordReset);
 
