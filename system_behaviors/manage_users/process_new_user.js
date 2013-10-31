@@ -13,9 +13,10 @@ var processNewUser = _.curry(function (sendgrid, emailTemplate, req, res) {
     from: "kanesteven@gmail.com",
     to: data.email,
     subject: "Welcome to embercasts!",
-    html: emailTemplate()
+    html: emailTemplate ? emailTemplate() : "Welcome!"
   };
 
+  //TODO: consider changing the email portion of this to be before responding?
   User.findOnePromised({email: data.email})
   .then(handleExistingUser)
   .then(function () { return User.createPromised(data); })

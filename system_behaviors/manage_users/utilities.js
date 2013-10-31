@@ -24,6 +24,13 @@ var handleExistingUser = function (user) {
   return null;
 }
 
+var checkIfUser = function (user) {
+  if (!user) {
+    throw new Error("No User Found.");
+  }
+  return user;
+}
+
 var returnUser = _.curry(function (res, user) {
   res.json(formatUser(user));
 });
@@ -31,5 +38,6 @@ var returnUser = _.curry(function (res, user) {
 module.exports = {
   loginUser: loginUser,
   handleExistingUser: handleExistingUser,
+  checkIfUser: checkIfUser,
   returnUser: returnUser
 }

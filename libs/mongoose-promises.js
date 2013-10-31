@@ -19,10 +19,6 @@ var promisifyMongoose = function (schema, options) {
     var savePromise = Q.defer()
       , self = this;
     
-    if (!this[propName]) {
-      savePromise.reject(new Error(this + " does not have property " + propName));
-    }
-    
     this[propName] = value;
     promisify(this, "save")
     .then(function () {

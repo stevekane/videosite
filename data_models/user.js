@@ -12,17 +12,16 @@ var UserSchema = new mongoose.Schema({
   },
   temporary_password: {
     type: String,
+    default: ""
   },
   email: { 
     type: String,
     require: true,
     unique: true
   },
-  last_modified_action: {
-    type: String
-  },
   stripeId: {
     type: String,
+    default: null
   },
   subscribed: {
     type: Boolean,
@@ -31,6 +30,7 @@ var UserSchema = new mongoose.Schema({
 
 });
 
+//TODO: user promises!
 UserSchema.pre('save', function (next) {
   var user = this;
   if (!user.isModified('password')) return next();

@@ -5,6 +5,7 @@ var _ = require('lodash')
   , comparePromised = bcryptPromises.comparePromised
   , hashPromised = bcryptPromises.hashPromised
   , returnUser = require('./utilities').returnUser
+  , checkIfUser = require('./utilities').checkIfUser
   , sendError = require('../../utils/http').sendError
   , sendEmail = require('../../libs/email').sendEmail;
 
@@ -21,6 +22,7 @@ module.exports = function (req, res) {
     , user = req.user;
 
   User.findByIdPromised(user._id)
+  .then(checkIfUser)
   .then(function (user) {
     comparePromised(oldPw, user.password)
     .then(checkIfMatches)
