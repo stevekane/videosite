@@ -40,7 +40,7 @@ App.KaneBaseFormComponent = Ember.Component.extend({
   //handle success w/ Ember
   handleSuccess: function (result) {
     set(this, "disabled", false);
-    this.sendAction("action", result.user);
+    this.sendAction("action", result);
   },
 
   //handleFailure w/ Ember

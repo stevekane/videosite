@@ -2,43 +2,50 @@ var bcrypt = require('bcrypt')
   , LocalStrategy = require('passport-local').Strategy
   , User = require('../data_models/user').User
   , Q = require('q')
+  , mustMatchPromised = require('../libs/bcrypt-promises').mustMatchPromised
   , callWithPromise = Q.ninvoke;
 
-//helpers for async chain
-function checkValidUser(email){
-  return callWithPromise(User, "findOne", {email: email});
-}
-
 function handleNoUser(user) {
-  var deferred = Q.defer();
-  if (!user) { 
-    deferred.reject(new Error('Invalid Username'));
-  } else { 
-    deferred.resolve(user);
+  if (!user) {
+    throw new Error("No user found with that email");
   }
-  return deferred.promise;
+  return user;
 }
 
-function checkPassword(password, passportDone){
-  return function(user) { 
-    var passwordCompare = callWithPromise(bcrypt, "compare", password, user.password)
-      .then(function(isMatch){
-        if (!isMatch) {
-          return passportDone(null, false, {message: "Invalid Password"});
-        } else {
-          return passportDone(null, user);
-        }
-      });
-    return passwordCompare;
-  }
-}
-
+//NOTE: we used passport done since
 //strategy for use with Mongoose
 function mongoStrategy (email, password, passportDone) {  
-  checkValidUser(email)
+  User.findOnePromised({email: email})
   .then(handleNoUser)
-  .then(checkPassword(password, passportDone))
-  .fail(function(err){return passportDone(null, false, "invalid user")})
+  .then(function (user) {
+    var passwordPromise = Q.defer()
+      , invalidCredentials = new Error("Invalid credentials");
+
+    mustMatchPromised(password, user.password)
+    .then(function (match) {
+      passwordPromise.resolve(user);
+    })
+    .fail(function (err) {
+      //we MUST check if temp is blank, this would be big security hole!
+      if (user.temporary_password === "" || user.temporary_password === null) {
+        return passwordPromise.reject(invalidCredentials);
+      }
+      if (user.temporary_password === password) {
+        //TODO: perhaps reset the temporary_password ??
+        return passwordPromise.resolve(user);
+      } else {
+        return passwordPromise.reject(invalidCredentials);
+      }
+    });
+
+    return passwordPromise.promise;
+  })
+  .then(function (user) {
+    passportDone(null, user);
+  })
+  .fail(function(err){
+    console.log(err);
+    passportDone(null, false, err.message)})
   .done();
 } 
 
