@@ -6,8 +6,7 @@ var _ = require('lodash')
   , hashPromised = bcryptPromises.hashPromised
   , returnUser = require('./utilities').returnUser
   , checkIfUser = require('./utilities').checkIfUser
-  , sendError = require('../../utils/http').sendError
-  , sendEmail = require('../../libs/email').sendEmail;
+  , sendError = require('../../utils/http').sendError;
 
 function checkIfMatches (isMatch) {
   if (!isMatch) { 

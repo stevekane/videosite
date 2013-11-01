@@ -5,8 +5,7 @@ var _ = require('lodash')
   , handleExistingUser = utilities.handleExistingUser
   , refreshSession = require('../manage_sessions/refresh')
   , returnUser = utilities.returnUser
-  , sendError = require('../../utils/http').sendError
-  , sendEmail = require('../../libs/email').sendEmail;
+  , sendError = require('../../utils/http').sendError;
 
 module.exports = function (req, res) {
   var newData = req.body.user

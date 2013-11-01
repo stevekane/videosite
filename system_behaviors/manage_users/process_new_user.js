@@ -1,13 +1,10 @@
-var _ = require('lodash')
-  , User = require('../../data_models/user').User
+var User = require('../../data_models/user').User
   , utilities = require('./utilities')
-  , handleExistingUser = utilities.handleExistingUser
-  , loginUser = utilities.loginUser
-  , returnUser = utilities.returnUser
   , sendError = require('../../utils/http').sendError
-  , sendEmail = require('../../libs/email').sendEmail;
+  , sendEmail = require('../../systems/email').sendEmail
+  , newUserTemplate = require('../../compiledEmails').signup;
 
-var processNewUser = _.curry(function (sendgrid, emailTemplate, req, res) {
+var processNewUser = function (req, res) {
   var data = req.body;
   var config = {
     from: "kanesteven@gmail.com",
@@ -16,16 +13,19 @@ var processNewUser = _.curry(function (sendgrid, emailTemplate, req, res) {
     html: emailTemplate ? emailTemplate() : "Welcome!"
   };
 
-  //TODO: consider changing the email portion of this to be before responding?
   User.findOnePromised({email: data.email})
-  .then(handleExistingUser)
-  .then(function () { return User.createPromised(data); })
-  .then(loginUser(req))
-  .then(returnUser(res))
+  .then(utilities.handleExistingUser)
+  .then(function () {
+    return User.createPromised(data);
+  })
+  .then(utilities.loginUser(req))
+  .then(utilities.returnUser(res))
   .fail(sendError(res))
-  .then(function () { return config; })
-  .then(sendEmail(sendgrid))
+  .then(function () {
+    return config;
+  })
+  .then(sendEmail)
   .done();
-});
+};
 
 module.exports = processNewUser;

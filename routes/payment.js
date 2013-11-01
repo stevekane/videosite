@@ -4,7 +4,6 @@ var moment = require('moment')
   , User = require('../data_models/user').User
   , sendConfirmation = require('../utils/http').sendConfirmation
   , sendError = require('../utils/http').sendError
-  , email = require('../libs/email')
   , callWithPromise = Q.ninvoke;
 
 //user is an existing user in mongo, customer is returned from stripe
@@ -28,7 +27,7 @@ Create subscription status in mongo
 Send an email to the customer thanking them for being fucking awesome
 return the updated user object
 */
-var processNewSubscription = _.curry(function (stripe, sendgrid, req, res) {
+var processNewSubscription = function (req, res) {
   var user = req.user
     , token = req.body.token;
 
@@ -55,16 +54,13 @@ var processNewSubscription = _.curry(function (stripe, sendgrid, req, res) {
   console.log('inside process');
   stripe.customers.create(data)
   .then(saveCustomerInDb(user))
-  //.then(email.compileAndSendEmail(sendgrid, config, templateName, user))
   .then(sendConfirmation(res))
   .then(null, sendError(res));
-});
+};
 
 exports.configure = function (app) {
-  var stripe = app.get('stripe')
-    , passport = app.get('passport')
-    , sendgrid = app.get('sendgrid');
+  var passport = app.get('passport')
 
-  app.post("/subscriber/create", passport.verifyAuth, processNewSubscription(stripe, sendgrid));
+  app.post("/subscriber/create", passport.verifyAuth, processNewSubscription);
   return app;
 }

@@ -7,12 +7,7 @@ var processNewUser = require('../system_behaviors/manage_users/process_new_user'
   , restoreSession = require('../system_behaviors/manage_sessions/restore');
 
 exports.configure = function (app, options) {
-  var sendgrid = app.get('sendgrid')
-    , passport = app.get('passport')
-    , emailTemplates = app.get('emailTemplates')
-    , subscribeTemplate = emailTemplates.subscribe
-    , changeEmailTemplate = emailTemplates.changeEmail
-    , resetPasswordTemplate = emailTemplates.resetPassword
+  var passport = app.get('passport');
 
   //sessions
   app.post('/user/login', passport.authenticate('local'), login);
@@ -20,11 +15,11 @@ exports.configure = function (app, options) {
   app.get('/user/restore', restoreSession); 
 
   //user crud/lifecycle
-  app.post('/users', processNewUser(sendgrid, subscribeTemplate));
-  app.post('/user/create', processNewUser(sendgrid, subscribeTemplate));
+  app.post('/users', processNewUser);
+  app.post('/user/create', processNewUser);
   app.put('/user/edit', passport.verifyAuth, processChangeEmail);
   app.post('/user/pwchange', passport.verifyAuth, processChangePassword);
-  app.post('/user/pwreset', processResetPassword(sendgrid, resetPasswordTemplate));
+  app.post('/user/pwreset', processResetPassword);
 
   return app;
 }
