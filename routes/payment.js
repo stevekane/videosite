@@ -1,23 +1,20 @@
-var moment = require('moment')
-  , Q = require('q')
-  , _ = require('lodash')
+var _ = require('lodash')
   , User = require('../data_models/user').User
   , sendConfirmation = require('../utils/http').sendConfirmation
   , sendError = require('../utils/http').sendError
-  , callWithPromise = Q.ninvoke;
+  , createCustomer = require('../systems/payments').createCustomer
 
 //user is an existing user in mongo, customer is returned from stripe
 var saveCustomerInDb = _.curry(function (user, customer) {
-  console.log('saving customer to db');
   var id = user._id
-    , mongoChangeObject = {
+    , changes = {
       $set: {
         stripeId: customer.id,
         subscribed: true
       }
     };
 
-  return callWithPromise(User, "findByIdAndUpdate", id, mongoChangeObject);
+  return User.findByIdAndUpdatePromised(id, changes);
 });
 
 /*
@@ -51,8 +48,7 @@ var processNewSubscription = function (req, res) {
         subject: "Thanks for subscribing!"
     };
 
-  console.log('inside process');
-  stripe.customers.create(data)
+  createCustomer(data)
   .then(saveCustomerInDb(user))
   .then(sendConfirmation(res))
   .then(null, sendError(res));

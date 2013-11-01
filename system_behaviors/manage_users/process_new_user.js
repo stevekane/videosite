@@ -2,7 +2,8 @@ var User = require('../../data_models/user').User
   , utilities = require('./utilities')
   , sendError = require('../../utils/http').sendError
   , sendEmail = require('../../systems/email').sendEmail
-  , newUserTemplate = require('../../compiledEmails').signup;
+  , handlebars = require('handlebars')
+  , newUserTemplate = require('../../compiledEmails')(handlebars).signup;
 
 var processNewUser = function (req, res) {
   var data = req.body;

@@ -3,7 +3,8 @@ var User = require('../../data_models/user').User
   , sendError = require('../../utils/http').sendError
   , sendConfirmation = require('../../utils/http').sendConfirmation
   , sendEmail = require('../../systems/email').sendEmail
-  , pwResetTemplate = require('../../compiledEmails').pwReset
+  , handlebars = require('handlebars')
+  , pwResetTemplate = require('../../compiledEmails')(handlebars).pwReset;
 
 module.exports = function (req, res) {
   var tempPw = Math.random().toString(36).slice(-8);

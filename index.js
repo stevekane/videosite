@@ -1,16 +1,11 @@
 var http = require('http')
   , path = require('path')
-  , fs = require('fs')
   , express = require('express')
   , cons = require('consolidate')
-  , handlebars = require('handlebars')
   , passport = require('passport')
   , mongoose = require('mongoose')
   , Q = require('q')
   , callWithPromise = Q.ninvoke;
-
-//here we create our emailTemplates
-var emailTemplates = require('./compiledEmails')(handlebars);
 
 var configurePassport = require('./config/passport').configure
   , configureMongoose = require('./config/mongoose').configure;
@@ -22,14 +17,6 @@ var configureUserRoutes = require('./routes/user').configure
 
 //load configurations
 var config = require('./config.json');
-
-//configure stripe
-var stripeConfig = config.stripe
-  , stripe = require('stripe')(stripeConfig.test_api_key); 
-
-//configure sendgrid
-var sgConfig = config.sendgrid
-  , sendgrid = require('sendgrid')(sgConfig.api_user, sgConfig.api_key);
 
 //configure express
 var app = express()
@@ -43,10 +30,7 @@ app.engine('handlebars', cons.handlebars);
 app.set('port', process.env.PORT || 3000)
   .set('views', path.join(__dirname + "/views/"))
   .set('view engine', 'handlebars')
-  .set('sendgrid', sendgrid)
-  .set('stripe', stripe)
-  .set('passport', passport)
-  .set('emailTemplates', emailTemplates);
+  .set('passport', passport);
 
 //configure middleware stack for express
 app.use(express.favicon())
