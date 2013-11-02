@@ -1,19 +1,7 @@
-var _ = require('lodash')
-  , Q = require('q')
-  , User = require('../../data_models/user').User
-  , bcryptPromises = require('../../libs/bcrypt-promises')
-  , comparePromised = bcryptPromises.comparePromised
-  , hashPromised = bcryptPromises.hashPromised
+var User = require('../../data_models/user').User
   , returnUser = require('./utilities').returnUser
   , checkIfUser = require('./utilities').checkIfUser
   , sendError = require('../../utils/http').sendError;
-
-function checkIfMatches (isMatch) {
-  if (!isMatch) { 
-    throw new Error("Incorrect Password.");
-  } 
-  return isMatch;
-}
 
 //NOTE: if we are changing password, we should reset temporary_password
 module.exports = function (req, res) {

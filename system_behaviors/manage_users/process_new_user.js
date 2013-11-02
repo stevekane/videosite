@@ -1,9 +1,9 @@
-var User = require('../../data_models/user').User
+var userManager = require('../../systems/user_management') 
   , utilities = require('./utilities')
   , sendError = require('../../utils/http').sendError
   , sendEmail = require('../../systems/email').sendEmail
   , handlebars = require('handlebars')
-  , newUserTemplate = require('../../compiledEmails')(handlebars).signup;
+  , signupTemplate = require('../../compiledEmails')(handlebars).signup;
 
 var processNewUser = function (req, res) {
   var data = req.body;
@@ -11,13 +11,13 @@ var processNewUser = function (req, res) {
     from: "kanesteven@gmail.com",
     to: data.email,
     subject: "Welcome to embercasts!",
-    html: emailTemplate ? emailTemplate() : "Welcome!"
+    html: signupTemplate ? signupTemplate() : "Welcome!"
   };
 
-  User.findOnePromised({email: data.email})
+  userManager.findOne({email: data.email})
   .then(utilities.handleExistingUser)
   .then(function () {
-    return User.createPromised(data);
+    return userManager.create(data);
   })
   .then(utilities.loginUser(req))
   .then(utilities.returnUser(res))

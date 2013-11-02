@@ -1,9 +1,11 @@
 var Q = require('q')
   , _ = require('lodash')
-  , User = require('data_models').User;
+  , User = require('../data_models/user').User;
 
 //Sanitize the model provided by mongoose for return
 var formatUser = function (data) {
+  if (!data) { return null; }
+
   var user = _.clone(data);
   user.id = data._id;
   delete user.password;
@@ -132,7 +134,7 @@ module.exports.findByIdAndRemove = function (id) {
 module.exports.findByIdAndUpdate = function (id, hash) {
   var updatePromise = Q.defer();
 
-  User.findByIdAndUpdatePromised(id, hash);
+  User.findByIdAndUpdatePromised(id, hash)
   .then(function (user) {
     updatePromise.resolve(formatUser(user));
   })

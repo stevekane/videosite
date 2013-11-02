@@ -1,6 +1,4 @@
-var _ = require('lodash')
-  , Q = require('q')
-  , User = require('../../data_models/user').User
+var User = require('../../data_models/user').User
   , utilities = require('./utilities')
   , handleExistingUser = utilities.handleExistingUser
   , refreshSession = require('../manage_sessions/refresh')
@@ -8,16 +6,16 @@ var _ = require('lodash')
   , sendError = require('../../utils/http').sendError;
 
 module.exports = function (req, res) {
-  var newData = req.body.user
+  var email = req.body.user.email
     , user = req.user;
 
-  User.findOnePromised({email: newData.email})
+  User.findOnePromised({email: email})
   .then(handleExistingUser)
   .then(function () { 
     return User.findByIdPromised(user._id); 
   })
   .then(function (user) {
-    return user.changePropAndSavePromised("email", newData.email);
+    return user.changePropAndSavePromised("email", email);
   })
   .then(refreshSession(req))
   .then(returnUser(res))
