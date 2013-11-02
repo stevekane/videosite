@@ -1,6 +1,6 @@
 var Q = require('q')
   , _ = require('lodash')
-  , User = require('./mongo/user').User;
+  , User = require('./mongo/User');
 
 //Sanitize the model provided by mongoose for return
 var formatModel = function (data) {
@@ -15,67 +15,87 @@ var formatModel = function (data) {
   return model;
 }
 
+var formatModels = function (array) {
+  return _.map(array, formatModel);
+}
+
+var getType = function (type) {
+  types = {
+    user: User, 
+  }
+
+  if (!types[type]) {
+    throw new Error("Invalid type " + type); 
+  }
+  
+  return types[type];
+}
+
+//READ
+var find = function (type, hash) {
+  var findPromise = Q.defer();
+
+  getType(type)
+  .findPromised(hash)
+  .then(formatModels)
+  .then(findPromise.resolve)
+  .fail(findPromise.reject);
+
+  return findPromise.promise;
+}
+
+var findById = function (type, id) {
+  var findPromise = Q.defer();
+
+  if (!id) {
+    throw new Error("No id provided");
+  }
+
+  getType(type)
+  .findByIdPromised(id)
+  .then(formatModel)
+  .then(findPromise.resolve)
+  .fail(findPromise.reject);
+
+  return findPromise.promise;
+}
+
+var findOne = function (type, hash) {
+  var findPromise = Q.defer();
+
+  getType(type)
+  .findOnePromised(hash)
+  .then(formatModel)
+  .then(findPromise.resolve)
+  .fail(findPromise.reject);
+
+  return findPromise.promise;
+}
+
 //CREATE
-module.exports.create = function (data) {
+var create = function (type, hash) {
   var createPromise = Q.defer();
   
-  User.createPromised(data)
-  .then(function (user) {
-    createPromise.resolve(formatModel(user));
-  })
-  .fail(function (err) {
-    createPromise.reject(err); 
-  })
+  getType(type)
+  .createPromised(data)
+  .then(formatModel)
+  .then(createPromise.resolve)
+  .fail(createPromise.reject);
 
   return createPromise.promise;
 }
 
-//READ
-module.exports.count = function (hash) {
-  return User.countPromised(hash); 
+var confirmFoundModel = function (model) {
+  if (!model) {
+    throw new Error("No model found!"); 
+  }
+  return model;
 }
 
-module.exports.findById = function (id) {
-  var findPromise = Q.defer();
-
-  User.findByIdPromised(id)
-  .then(function (user) {
-    findPromise.resolve(formatModel(user)); 
-  })
-  .fail(function (err) {
-    findPromise.reject(err); 
-  })
-
-  return findPromise.promise;
-}
-
-module.exports.findMany = function (conditions) {
-  var findPromise = Q.defer();
-
-  User.findPromised(conditions)
-  .then(function (user) {
-    findPromise.resolve(formatModel(user)); 
-  })
-  .fail(function (err) {
-    findPromise.reject(err); 
-  })
-
-  return findPromise.promise;
-}
-
-module.exports.findOne = function (conditions) {
-  var findPromise = Q.defer();
-
-  User.findOnePromised(conditions)
-  .then(function (user) {
-    findPromise.resolve(formatModel(user)); 
-  })
-  .fail(function (err) {
-    findPromise.reject(err); 
-  })
-
-  return findPromise.promise;
-}
+//helpers
+var updateProperties = _.curry(function (hash, object) {
+  return _.assign(object, hash); 
+});
 
 //UPDATE
 /*
@@ -83,99 +103,53 @@ We use find, update, and save in order to get our pre save
 hooks to fire (includes some nifty shit like timestamping and 
 encryption
 */
-module.exports.updateById = function (id, hash) {
+var updateById = function (type, id, hash) {
   var updatePromise = Q.defer();
 
   if (!id) {
     throw new Error("No id provided");
   }
 
-  User.findByIdPromised(id)
-  .then(function (user) {
-    //here we assign the k/v pairs to the retrieved model
-    _.assign(user, hash);
-    return user.savePromised();
+  getType(type)
+  .findByIdPromised(id)
+  .then(confirmFoundModel)
+  .then(updateProperties)
+  .then(function (model) {
+    return model.savePromised();
   })
-  .then(function (user) {
-    console.log('post save', user);
-    return updatePromise.resolve(formatModel(user));  
-  })
-  .fail(function (err) {
-    updatePromise.reject(err); 
-  })
+  .then(formatModel)
+  .then(updatePromise.resolve)
+  .fail(updatePromise.reject);
 
   return updatePromise.promise;
 }
 
 //DELETE
-module.exports.remove = function (hash) {
+var removeById = function (type, id) {
   var removePromise = Q.defer();
 
-  User.removePromised(hash)
-  .then(function (user) {
-    removePromise.resolve(formatModel(user));
+  if (!id) {
+    throw new Error("No id provided");
+  }
+
+  getType(type)
+  .findByIdPromised(id)
+  .then(confirmFoundModel)
+  .then(function (model) {
+    return model.removePromised();
   })
-  .fail(function (err) {
-    removePromise.reject(err);
-  })
+  .then(formatModel)
+  .then(removePromise.resolve)
+  .fail(removePromise.reject);
 
   return removePromise.promise;
 }
 
-//COMBINED?
-module.exports.findByIdAndRemove = function (id) {
-  var removePromise = Q.defer();
-
-  User.findByIdAndRemovePromised(id)
-  .then(function (user) {
-    removePromise.resolve(formatModel(user));
-  })
-  .fail(function (err) {
-    removePromise.reject(err);
-  })
-
-  return removePromise.promise;
-}
-
-//NOTE, hash is treated as "set" operators per mongoose
-module.exports.findByIdAndUpdate = function (id, hash) {
-  var updatePromise = Q.defer();
-
-  User.findByIdAndUpdatePromised(id, hash)
-  .then(function (user) {
-    updatePromise.resolve(formatModel(user));
-  })
-  .fail(function (err) {
-    updatePromise.reject(err);
-  })
-
-  return updatePromise.promise;
-}
-
-module.exports.findOneAndUpdate = function (conditions, hash) {
-  var updatePromise = Q.defer();
-
-  User.findOneAndUpdatePromised(conditions, hash)
-  .then(function (user) {
-    updatePromise.resolve(formatModel(user));
-  })
-  .fail(function (err) {
-    updatePromise.reject(err);
-  })
-
-  return updatePromise.promise;
-}
-
-module.exports.findOneAndRemove = function (conditions) {
-  var removePromise = Q.defer();
-
-  User.findOneAndRemove(conditions)
-  .then(function (user) {
-    removePromise.resolve(formatModel(user));
-  })
-  .fail(function (err) {
-    removePromise.reject(err);
-  })
-
-  return removePromise.promise;
+module.exports = {
+  find: find,
+  findOne: findOne,
+  findById: findById,
+  create: create,
+  updateById: updateById,
+  removeById: removeById
 }
