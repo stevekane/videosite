@@ -3,17 +3,16 @@ var Q = require('q')
   , User = require('../data_models/user').User;
 
 //Sanitize the model provided by mongoose for return
-var formatUser = function (data) {
+var formatModel = function (data) {
+
   if (!data) { return null; }
 
-  var user = _.clone(data);
-  user.id = data._id;
-  delete user.password;
-  delete user.temporary_password;
-  delete user.__v;
-  delete user._id;
-  console.log('cleaned user is', user);
-  return user;
+  var model = _.clone(data.toObject ? data.toObject() : data);
+  model.id = data._id;
+  delete model.__v;
+  delete model._id;
+
+  return model;
 }
 
 //CREATE
@@ -22,7 +21,7 @@ module.exports.create = function (data) {
   
   User.createPromised(data)
   .then(function (user) {
-    createPromise.resolve(formatUser(user));
+    createPromise.resolve(formatModel(user));
   })
   .fail(function (err) {
     createPromise.reject(err); 
@@ -41,7 +40,7 @@ module.exports.findById = function (id) {
 
   User.findByIdPromised(id)
   .then(function (user) {
-    findPromise.resolve(formatUser(user)); 
+    findPromise.resolve(formatModel(user)); 
   })
   .fail(function (err) {
     findPromise.reject(err); 
@@ -55,7 +54,7 @@ module.exports.findMany = function (conditions) {
 
   User.findPromised(conditions)
   .then(function (user) {
-    findPromise.resolve(formatUser(user)); 
+    findPromise.resolve(formatModel(user)); 
   })
   .fail(function (err) {
     findPromise.reject(err); 
@@ -69,7 +68,7 @@ module.exports.findOne = function (conditions) {
 
   User.findOnePromised(conditions)
   .then(function (user) {
-    findPromise.resolve(formatUser(user)); 
+    findPromise.resolve(formatModel(user)); 
   })
   .fail(function (err) {
     findPromise.reject(err); 
@@ -79,34 +78,42 @@ module.exports.findOne = function (conditions) {
 }
 
 //UPDATE
-module.exports.save = function (hash) {
-  var savePromise = Q.defer();
+/*
+We use find, update, and save in order to get our pre save
+hooks to fire (includes some nifty shit like timestamping and 
+encryption
+*/
+module.exports.updateById = function (id, hash) {
+  var updatePromise = Q.defer();
 
-  if (!hash.id) {
-    throw new Error("No id provided in hash" + hash);
+  if (!id) {
+    throw new Error("No id provided");
   }
 
-  //findById, then save, then return saved user
   User.findByIdPromised(id)
   .then(function (user) {
-    return user.savePromised(); 
+    //here we assign the k/v pairs to the retrieved model
+    _.assign(user, hash);
+    return user.savePromised();
   })
   .then(function (user) {
-    savePromise.resolve(formatUser(user));
+    console.log('post save', user);
+    return updatePromise.resolve(formatModel(user));  
   })
   .fail(function (err) {
-    savePromise.reject(err);
+    updatePromise.reject(err); 
   })
 
-  return savePromise.promise;
+  return updatePromise.promise;
 }
 
+//DELETE
 module.exports.remove = function (hash) {
   var removePromise = Q.defer();
 
   User.removePromised(hash)
   .then(function (user) {
-    removePromise.resolve(formatUser(user));
+    removePromise.resolve(formatModel(user));
   })
   .fail(function (err) {
     removePromise.reject(err);
@@ -121,7 +128,7 @@ module.exports.findByIdAndRemove = function (id) {
 
   User.findByIdAndRemovePromised(id)
   .then(function (user) {
-    removePromise.resolve(formatUser(user));
+    removePromise.resolve(formatModel(user));
   })
   .fail(function (err) {
     removePromise.reject(err);
@@ -136,7 +143,7 @@ module.exports.findByIdAndUpdate = function (id, hash) {
 
   User.findByIdAndUpdatePromised(id, hash)
   .then(function (user) {
-    updatePromise.resolve(formatUser(user));
+    updatePromise.resolve(formatModel(user));
   })
   .fail(function (err) {
     updatePromise.reject(err);
@@ -150,7 +157,7 @@ module.exports.findOneAndUpdate = function (conditions, hash) {
 
   User.findOneAndUpdatePromised(conditions, hash)
   .then(function (user) {
-    updatePromise.resolve(formatUser(user));
+    updatePromise.resolve(formatModel(user));
   })
   .fail(function (err) {
     updatePromise.reject(err);
@@ -164,7 +171,7 @@ module.exports.findOneAndRemove = function (conditions) {
 
   User.findOneAndRemove(conditions)
   .then(function (user) {
-    removePromise.resolve(formatUser(user));
+    removePromise.resolve(formatModel(user));
   })
   .fail(function (err) {
     removePromise.reject(err);

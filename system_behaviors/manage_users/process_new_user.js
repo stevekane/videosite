@@ -1,5 +1,8 @@
 var userManager = require('../../systems/user_management') 
   , utilities = require('./utilities')
+  , loginUser = utilities.loginUser
+  , handleExistingUser = utilities.handleExistingUser
+  , returnUser = utilities.returnUser
   , sendError = require('../../utils/http').sendError
   , sendEmail = require('../../systems/email').sendEmail
   , handlebars = require('handlebars')
@@ -15,12 +18,12 @@ var processNewUser = function (req, res) {
   };
 
   userManager.findOne({email: data.email})
-  .then(utilities.handleExistingUser)
+  .then(handleExistingUser)
   .then(function () {
     return userManager.create(data);
   })
-  .then(utilities.loginUser(req))
-  .then(utilities.returnUser(res))
+  .then(loginUser(req))
+  .then(returnUser(res))
   .fail(sendError(res))
   .then(function () {
     return config;

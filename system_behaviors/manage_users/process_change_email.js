@@ -1,21 +1,19 @@
-var User = require('../../data_models/user').User
+var userManager = require('../../systems/user_management')
   , utilities = require('./utilities')
   , handleExistingUser = utilities.handleExistingUser
-  , refreshSession = require('../manage_sessions/refresh')
   , returnUser = utilities.returnUser
+  , refreshSession = require('../manage_sessions/refresh')
   , sendError = require('../../utils/http').sendError;
 
 module.exports = function (req, res) {
-  var email = req.body.user.email
+  var newEmail = req.body.user.email
     , user = req.user;
 
-  User.findOnePromised({email: email})
+  //here we check if there is already a user by the new email
+  User.findOnePromised({email: newEmail})
   .then(handleExistingUser)
   .then(function () { 
-    return User.findByIdPromised(user._id); 
-  })
-  .then(function (user) {
-    return user.changePropAndSavePromised("email", email);
+    return userManager.findByIdAndUpdate(user.id, {email: newEmail});
   })
   .then(refreshSession(req))
   .then(returnUser(res))
