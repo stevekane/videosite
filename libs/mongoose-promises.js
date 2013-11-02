@@ -15,22 +15,6 @@ var promisifyMongoose = function (schema, options) {
     return promisify(this, "save");
   };
 
-  schema.methods.changePropAndSavePromised = function (propName, value) {
-    var savePromise = Q.defer()
-      , self = this;
-    
-    this[propName] = value;
-    promisify(this, "save")
-    .then(function () {
-      savePromise.resolve(self); 
-    })
-    .fail(function (err) {
-      savePromise.reject(err); 
-    });
-
-    return savePromise.promise;
-  };
-
   schema.statics.countPromised = function (hash) {
     return promisify(this, "count", hash); 
   };
