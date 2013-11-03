@@ -38,6 +38,7 @@
     "sendgrid": "~0.3.1",
     "mongoose-timestamp": "~0.1.1",
     "grunt-contrib-handlebars": "~0.5.11",
-    "node-uuid": "~1.4.1"
+    "node-uuid": "~1.4.1",
+    "rsvp": "~2.0.4"
   }
 }

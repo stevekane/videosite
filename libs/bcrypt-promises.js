@@ -2,10 +2,10 @@ var bcrypt = require('bcrypt')
   , Q = require('q')
   , callWithPromise = Q.ninvoke;
 
-exports.comparePromised = function (candidate, current) {
+exports.comparePromised = function (current, candidate) {
   return callWithPromise(bcrypt, "compare", candidate, current);
 };
 
-exports.hashPromised = function (value, salt) {
+exports.hashPromised = function (salt, value) {
   return callWithPromise(bcrypt, "hash", value, salt);
 }
