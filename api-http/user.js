@@ -5,7 +5,7 @@ var processNewUser = require('./user/processNewUser')
 
 //create, update, delete, find
 module.exports = function (app) {
-  app.post("/user", processNewUser);
+  app.post("/user/signup", processNewUser);
   app.post("/user/changeEmail", processChangeEmail);
   app.post("/user/changePassword", processChangePassword);
   app.post("/user/resetPassword", processResetPassword);

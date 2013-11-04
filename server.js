@@ -2,8 +2,8 @@ var http = require('http')
   , express = require('express')
   , passport = require('passport')
   , configurePassport = require('./config/passport').configure
-  , configureAppRoutes = require('./routes/app')
-  , configureUserRoutes = require('./routes/user')
+  , configureAppRoutes = require('./routes-http/app')
+  , configureUserRoutes = require('./api-http/user')
   , config = require('./config/config.json');
 
 //WE ARE USING EXPRESS AND PASSPORT AS OUR ONLY "hard dependencies"
