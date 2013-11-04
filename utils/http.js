@@ -3,7 +3,8 @@ var _ = require('lodash');
 //takes a response object
 module.exports.sendError = _.curry(function (res, err) {
   var message = (err instanceof Error) ? err.message : err; 
-  console.log("sendError: ", message);
+
+  console.log("sendError: ", err.stack);
   return res.status(400).json({error: message});
 });
 
@@ -19,6 +20,7 @@ module.exports.sendConfirmation = function (res) {
 module.exports.returnByType = _.curry(function (res, type, data) {
   var dataCopy = _.clone(data)
     , json = {};
+
   delete dataCopy.password;
   delete dataCopy.temporary_password;
   json[type] = dataCopy;
