@@ -1,6 +1,10 @@
 var http = require('http')
   , express = require('express')
-  , configureAppRoutes = require('./routes/app')
+  , passport = require('passport')
+  , configurePassport = require('./config/passport').configure
+  , configureAppRoutes = require('./routes/app');
+
+var passport = configurePassport(passport);
 
 //load configurations
 var config = require('./config.json');
@@ -19,8 +23,8 @@ app.use(express.favicon())
   .use(express.bodyParser())
   .use(express.cookieParser())
   .use(express.session(SESSION_CONFIG))
-  //.use(passport.initialize())
-  //.use(passport.session())
+  .use(passport.initialize())
+  .use(passport.session())
   .use(express.static(__dirname + "/public"));
 
 configureAppRoutes(app);

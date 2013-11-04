@@ -1,9 +1,7 @@
-var bcrypt = require('bcrypt')
+var Q = require('q')
   , LocalStrategy = require('passport-local').Strategy
-  , User = require('../data_models/user').User
-  , Q = require('q')
-  , mustMatchPromised = require('../libs/bcrypt-promises').mustMatchPromised
-  , callWithPromise = Q.ninvoke;
+  , compare = require('../libs/bcrypt-promises').comparePromised
+  , persistence = require('../systems/persistence');
 
 function handleNoUser(user) {
   if (!user) {
@@ -12,22 +10,25 @@ function handleNoUser(user) {
   return user;
 }
 
-//NOTE: we used passport done since
-//strategy for use with Mongoose
 function mongoStrategy (email, password, passportDone) {  
-  User.findOnePromised({email: email})
+
+  persistence.findOne("user", {email: email})
   .then(handleNoUser)
   .then(function (user) {
-    
-    user.matchPasswordOrTemporaryPromised(password)
-    .then(function (user) {
-      passportDone(null, user);
+    var comparisons = [
+      compare(password, user.password),
+      compare(password, user.temporary_password)
+    ];
+
+    //compare against pw and temp pw
+    return Q.allSettled(comparisons)
+    .spread(function (pwMatch, tmpMatch) {
+      if (pwMatch || tmpMatch) {
+        passportDone(null, user); 
+      } else {
+        passportDone(null, false); 
+      }
     })
-    .fail(function (err) {
-      console.log(err);
-      passportDone(null, false, err.message);
-    })
-    .done();
   })
   .fail(function (err) {
     console.log(err);
@@ -50,11 +51,12 @@ exports.configure = function (passport, options) {
   passport.serializeUser(serialize);
   passport.deserializeUser(deserializeMongo);
   passport.verifyAuth = function (req, res, next) {
-    var noUser = "no user currently logged in";
     if (req.isAuthenticated()) {
       return next();
     } else {
-      return res.status(400).send({message: noUser});
+      return res.status(400).send({
+        message: "No user session found."
+      });
     }
   }
   return passport;
