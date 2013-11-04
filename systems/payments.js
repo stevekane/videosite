@@ -1,4 +1,4 @@
-var stripeConfig = require('../config.json').stripe
+var stripeConfig = require('../config/config.json').stripe
   , stripe = require('stripe')(stripeConfig.test_api_key); 
 
 var createCustomer = function (data) {

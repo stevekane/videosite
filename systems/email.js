@@ -1,6 +1,6 @@
 var Q = require('q')
   , callWithPromise = Q.ninvoke
-  , sgConfig = require('../config.json').sendgrid
+  , sgConfig = require('../config/config.json').sendgrid
   , sendgrid = require('sendgrid')(sgConfig.api_user, sgConfig.api_key);
 
 //send an email with provided text and return a promise

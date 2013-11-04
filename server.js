@@ -3,20 +3,16 @@ var http = require('http')
   , passport = require('passport')
   , configurePassport = require('./config/passport').configure
   , configureAppRoutes = require('./routes/app')
-  //load configurations
   , config = require('./config/config.json');
 
-configurePassport(passport);
-
-//configure express
+//WE ARE USING EXPRESS AND PASSPORT AS OUR ONLY "hard dependencies"
 var app = express()
   , SESSION_CONFIG = { secret: config.session.secret }
   , server = http.createServer(app);
 
-//set some values on the "global" express app object
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 3000)
+  .set("passport", passport);
 
-//configure middleware stack for express
 app.use(express.favicon())
   .use(express.methodOverride())
   .use(express.bodyParser())
@@ -26,9 +22,10 @@ app.use(express.favicon())
   .use(passport.session())
   .use(express.static(__dirname + "/public"));
 
+//NOTE: configure passport mutates the passport object
+configurePassport(passport);
 configureAppRoutes(app);
 
-//start the server
 server.listen(app.get('port'), function (err) {
   console.log("connected!");
 });

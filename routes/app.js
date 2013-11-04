@@ -7,4 +7,5 @@ function renderApp (req, res) {
 
 module.exports = function (app) {
   app.get('/', renderApp); 
+  return app;
 }
