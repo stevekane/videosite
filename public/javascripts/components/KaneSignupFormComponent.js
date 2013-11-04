@@ -11,7 +11,7 @@ App.KaneSignupFormComponent = App.KaneBaseFormComponent.extend({
     confirmPassword: ""
   },
 
-  url: "/user/create",
+  url: "/user/signup",
 
   fieldValidations: [
     validateEmail,

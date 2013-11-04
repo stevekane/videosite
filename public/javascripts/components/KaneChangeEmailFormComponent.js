@@ -5,6 +5,7 @@ var emailsMatch = Validations.fieldsMatch("email", "confirmEmail")
 App.KaneChangeEmailFormComponent = App.KaneBaseFormComponent.extend({
 
   hash: {
+    newEmail: "",
     email: "",
     confirmEmail: ""
   },
@@ -12,7 +13,7 @@ App.KaneChangeEmailFormComponent = App.KaneBaseFormComponent.extend({
   url: "",
 
   fieldValidations: [
-    checkIfBlank("email"),
+    checkIfBlank("newEmail"),
     checkIfBlank("confirmEmail"),
     validateEmail
   ],
@@ -21,10 +22,19 @@ App.KaneChangeEmailFormComponent = App.KaneBaseFormComponent.extend({
     emailsMatch
   ],
 
+  //TODO: SHOULD LOAD THE UPDATED USER
   //override the normal submit method (not using url)
   submit: function (url, hash) {
     var user = this.get('user');
-    return user.set('email', hash.email).save();
+    var data = {
+      id: user.get('id'),
+      email: hash.email,
+      newEmail: hash.newEmail
+    };
+    return Ember.$.post("/user/changeEmail", data)
+    .then(function (user) {
+      console.log("new user is", user); 
+    })
   }
   
 });
