@@ -5,7 +5,9 @@ var Q = require('q')
 //Sanitize the model provided by mongoose for return
 var formatModel = function (data) {
 
-  if (!data) { return null; }
+  if (!data) {
+    throw new Error("No data provided to formatModel");
+  }
 
   var model = _.clone(data.toObject ? data.toObject() : data);
   model.id = data._id;

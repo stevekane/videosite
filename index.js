@@ -2,12 +2,11 @@ var http = require('http')
   , express = require('express')
   , passport = require('passport')
   , configurePassport = require('./config/passport').configure
-  , configureAppRoutes = require('./routes/app');
+  , configureAppRoutes = require('./routes/app')
+  //load configurations
+  , config = require('./config/config.json');
 
-var passport = configurePassport(passport);
-
-//load configurations
-var config = require('./config.json');
+configurePassport(passport);
 
 //configure express
 var app = express()
