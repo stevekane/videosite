@@ -2,7 +2,7 @@
   "name": "videosite",
   "version": "0.0.0",
   "description": "Ember.js video site",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
