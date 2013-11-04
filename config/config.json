@@ -29,6 +29,10 @@
     "secret": "yiss" 
   },
 
-  "persistence": "mongo"
+  "persistence": "mongo",
+
+  "mongo": {
+    "url": "mongodb://localhost:27017/videosite" 
+  }
 
 }

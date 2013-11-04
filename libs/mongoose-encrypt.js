@@ -18,21 +18,26 @@ module.exports = function (schema, options) {
   schema.pre("save", function (next) {
     var user = this
       , keys = options.keys || []
-      , hashObject = _.pick(user, keys);
+      , hashObject = _.pick(user, keys)
+      , modifiedKeys = _.any(keys, function (key) {
+        return user.isModified(key); 
+      });
     
     if (0 === keys.length) {
       return next();
     }
 
     //check if any of the provided fields were modified
-    if (!_.any(keys, user.isModified)) {
+    if (!modifiedKeys) {
       return next(); 
     }
 
     //TODO: this is sync atm because I cannot fucking figure out
-    //how to loop over the keys properly...fuck
+    //how to properly loop over the keys asyncronously ...fuck
     _.each(keys, function (key) {
-      user[key] = bcrypt.hashSync(user[key], SALT_WORK_FACTOR);
+      if (user[key]) {
+        user[key] = bcrypt.hashSync(user[key], SALT_WORK_FACTOR);
+      }
     });
 
     return next();

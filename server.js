@@ -3,6 +3,7 @@ var http = require('http')
   , passport = require('passport')
   , configurePassport = require('./config/passport').configure
   , configureAppRoutes = require('./routes/app')
+  , configureUserRoutes = require('./routes/user')
   , config = require('./config/config.json');
 
 //WE ARE USING EXPRESS AND PASSPORT AS OUR ONLY "hard dependencies"
@@ -25,6 +26,7 @@ app.use(express.favicon())
 //NOTE: configure passport mutates the passport object
 configurePassport(passport);
 configureAppRoutes(app);
+configureUserRoutes(app);
 
 server.listen(app.get('port'), function (err) {
   console.log("connected!");
