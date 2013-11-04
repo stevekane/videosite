@@ -102,7 +102,7 @@ var confirmFoundModel = function (model) {
 
 //helpers
 var updateProperties = _.curry(function (hash, object) {
-  return _.assign(object, hash); 
+  return _.assign(object, hash);
 });
 
 //UPDATE
@@ -121,7 +121,7 @@ var updateById = function (type, id, hash) {
   getType(type)
   .findByIdPromised(id)
   .then(confirmFoundModel)
-  .then(updateProperties)
+  .then(updateProperties(hash))
   .then(function (model) {
     return model.savePromised();
   })

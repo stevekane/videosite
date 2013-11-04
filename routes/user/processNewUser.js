@@ -2,7 +2,7 @@ var sendError = require('../../utils/http').sendError
   , returnByType = require('../../utils/http').returnByType
   , sendEmail = require('../../systems/email').sendEmail
   , template = require('../../templates/emails').signup
-  , userManager = require('../../systems/persistence');
+  , persistence = require('../../systems/persistence');
 
 var throwIfUser = function (user) {
   if (user) {
@@ -13,20 +13,20 @@ var throwIfUser = function (user) {
 
 /*
 Parse out new user data from request
-Build email template
 Check if user by that email already exists
 Return error stating "user already exists"
 Create new User with provided data
+Build email template
 Send email to their email address
 Return new User object
 */
 module.exports = function (req, res) {   
   var data = req.body;
 
-  userManager.findOne("user", {email: data.email})
+  persistence.findOne("user", {email: data.email})
   .then(throwIfUser)
   .then(function () {
-    return userManager.create("user", data)
+    return persistence.create("user", data)
     .then(function (newUser) {
       var emailData = {
         to: newUser.email,
@@ -39,7 +39,7 @@ module.exports = function (req, res) {
       .then(function () {
         return returnByType(res, "user", newUser);
       });
-    })
+    });
   })
   .fail(sendError(res))
   .done();

@@ -2,6 +2,15 @@ module.exports = function(Handlebars) {
 
 this["JST"] = this["JST"] || {};
 
+this["JST"]["changeEmail"] = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
+  this.compilerInfo = [4,'>= 1.0.0'];
+helpers = this.merge(helpers, Handlebars.helpers); data = data || {};
+  
+
+
+  return "<h1>You changed your email????</h1>\n";
+  });
+
 this["JST"]["signup"] = Handlebars.template(function (Handlebars,depth0,helpers,partials,data) {
   this.compilerInfo = [4,'>= 1.0.0'];
 helpers = this.merge(helpers, Handlebars.helpers); data = data || {};

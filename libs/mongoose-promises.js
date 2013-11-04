@@ -11,8 +11,18 @@ var promisifyMongoose = function (schema, options) {
     return promisify(this, "remove");
   };
 
+  //Mongoose spec returns an array here
+  //We want the first element which is the model
   schema.methods.savePromised = function () {
-    return promisify(this, "save");
+    var savePromise = Q.defer();
+
+    promisify(this, "save")
+    .then(function (array) {
+      return savePromise.resolve(array[0]); 
+    })
+    .fail(savePromise.reject)
+
+    return savePromise.promise;
   };
 
   schema.statics.countPromised = function (hash) {
