@@ -2,14 +2,9 @@ var sendError = require('../../utils/http').sendError
   , returnByType = require('../../utils/http').returnByType
   , sendEmail = require('../../systems/email').sendEmail
   , template = require('../../templates/emails').changeEmail
-  , persistence = require('../../systems/persistence');
-
-var throwIfUser = function (user) {
-  if (user) {
-    throw new Error("User already exists with that email"); 
-  }
-  return true;
-}
+  , persistence = require('../../systems/persistence')
+  , throwIfFound = require('../../utils/promises').throwIfFound
+  , throwIfMissing = require('../../utils/promises').throwIfMissing;
 
 /*
 Parse out change data from request
@@ -26,12 +21,13 @@ module.exports = function (req, res) {
   var data = req.body;
 
   persistence.findOne("user", {email: data.newEmail})
-  .then(throwIfUser)
+  .then(throwIfFound("User already exists with that email"))
   //TODO: The user.id could probably be taken from the session directly
   //this would save this somewhat pointless persistence lookup
   .then(function () {
     return persistence.findOne("user", {email: data.email});
   })
+  .then(throwIfMissing("No user found for provided email"))
   .then(function (user) {
     return persistence.updateById("user", user.id, {email: data.newEmail})
     .then(function (updatedUser) {
