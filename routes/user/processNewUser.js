@@ -1,11 +1,8 @@
-var Q = require('q')
-  , _ = require('lodash')
-  , handlebars = require('handlebars')
-  , sendError = require('../../utils/http').sendError
+var sendError = require('../../utils/http').sendError
+  , returnByType = require('../../utils/http').returnByType
   , sendEmail = require('../../systems/email').sendEmail
-  , email = require('../../templates/emails')(handlebars).signup
-  , userManager = require('../../systems/persistence')
-  , callWithPromise = Q.ninvoke;
+  , template = require('../../templates/emails').signup
+  , userManager = require('../../systems/persistence');
 
 var throwIfUser = function (user) {
   if (user) {
@@ -35,12 +32,12 @@ module.exports = function (req, res) {
         to: newUser.email,
         from: "kanesteven@gmail.com",
         subject: "Thanks for registering!",
-        html: email ? email() : "Thanks!"
+        html: template ? template() : "Thanks!"
       };
 
       return sendEmail(emailData)
       .then(function () {
-        return res.send({user: newUser});
+        return returnByType(res, "user", newUser);
       });
     })
   })

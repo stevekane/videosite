@@ -1,5 +1,4 @@
-var handlebars = require('handlebars')
-  , appTemplate = require('../templates/views')(handlebars).app;
+var template = require('../templates/views').app;
 
 function renderApp (req, res) {
   res.send(appTemplate());

@@ -6,10 +6,10 @@ module.exports = (grunt) ->
   grunt.initConfig
 
     #SERVER SIDE STUFF
-    templatesDir: "templates/"
-    viewsCompiled: "views.js"
+    templatesDir: "templates"
+    viewsCompiled: "viewFunctions.js"
     viewsDir: "templates/views"
-    emailsCompiled: "emails.js"
+    emailsCompiled: "emailFunctions.js"
     emailsDir: "templates/emails"
 
     #vendor directory and specific dependencies
@@ -71,7 +71,7 @@ module.exports = (grunt) ->
           processName: (filePath) ->
             return path.basename(filePath, ".handlebars")
         files:
-          "<%= templatesDir %>/views.js": "<%= viewsDir %>/**/*.handlebars"
+          "<%= templatesDir %>/<%= viewsCompiled %>": "<%= viewsDir %>/**/*.handlebars"
 
       emails:
         options:
@@ -79,7 +79,7 @@ module.exports = (grunt) ->
           processName: (filePath) ->
             return path.basename(filePath, ".handlebars")
         files:
-          "<%= templatesDir %>/emails.js": "<%= emailsDir %>/**/*.handlebars"
+          "<%= templatesDir %>/<%= emailsCompiled %>": "<%= emailsDir %>/**/*.handlebars"
 
 
     #FILE WATCHING
