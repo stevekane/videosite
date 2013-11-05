@@ -9,14 +9,15 @@ function localStrategy (email, password, passportDone) {
   persistence.findOne("user", {email: email})
   .then(throwIfMissing("No user found for provided email"))
   .then(function (user) {
-    return compareMultiple(user.password, user.temporary_password, password);
-  })
-  .then(function () {
-    return passportDone(null, user); 
+    return compareMultiple(user.password, user.temporary_password, password)
+    .then(function () {
+      return passportDone(null, user); 
+    });
   })
   .fail(function (err) {
-    console.log(err);
-    passportDone(null, false, err.message)})
+    console.log(err.stack);
+    return passportDone(null, false, err.message);
+  })
   .done();
 } 
 

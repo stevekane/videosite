@@ -44,18 +44,16 @@ App.UserController = Ember.ObjectController.extend({
 
   logout: function (store, optionalURL) {
     var self = this
-      , url = optionalURL ? optionalURL : "user/logout"
+      , url = optionalURL ? optionalURL : "/user/logout"
       , method = "POST";
 
-    return Ember.RSVP.Promise(function (resolve, reject) {
-      Ember.$.ajax(url, method)
-      .then(function () {
-        self.set('content', null);
-        self.transitionToRoute("index");
-      })
-      .fail(function (err) {
-        alert('logout failed!');
-      });
+    Ember.$.post(url)
+    .then(function () {
+      self.set('content', null);
+      self.transitionToRoute("index");
+    })
+    .fail(function (err) {
+      alert('logout failed!');
     });
   }
 
