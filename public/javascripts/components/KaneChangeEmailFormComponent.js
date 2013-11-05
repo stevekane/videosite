@@ -1,12 +1,11 @@
-var emailsMatch = Validations.fieldsMatch("email", "confirmEmail")
-  , validateEmail = Validations.validateEmail("email")
+var emailsMatch = Validations.fieldsMatch("newEmail", "confirmEmail")
+  , validateEmail = Validations.validateEmail("newEmail")
   , checkIfBlank = Validations.checkIfBlank;
  
 App.KaneChangeEmailFormComponent = App.KaneBaseFormComponent.extend({
 
   hash: {
     newEmail: "",
-    email: "",
     confirmEmail: ""
   },
 
@@ -28,13 +27,13 @@ App.KaneChangeEmailFormComponent = App.KaneBaseFormComponent.extend({
     var user = this.get('user');
     var data = {
       id: user.get('id'),
-      email: hash.email,
+      email: user.get('email'),
       newEmail: hash.newEmail
     };
     return Ember.$.post("/user/changeEmail", data)
-    .then(function (user) {
-      console.log("new user is", user); 
-    })
+    .then(function (json) {
+      return json.user; 
+    });
   }
   
 });

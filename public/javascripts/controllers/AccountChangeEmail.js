@@ -7,4 +7,11 @@ App.AccountChangeEmailController = Ember.ObjectController.extend({
 
   content: alias('controllers.user.content'),
 
+  actions: {
+  
+    updateUser: function (user) {
+      this.get('store').push("user", user);     
+    }
+  }
+
 });
