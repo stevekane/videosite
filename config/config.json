@@ -31,6 +31,10 @@
 
   "persistence": "mongo",
 
+  "email": "sendgrid",
+
+  "payments": "stripe",
+
   "mongo": {
     "url": "mongodb://localhost:27017/videosite" 
   }

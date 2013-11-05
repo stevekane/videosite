@@ -1,8 +1,8 @@
-var stripeConfig = require('../config/config.json').stripe
-  , stripe = require('stripe')(stripeConfig.test_api_key); 
-
-var createCustomer = function (data) {
-  return stripe.customers.create(data);
-}
-
-module.exports.createCustomer = createCustomer;
+/*
+This is a proxy to different payment services 
+All methods MUST return promises!
+*/
+module.exports = (function () {
+  var paymentService = require('../config/config.json').payments;
+  return require('./payments/' + paymentService);
+})()
