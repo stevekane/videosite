@@ -3,7 +3,8 @@ var processNewUser = require('./user/processNewUser')
   , processChangePassword = require('./user/processChangePassword')
   , processResetPassword = require('./user/processResetPassword')
   , login = require('./user/login')
-  , logout = require('./user/logout');
+  , logout = require('./user/logout')
+  , restoreSession = require('./user/restoreSession');
 
 //create, update, delete, find
 module.exports = function (app) {
@@ -17,6 +18,7 @@ module.exports = function (app) {
   //session-related endpoints
   app.post("/user/login", authenticate, login);
   app.post("/user/logout", logout);
+  app.get("/user/restore", restoreSession);
 
   return app;   
 }

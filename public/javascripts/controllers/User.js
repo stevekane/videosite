@@ -23,22 +23,20 @@ App.UserController = Ember.ObjectController.extend({
   //fired on app bootup.  used to verify if a user should still be logged in
   restoreSession: function (store, optionalURL) {
     var self = this
-      , url = optionalURL ? optionalURL : "user/restore"
+      , url = optionalURL ? optionalURL : "/user/restore"
       , method = "GET";
 
-    return Ember.RSVP.Promise(function (resolve, reject) {
-      Ember.$.ajax(url, method)
-      .then(function (payload) {
-        if (payload) {
-          newUser = store.push("user", payload.user); 
-          return resolve(newUser);
-        } else {
-          resolve(null); 
-        }
-      })
-      .fail(function (err) {
-        return resolve(null);   
-      });
+    return Ember.$.get(url)
+    .then(function (payload) {
+      if (payload) {
+        var newUser = store.push("user", payload.user); 
+        return newUser;
+      } else {
+        return null; 
+      }
+    })
+    .fail(function (err) {
+      return null;   
     });
   },
 
