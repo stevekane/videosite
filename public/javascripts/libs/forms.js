@@ -26,26 +26,23 @@ Forms.Field = function (value, error) {
 }
 
 Forms.Result = function (fields, passed, error) {
-  this.passed = passed;
   this.fields = fields;
+  this.passed = passed;
   this.error = error;
 }
 
-function findFailures (result) {
-  return !result.passed;
-}
-
-Forms.runLocalValidations = function (validationFunctions, fields) {
-  return _.map(validationFunctions, function (fn) {
-    return fn(fields);   
+Forms.runLocalValidations = function (validations, fields) {
+  return _.map(validations, function (validation) {
+    var passed = validation.fn(fields)
+      , error = passed ? "" : validation.error;
+      
+    return new Forms.Result(validation.fields, passed, error);
   });
 }
 
-//returns an array of results that have errors, else returns false
+//returns true or false depending on whether any results return passed=false
 Forms.checkForErrors = function (results) {
-  var failures = _.filter(results, findFailures);
-
-  return failures.length === 0 ? false : failures;
+  return _.any(results, {passed: false});
 }
 
 //for user in error chains, similar promisified semantics to sync above
@@ -59,6 +56,19 @@ Forms.checkForErrorsPromised = function (results) {
       resolve(results);  
     }
   });
+}
+
+//REWRITE
+Forms.buildFieldErrors = function (results) {
+  return _.chain(results)
+    .filter({passed: false})
+    .map(function (result) {
+      return _.map(result.fields, function (field) {
+        return {field: field, error: result.error}; 
+      })
+    })
+    .flatten()
+    .value();
 }
 
 /*

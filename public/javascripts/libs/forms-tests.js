@@ -5,32 +5,35 @@ var testFields = {
 
 //example of a local Field Validation
 var testFieldVal1 = function (fields) {
-  return new Forms.Result("email", true, "");
+  return true;
 }
 var testFieldVal2 = function (fields) {
-  return new Forms.Result("name", true, "");
+  return true;
 }
 var testFieldVal3 = function (fields) {
-  return new Forms.Result("email", true, "");
+  return true;
 }
 
 var testFieldValidations = [
-  testFieldVal1,
-  testFieldVal2,
-  testFieldVal3
+  {fn: testFieldVal1, error: "first was wrong", fields: ["email"]},
+  {fn: testFieldVal2, error: "second was wrong", fields: ["email", "name"]},
+  {fn: testFieldVal3, error: "third was wrong", fields: ["name"]},
 ];
 
 //example of a local Form Validation
 var testFormVal1 = function (fields) {
-  return new Forms.Result(["name", "email"], true, "");
+  return true;
 }
 
-var testFormValidations = [testFormVal1];
+var testFormValidations = [
+  {fn: testFormVal1, error: "form validation went wack", fields: ["email", "name"]}
+];
 
+//Todo: should be rewritten
 var testRemoteVal1 = function (fields) {
   return Forms.Promise(function (resolve, reject) {
     window.setTimeout(function () { 
-      resolve(new Forms.Result("email", true, ""));
+      resolve(new Forms.Result(["email"], true, ""));
     }, 4);
   });
 }
@@ -50,7 +53,7 @@ function testCycle () {
   var fieldErrors = Forms.checkForErrors(fieldResults);
 
   if (fieldErrors) {
-    console.log("Field errors!", _.pluck(fieldErrors, "error")); 
+    console.log(Forms.buildFieldErrors(fieldResults));
     return;
   }
 
@@ -58,29 +61,33 @@ function testCycle () {
   var formErrors = Forms.checkForErrors(formResults);
 
   if (formErrors) {
-    console.log("Form errors!", _.pluck(formErrors, "error")); 
+    console.log(Forms.buildFieldErrors(formResults));
     return;
   }
 
-  Forms.runRemoteValidations([testRemoteVal1], testFields)
-  .then(Forms.checkForErrorsPromised)
-  .fail(function (remoteErrors) {
-    return Forms.Promise(function (resolve, reject) {
-      console.log("there were remote validation errors", remoteErrors);
-      reject(); 
-    })
-  })
-  .then(function () {
-    return testSubmit(testSubmit, testFields)
-    .then(function () {
-      //Here you would handle form subission success
-      console.log("Success!"); 
-    })
-    .fail(function (err) {
-      //Here you would handle form submission failure
-      console.log(err.message); 
-    })
-  })
+  console.log("local test validations passed");
+  console.log("remote test validations commented out");
+  console.log("test submission commented out");
+
+  //Forms.runRemoteValidations([testRemoteVal1], testFields)
+  //.then(Forms.checkForErrorsPromised)
+  //.fail(function (remoteErrors) {
+  //  return Forms.Promise(function (resolve, reject) {
+  //    console.log("there were remote validation errors", remoteErrors);
+  //    reject(); 
+  //  })
+  //})
+  //.then(function () {
+  //  return testSubmit(testSubmit, testFields)
+  //  .then(function () {
+  //    //Here you would handle form subission success
+  //    console.log("Success!"); 
+  //  })
+  //  .fail(function (err) {
+  //    //Here you would handle form submission failure
+  //    console.log(err.message); 
+  //  })
+  //})
 }
 
 testCycle();

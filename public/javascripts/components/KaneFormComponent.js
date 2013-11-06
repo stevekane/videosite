@@ -37,20 +37,19 @@ When the promise resolves, we will call "onSubmitSuccess", or "onSubmitError"
 
 */
 
-//set errors that apply to single fields
-function setFieldError (fields, results) {
-  results.forEach(function (result) {
-    set(fields, result.fields, result.error);
-  })
+function setFieldErrors (fields, fieldErrors) {
+  fieldErrors.forEach(function (fieldError) {
+    set(fields[fieldError.field], "error", fieldError.error);
+  });
 }
 
-//set errors that apply to multiple fields
-function setFieldErrors (fields, results) {
-  results.forEach(function (result) {
-    result.fields.forEach(function (field) {
-      set(fields, field, result.error);
-    })
-  })
+function resetErrors (fields) {
+  //reset field errors
+  _.each(fields, function (field) {
+    set(field, "error", ""); 
+  });
+  //reset form-wide error
+  set(this, "error", "");
 }
 
 App.KaneFormComponent = Ember.Component.extend({
@@ -75,9 +74,9 @@ App.KaneFormComponent = Ember.Component.extend({
 
   remoteFormValidations: [],
 
-  setFieldError: setFieldError,
-
   setFieldErrors: setFieldErrors,
+
+  resetErrors: resetErrors,
 
   //return a thennable from this
   submitFn: function (hash) {
@@ -97,20 +96,23 @@ App.KaneFormComponent = Ember.Component.extend({
         , localFormVals = this.get('localFormVals')
         , remoteFieldVals = this.get('remoteFieldValidations')
         , remoteFormVals = this.get('removeFormValidations')
-        , fields = this.get('fields');
+        , fields = this.get('fields')
+        , fieldErrors;
+
+      this.resetErrors(fields);
 
       //handle local field validations
       var fieldResults = Forms.runLocalValidations(localFieldVals, fields);
-      var fieldErrors = Forms.checkForErrors(fieldResults);
-      if (fieldErrors) {
-        return this.setFieldError(fields, fieldErrors)
+      if (Forms.checkForErrors(fieldResults)) {
+        fieldErrors = Forms.buildFieldErrors(fieldResults);
+        return this.setFieldErrors(fields, fieldErrors)
       }
 
       //handle local form validations
       var formResults = Forms.runLocalValidations(localFormVals, fields);
-      var formErrors = Forms.checkForErrors(formResults);
-      if (formErrors) {
-        return this.setFieldErrors(fields, formErrors)
+      if (Forms.checkForErrors(formResults)) {
+        fieldErrors = Forms.buildFieldErrors(formResults);
+        return this.setFieldErrors(fields, fieldErrors)
       }
 
       //handle remote field validation
@@ -122,10 +124,15 @@ App.KaneFormComponent = Ember.Component.extend({
       self.disableForm();
       //handle submission
       self.submitFn(fields)
-      .then(self.successHandler)
-      .fail(self.failureHandler)
+      .then(function (response) {
+        self.successHandler.call(self, response);
+      })
+      .fail(function (err) {
+        self.failureHandler.call(self, err);
+      })
       //re-enable the form regardless of outcome
-      .then(self.enableForm, self.enableForm);
+      .then(function () { self.enableForm.call(self) })
+      .fail(function () { self.enableForm.call(self) })
     }, 
   }
 });
