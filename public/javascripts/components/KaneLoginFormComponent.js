@@ -38,7 +38,6 @@ App.KaneLoginFormComponent = App.KaneFormComponent.extend({
   },
 
   failureHandler: function (err) {
-    console.log(err);
     this.set("error", err.message ? err.message : "Login error");
   }
 
