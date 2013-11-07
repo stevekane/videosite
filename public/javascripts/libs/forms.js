@@ -31,7 +31,7 @@ Forms.FieldError = function (field, error) {
   this.error = error;
 }
 
-/*
+/**
 @validations: [Forms.Validation]
 @fields: [Forms.Field]
 @returns: [Forms.Result]
@@ -45,7 +45,7 @@ Forms.runLocalValidations = function (validations, fields) {
   });
 }
 
-/*
+/**
 @validations: [Forms.Validation]
 @fields: [Forms.Field]
 returns Promise
@@ -57,7 +57,7 @@ Forms.runRemoteValidations = function (validations, fields) {
     return fn(fields); 
   });
 
-  return Forms.Promise( function (resolve, reject) {
+  return Forms.Promise(function (resolve, reject) {
     return Forms.allPromises(remotePromises)
     .then(function (results) {
 
@@ -79,7 +79,7 @@ Forms.runRemoteValidations = function (validations, fields) {
   });
 }
 
-/*
+/**
 @results: [Forms.Result]
 @returns: Boolean
 */
@@ -87,7 +87,7 @@ Forms.checkForErrors = function (results) {
   return _.any(results, {passed: false});
 }
 
-/*
+/**
 @results: [Forms.Result]
 @returns: Promise
           @resolvesWith: [Forms.Result]
@@ -95,9 +95,7 @@ Forms.checkForErrors = function (results) {
 */
 Forms.checkForErrorsPromised = function (results) {
   return Forms.Promise(function (resolve, reject) {
-    var remoteErrors = Forms.checkForErrors(results);
-
-    if (remoteErrors) {
+    if (Forms.checkForError(results)) {
       return reject(results); 
     } else {
       return resolve(results);  
@@ -105,7 +103,7 @@ Forms.checkForErrorsPromised = function (results) {
   });
 }
 
-/*
+/**
 @results: [Forms.Result]
 @returns: [Forms.FieldError]
 */
@@ -120,4 +118,3 @@ Forms.buildFieldErrors = function (results) {
     .flatten()
     .value();
 }
-

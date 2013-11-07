@@ -1,39 +1,52 @@
-var emailsMatch = Validations.fieldsMatch("newEmail", "confirmEmail")
-  , validateEmail = Validations.validateEmail("newEmail")
-  , checkIfBlank = Validations.checkIfBlank;
- 
-App.KaneChangeEmailFormComponent = App.KaneBaseFormComponent.extend({
+var isEmailBlank = {
+  fn: Validations.checkIfBlank("newEmail"),
+  error: "Please enter an email ",
+  fields: ["newEmail"]
+}
 
-  hash: {
-    newEmail: "",
-    confirmEmail: ""
+var isConfirmEmailBlank = {
+  fn: Validations.checkIfBlank("confirmEmail"),
+  error: "Please confirm your email",
+  fields: ["confirmEmail"]
+}
+
+var doPasswordsMatch = {
+  fn: Validations.fieldsMatch("newEmail", "confirmEmail"),
+  error: "Email and confirmation must match",
+  fields: ["newEmail", "confirmEmail"]
+}
+ 
+App.KaneChangeEmailFormComponent = App.KaneFormComponent.extend({
+
+  fields: {
+    newEmail: new Forms.Field("", ""),
+    confirmEmail: new Forms.Field("", "")
   },
 
-  url: "",
-
-  fieldValidations: [
-    checkIfBlank("newEmail"),
-    checkIfBlank("confirmEmail"),
-    validateEmail
+  localFieldValidations: [
+    isEmailBlank,
+    isConfirmEmailBlank
   ],
 
-  formValidations: [
-    emailsMatch
+  localFormValidations: [
+    doPasswordsMatch
   ],
 
-  //TODO: SHOULD LOAD THE UPDATED USER
-  //override the normal submit method (not using url)
-  submit: function (url, hash) {
-    var user = this.get('user');
-    var data = {
-      id: user.get('id'),
-      email: user.get('email'),
-      newEmail: hash.newEmail
-    };
-    return Ember.$.post("/user/changeEmail", data)
-    .then(function (json) {
-      return json.user; 
-    });
-  }
-  
+  submitFn: function (hash) {
+    var data = {}
+      , url = "/user/changeEmail";
+
+    data.newEmail = hash.newEmail.value;
+    data.email = 
+    return Ember.$.post(url, data);
+  },
+
+  successHandler: function (response) {
+    this.sendAction("action", response.user);
+  },
+
+  failureHandler: function (err) {
+    set(this, "error", err.responseJSON.message || "Change email failed");
+  },
+
 });

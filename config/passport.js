@@ -35,14 +35,5 @@ exports.configure = function (passport, options) {
   passport.use(new LocalStrategy({usernameField: 'email'}, localStrategy));
   passport.serializeUser(serialize);
   passport.deserializeUser(deserialize);
-  passport.verifyAuth = function (req, res, next) {
-    if (req.isAuthenticated()) {
-      return next();
-    } else {
-      return res.status(400).send({
-        message: "No user session found."
-      });
-    }
-  }
   return passport;
 }

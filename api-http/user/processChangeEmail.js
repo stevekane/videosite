@@ -1,5 +1,6 @@
 var sendError = require('../../utils/http').sendError
   , returnByType = require('../../utils/http').returnByType
+  , refreshSession = require('../../utils/session').refreshSession
   , sendEmail = require('../../systems/email').sendEmail
   , template = require('../../templates/emails').changeEmail
   , persistence = require('../../systems/persistence')
@@ -15,6 +16,7 @@ Return error if none exists "User doesn't exist"
 Update user information with new email
 Build email template
 Send email to their new email address
+Refresh the session!
 Return updated User object
 */
 module.exports = function (req, res) {
@@ -25,11 +27,12 @@ module.exports = function (req, res) {
   //TODO: The user.id could probably be taken from the session directly
   //this would save this somewhat pointless persistence lookup
   .then(function () {
-    return persistence.findOne("user", {email: data.email});
+    return persistence.findOne("user", {email: req.user.email});
   })
   .then(throwIfMissing("No user found for provided email"))
   .then(function (user) {
     return persistence.updateById("user", user.id, {email: data.newEmail})
+    .then(refreshSession(req))
     .then(function (updatedUser) {
       var emailData = {
         to: updatedUser.email,

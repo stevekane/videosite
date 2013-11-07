@@ -11,7 +11,8 @@
       classNames="form-control"
       disabled=disabled
       placeholder="New Email"
-      value=hash.newEmail}}
+      value=fields.newEmail.value}}
+    <small>{{fields.newEmail.error}}</small>
   </div>
 
   <div class="form-group">
@@ -20,14 +21,15 @@
       classNames="form-control"
       disabled=disabled
       placeholder="Confirm New Email"
-      value=hash.confirmEmail}}
+      value=fields.confirmEmail.value}}
+    <small>{{fields.confirmEmail.error}}</small>
   </div>
 
 
   <div class="form-group">
     <button class="btn btn-warning" 
     {{bind-attr disabled="disabled"}}
-    {{action submit hash}}>
+    {{action submit}}>
       Update Email
     </button>
     {{#if error}}

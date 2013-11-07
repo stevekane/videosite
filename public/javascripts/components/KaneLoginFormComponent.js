@@ -42,7 +42,7 @@ App.KaneLoginFormComponent = App.KaneFormComponent.extend({
     this.sendAction("action", response.user);
   },
 
-  failureHandler: function (huh) {
+  failureHandler: function () {
     set(this, "error", "Invalid credentials");
   },
 

@@ -37,9 +37,9 @@ When the promise resolves, we will call "onSubmitSuccess", or "onSubmitError"
 
 */
 
-function setFieldErrors (fields, fieldErrors) {
-  fieldErrors.forEach(function (fieldError) {
-    set(fields[fieldError.field], "error", fieldError.error);
+function setFieldErrors (fields, errors) {
+  errors.forEach(function (error) {
+    set(fields[error.field], "error", error.error);
   });
 }
 
@@ -102,11 +102,12 @@ App.KaneFormComponent = Ember.Component.extend({
     submit: function () {
       var self = this
         , localFieldVals = this.get('localFieldValidations')
-        , localFormVals = this.get('localFormVals')
+        , localFormVals = this.get('localFormValidations')
         , remoteFieldVals = this.get('remoteFieldValidations')
         , remoteFormVals = this.get('removeFormValidations')
         , fields = this.get('fields')
-        , fieldErrors;
+        , fieldErrors
+        , formErrors;
 
       this.resetErrors(fields);
 
@@ -114,14 +115,14 @@ App.KaneFormComponent = Ember.Component.extend({
       var fieldResults = Forms.runLocalValidations(localFieldVals, fields);
       if (Forms.checkForErrors(fieldResults)) {
         fieldErrors = Forms.buildFieldErrors(fieldResults);
-        return this.setFieldErrors(fields, fieldErrors)
+        return this.setFieldErrors(fields, fieldErrors);
       }
 
       //handle local form validations
       var formResults = Forms.runLocalValidations(localFormVals, fields);
       if (Forms.checkForErrors(formResults)) {
-        fieldErrors = Forms.buildFieldErrors(formResults);
-        return this.setFieldErrors(fields, fieldErrors)
+        formErrors = Forms.buildFieldErrors(formResults);
+        return this.setFieldErrors(fields, formErrors);
       }
 
       //handle remote field validation
@@ -131,6 +132,7 @@ App.KaneFormComponent = Ember.Component.extend({
       
       //disable the form for remote roundtrip
       self.disableForm();
+
       //handle submission
       self.submitFn(fields)
       .then(function (response) {
@@ -140,8 +142,8 @@ App.KaneFormComponent = Ember.Component.extend({
         return self.failureHandler.call(self, err);
       })
       //re-enable the form regardless of outcome
-      .then(function () { self.enableForm.call(self) })
-      .fail(function () { self.enableForm.call(self) })
+      .then(function () { self.enableForm.call(self); })
+      .fail(function () { self.enableForm.call(self); })
     }, 
   }
 });
