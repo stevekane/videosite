@@ -15,14 +15,14 @@ If either matches, set temporary_password to "" and password to new password
 Return updated User object
 */
 module.exports = function (req, res) {
-  var data = req.body
-    , oldPw = req.body.oldpassword
-    , newPw = req.body.password;
+  var user = req.user
+    , oldPw = req.body.oldPassword
+    , newPw = req.body.newPassword;
 
   //TODO: this should either find an id on the session
   //or on the request body...atm accounting for either
   //persistance.findById("user", req.user.id)
-  persistence.findById("user", data.id)
+  persistence.findById("user", user.id)
   .then(throwIfMissing("No user found"))
   .then(function (user) {
     return compareMultiple(user.password, user.temporary_password, oldPw)

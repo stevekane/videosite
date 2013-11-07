@@ -1,3 +1,5 @@
+var set = Ember.set;
+
 var isEmailBlank = {
   fn: Validations.checkIfBlank("newEmail"),
   error: "Please enter an email ",
@@ -10,7 +12,7 @@ var isConfirmEmailBlank = {
   fields: ["confirmEmail"]
 }
 
-var doPasswordsMatch = {
+var doEmailsMatch = {
   fn: Validations.fieldsMatch("newEmail", "confirmEmail"),
   error: "Email and confirmation must match",
   fields: ["newEmail", "confirmEmail"]
@@ -29,15 +31,15 @@ App.KaneChangeEmailFormComponent = App.KaneFormComponent.extend({
   ],
 
   localFormValidations: [
-    doPasswordsMatch
+    doEmailsMatch 
   ],
 
   submitFn: function (hash) {
-    var data = {}
-      , url = "/user/changeEmail";
+    var url = "/user/changeEmail";
+    var data = {
+      newEmail: hash.newEmail.value
+    };
 
-    data.newEmail = hash.newEmail.value;
-    data.email = 
     return Ember.$.post(url, data);
   },
 

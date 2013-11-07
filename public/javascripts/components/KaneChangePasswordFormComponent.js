@@ -1,30 +1,37 @@
-var passwordsMatch = Validations.fieldsMatch("password", "confirmPassword");
+var doPasswordsMatch = {
+  fn: Validations.fieldsMatch("newPassword", "confirmPassword"),
+  error: "New password and confirmation must match",
+  fields: ["newPassword", "confirmPassword"]
+}
 
-App.KaneChangePasswordFormComponent = App.KaneBaseFormComponent.extend({
+App.KaneChangePasswordFormComponent = App.KaneFormComponent.extend({
 
-  hash: {
-    oldPassword: "",
-    password: "",
-    confirmPassword: ""
+  fields: {
+    oldPassword: new Forms.Field("", ""),
+    newPassword: new Forms.Field("", ""),
+    confirmPassword: new Forms.Field("", "")
   },
 
-  url: "",
-
-  formValidations: [
-    passwordsMatch 
+  localFormValidations: [
+    doPasswordsMatch
   ], 
 
-  //override the normal submit
-  submit: function (url, hash) {
-    var user = this.get('user');
+  submitFn: function (hash) {
+    var url = "/user/changePassword";
     var data = {
-      id: user.get('id'),
-      email: user.get('email'),
-      oldpassword: hash.oldPassword,
-      password: hash.password
+      oldPassword: hash.oldPassword.value,
+      newPassword: hash.newPassword.value
     };
   
-    return Ember.$.post("/user/changePassword", data);
+    return Ember.$.post(url, data);
+  },
+
+  successHandler: function (response) {
+    this.sendAction("action", response.user); 
+  },
+
+  failureHandler: function (err) {
+    set(this, "error", err.responseJSON.message || "Change password failed");  
   }
 
 });
