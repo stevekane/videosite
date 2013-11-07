@@ -9,6 +9,10 @@ App.ApplicationRoute = Ember.Route.extend({
         , userController = this.controllerFor('user');
 
       userController.logout(store);
+    },
+
+    redirectToLogin: function () {
+      this.transitionTo("login"); 
     }
   },
 

@@ -1,3 +1,5 @@
+var set = Ember.set;
+
 var doPasswordsMatch = {
   fn: Validations.fieldsMatch("newPassword", "confirmPassword"),
   error: "New password and confirmation must match",
@@ -31,6 +33,9 @@ App.KaneChangePasswordFormComponent = App.KaneFormComponent.extend({
   },
 
   failureHandler: function (err) {
+    if (401 === err.status) {
+      this.sendAction("unauthorized");   
+    }
     set(this, "error", err.responseJSON.message || "Change password failed");  
   }
 

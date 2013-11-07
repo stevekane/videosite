@@ -24,7 +24,7 @@ module.exports.verifyAuth = function (req, res, next) {
   if (req.isAuthenticated()) {
     return next();
   } else {
-    return res.status(400).send({
+    return res.status(401).send({
       message: "No user session found."
     });
   }

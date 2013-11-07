@@ -48,6 +48,9 @@ App.KaneChangeEmailFormComponent = App.KaneFormComponent.extend({
   },
 
   failureHandler: function (err) {
+    if (401 === err.status) {
+      this.sendAction("unauthorized");   
+    }
     set(this, "error", err.responseJSON.message || "Change email failed");
   },
 
