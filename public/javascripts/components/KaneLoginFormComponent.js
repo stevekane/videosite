@@ -1,16 +1,19 @@
-var validateEmail = _.curry(function (fieldName, fields) {
-  var value = fields[fieldName].value;
+var isValidEmail = {
+  fn: Validations.validateEmail("email"),
+  error: "Not a valid email",
+  fields: ["email"]
+}
+var isEmailFilled = {
+  fn: Validations.checkIfBlank("email"),
+  error: "Please provide email",
+  fields: ["email"]
+}
+var isPasswordFilled = {
+  fn: Validations.checkIfBlank("password"),
+  error: "Please provide password",
+  fields: ["password"]
+}
 
-  return value.indexOf("@") > -1;
-});
-
-var checkIfBlank = _.curry(function (fieldName, fields) {
-  var value = fields[fieldName].value;
-
-  return value !== "";
-});
-
-//Ember form component that uses our form functionality 
 App.KaneLoginFormComponent = App.KaneFormComponent.extend({
   
   fields: {
@@ -19,9 +22,9 @@ App.KaneLoginFormComponent = App.KaneFormComponent.extend({
   },
 
   localFieldValidations: [
-    {fn: validateEmail("email"), error: "Not a valid email", fields: ["email"]},
-    {fn: checkIfBlank("email"), error: "Please provide an email", fields: ["email"]},
-    {fn: checkIfBlank("password"), error: "Please provide a password", fields: ["password"]},
+    isValidEmail,
+    isEmailFilled,
+    isPasswordFilled
   ],
 
   submitFn: function (hash) {

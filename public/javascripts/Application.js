@@ -1,10 +1,7 @@
 window.App = Ember.Application.create();
 
-require('validations/Validations.js');
 require('libs/forms.js');
-//TODO: remove this, just temporary for building the lib
-require('libs/forms-tests.js');
-require('behaviors/Behaviors.js');
+require('libs/validations.js');
 
 require('Router.js');
 require('Models.js');

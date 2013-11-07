@@ -8,18 +8,6 @@ if (!Forms.Promise || !Forms.allPromises) {
   throw new Error("No implementation of RSVP found!");
 }
 
-//OLD STUFF STILL IN USE.  SHOULD REMOVE ONCE REWRITTEN
-var callValidation = _.curry(function (hash, validationFn) {
-  return validationFn(hash);
-});
-
-//should perform sequence of validations provided
-Forms.validate = _.curry(function (fieldValidations, formValidations, hash) {
-  fieldValidations.forEach(callValidation(hash));
-  formValidations.forEach(callValidation(hash));
-});
-// /OLD STUFF
-
 //STRUCTURAL TYPING DATA OBJECTS
 Forms.Field = function (value, error) {
   this.value = value;
