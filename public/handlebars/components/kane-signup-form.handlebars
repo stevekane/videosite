@@ -6,7 +6,8 @@
       class="form-control"
       disabled=disabled
       placeholder="Your Email"
-      value=hash.email}}
+      value=fields.email.value}}
+    <small>{{fields.email.error}}</small>
   </div>
 
   <div class="form-group">
@@ -15,7 +16,8 @@
       class="form-control"
       disabled=disabled
       placeholder="Password"
-      value=hash.password}}
+      value=fields.password.value}}
+    <small>{{fields.password.error}}</small>
   </div>
 
   <div class="form-group">
@@ -24,13 +26,14 @@
       class="form-control"
       disabled=disabled
       placeholder="Confirm Password"
-      value=hash.confirmPassword}}
+      value=fields.confirmPassword.value}}
+    <small>{{fields.confirmPassword.error}}</small>
   </div>
 
   <div class="form-group">
     <button class="btn btn-warning"
     {{bind-attr disabled="disabled"}}
-    {{action submit hash}}>
+    {{action submit}}>
       Signup!
     </button>
     <small class="text-danger">{{error}}</small>

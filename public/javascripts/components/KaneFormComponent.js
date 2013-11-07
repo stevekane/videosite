@@ -85,9 +85,18 @@ App.KaneFormComponent = Ember.Component.extend({
     });
   },
 
-  successHandler: function (json) {},
+  //default behavior is to broadcast action with reponses data
+  successHandler: function (json) {
+    this.sendAction("action", json); 
+  },
 
-  failureHandler: function (err) {},
+  //default behavior is to set "error" property to responseText.error
+  failureHandler: function (err) {
+    var error = err.responseJSON.error 
+      || err.responseText 
+      || "Submission unsuccessful";
+    set(this, "error", error);
+  },
 
   actions: {
     submit: function () {
@@ -125,10 +134,10 @@ App.KaneFormComponent = Ember.Component.extend({
       //handle submission
       self.submitFn(fields)
       .then(function (response) {
-        self.successHandler.call(self, response);
+        return self.successHandler.call(self, response);
       })
       .fail(function (err) {
-        self.failureHandler.call(self, err);
+        return self.failureHandler.call(self, err);
       })
       //re-enable the form regardless of outcome
       .then(function () { self.enableForm.call(self) })

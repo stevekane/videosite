@@ -1,3 +1,5 @@
+var set = Ember.set;
+
 var isValidEmail = {
   fn: Validations.validateEmail("email"),
   error: "Not a valid email",
@@ -36,12 +38,12 @@ App.KaneLoginFormComponent = App.KaneFormComponent.extend({
     return Ember.$.post(url, data);
   },
 
-  successHandler : function (response) {
-    this.sendAction("action", response);
+  successHandler: function (response) {
+    this.sendAction("action", response.user);
   },
 
-  failureHandler: function (err) {
-    this.set("error", err.message ? err.message : "Login error");
-  }
+  failureHandler: function (huh) {
+    set(this, "error", "Invalid credentials");
+  },
 
 });

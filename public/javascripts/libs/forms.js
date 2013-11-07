@@ -4,7 +4,7 @@ Forms.Promise = window.Ember.RSVP.Promise || window.RSVP.Promise || null;
 Forms.allPromises = window.Ember.RSVP.all || window.RSVP.all || null;
 Forms.hashPromises = window.Ember.RSVP.hash || window.RSVP.all || null;
 
-if (!Forms.Promise || !Forms.allPromises) {
+if (!window.Ember.RSVP && !window.RSVP) {
   throw new Error("No implementation of RSVP found!");
 }
 
