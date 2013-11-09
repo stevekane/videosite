@@ -37,10 +37,6 @@ Send an email to the user's email
 
 module.exports = function (req, res) {
 
-  //This promise represents whether all work w/ 
-  //external services has completed successfully
-  var processPromise = Q.defer();
-
   var user = req.user
     token = req.body.token
     plan = req.body.plan || "silver";
@@ -85,30 +81,15 @@ module.exports = function (req, res) {
 
           return persistence.updateById("user", foundUser.id, userUpdates)
           .then(function (updatedUser) {
-            return {
-              user: updatedUser,
-              subscription: subscription
-            };
+            return [updatedUser, subscription];
           })
         })
       })
     }) 
   })
-  .then(processPromise.resolve)
-  .fail(processPromise.reject);
-
-  //These are the entire process handlers.  both paths should
-  //return something in the response object
-  processPromise.promise.then(function (results) {
-    //TODO: This MUST be reworked to filter out password/temp
-    res.send({
-      user: results.user,
-      subscription: results.subscription
-    })
-  });
-  processPromise.promise.then(function (results) {
+  .spread(function (user, subscription) {
     var emailData = {
-      to: results.user.email,
+      to: user.email,
       from: "kanesteven@gmail.com",
       subject: "Thanks for subscribing!",
       html: template ? template() : "Subscribed!"
@@ -116,9 +97,14 @@ module.exports = function (req, res) {
 
     //we don't care if this fails...for now
     sendEmail(emailData);
-    return true;
-  });
-  processPromise.promise.fail(function (err) {
+
+    //TODO: This MUST be reworked to filter out password/temp
+    res.send({
+      user: user,
+      subscription: subscription
+    })
+  })
+  .fail(function (err) {
     sendError(res, err);
   });
 
