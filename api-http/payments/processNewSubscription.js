@@ -1,4 +1,3 @@
-var Q = require('q');
 var persistence = require('../../systems/persistence')
   , payments = require('../../systems/payments')
   , sendError = require('../../utils/http').sendError

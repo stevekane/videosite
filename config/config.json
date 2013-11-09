@@ -36,7 +36,8 @@
   "payments": "stripe",
 
   "mongo": {
-    "url": "mongodb://localhost:27017/videosite" 
+    "url": "mongodb://localhost:27017/videosite",
+    "mongohq": "mongodb://test:mongohq@paulo.mongohq.com:10061/videosite" 
   }
 
 }

@@ -1,12 +1,18 @@
 var Q = require('q')
   , _ = require('lodash')
   , mongoose = require('mongoose')
-  , url = require('../../config/config.json').mongo.url
+  //, url = require('../../config/config.json').mongo.url
+  , url = require('../../config/config.json').mongo.mongohq
   , User = require('./mongo/User')
   , Subscription = require('./mongo/Subscription');
 
 mongoose.connect(url, function (err) {
-  console.log('mongo connected !');
+  if (err) { 
+    console.log(err); 
+  }
+  else {
+    console.log('mongo connected !');
+  }
 })
 
 //Sanitize the model provided by mongoose for return
