@@ -1,8 +1,8 @@
 var Q = require('q')
   , _ = require('lodash')
   , mongoose = require('mongoose')
-  //, url = require('../../config/config.json').mongo.url
-  , url = require('../../config/config.json').mongo.mongohq
+  , url = require('../../config/config.json').mongo.url
+  //, url = require('../../config/config.json').mongo.mongohq
   , User = require('./mongo/User')
   , Subscription = require('./mongo/Subscription');
 

@@ -1,5 +1,6 @@
 var persistence = require('../../systems/persistence')
   , payments = require('../../systems/payments')
+  , sanitizeUser = require('../../utils/http').sanitizeUser
   , sendError = require('../../utils/http').sendError
   , sendEmail = require('../../systems/email').sendEmail
   , template = require('../../templates/emails').subscribe
@@ -97,9 +98,8 @@ module.exports = function (req, res) {
     //we don't care if this fails...for now
     sendEmail(emailData);
 
-    //TODO: This MUST be reworked to filter out password/temp
     res.send({
-      user: user,
+      user: sanitizeUser(user),
       subscription: subscription
     })
   })

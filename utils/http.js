@@ -26,3 +26,21 @@ module.exports.returnByType = _.curry(function (res, type, data) {
   json[type] = dataCopy;
   return res.send(json);
 });
+
+//use this to strip sensitive fields from an object before
+var removeUnsafeFields = _.curry(function (unsafeFields, data) {
+  var dataCopy = _.clone(data);
+
+  _.each(unsafeFields, function (fieldName) {
+    delete dataCopy[fieldName]; 
+  });
+
+  return dataCopy;
+});
+
+module.exports.removeUnsafeFields = removeUnsafeFields;
+
+module.exports.sanitizeUser = removeUnsafeFields([
+  "password",
+  "temporary_password"
+]);
