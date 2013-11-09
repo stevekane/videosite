@@ -1,5 +1,5 @@
 var sendError = require('../../utils/http').sendError
-  , returnByType = require('../../utils/http').returnByType
+  , sanitizeUser = require('../../utils/http').sanitizeUser
   , throwIfFound = require('../../utils/promises').throwIfFound
   , startSession = require('../../utils/session').startSession
   , sendEmail = require('../../systems/email').sendEmail
@@ -31,10 +31,10 @@ module.exports = function (req, res) {
         html: template ? template() : "Thanks!"
       };
 
-      return sendEmail(emailData)
-      .then(function () {
-        return returnByType(res, "user", newUser);
-      });
+      //for now we don't care if this fails
+      sendEmail(emailData)
+
+      return res.send({user: sanitizeUser(newUser)});
     });
   })
   .fail(sendError(res))

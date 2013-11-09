@@ -1,5 +1,5 @@
 var sendError = require('../../utils/http').sendError
-  , returnByType = require('../../utils/http').returnByType
+  , sanitizeUser = require('../../utils/http').sanitizeUser
   , refreshSession = require('../../utils/session').refreshSession
   , sendEmail = require('../../systems/email').sendEmail
   , template = require('../../templates/emails').changeEmail
@@ -43,7 +43,7 @@ module.exports = function (req, res) {
 
       return sendEmail(emailData)
       .then(function () {
-        return returnByType(res, "user", updatedUser);
+        return res.send({user: sanitizeUser(updatedUser)});
       });
     })
   })

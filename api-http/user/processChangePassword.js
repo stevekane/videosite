@@ -1,5 +1,5 @@
 var sendError = require('../../utils/http').sendError
-  , returnByType = require('../../utils/http').returnByType
+  , sanitizeUser = require('../../utils/http').sanitizeUser
   , template = require('../../templates/emails').changeEmail
   , persistence = require('../../systems/persistence')
   , compareMultiple = require('../../libs/bcrypt-promises').compareMultiplePromised
@@ -33,7 +33,7 @@ module.exports = function (req, res) {
       };
       return persistence.updateById("user", user.id, changes)
       .then(function (updatedUser) {
-        return returnByType(res, "user", updatedUser);
+        return res.send({user: sanitizeUser(updatedUser)});
       })
     })
   })
