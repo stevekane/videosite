@@ -2,7 +2,8 @@ var Q = require('q')
   , _ = require('lodash')
   , mongoose = require('mongoose')
   , url = require('../../config/config.json').mongo.url
-  , User = require('./mongo/User');
+  , User = require('./mongo/User')
+  , Subscription = require('./mongo/Subscription');
 
 mongoose.connect(url, function (err) {
   console.log('mongo connected !');
@@ -30,6 +31,7 @@ var formatModels = function (array) {
 var getType = function (type) {
   types = {
     user: User, 
+    subscription: Subscription
   }
 
   if (!types[type]) {

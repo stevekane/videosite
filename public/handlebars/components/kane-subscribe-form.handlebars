@@ -2,24 +2,16 @@
   <legend>Subscribe!</legend>
   <fieldset>
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-md-12">
         <div class="form-group">
-          <label for="name">Name On Card</label>
-          {{input type="text"
-            classNames="form-control"
-            placeholder="As appears on card"
-            disabled=disabled
-            autocomplete=true
-            value=hash.name}}
-        </div>
-        <div class="form-group">
-          <label for="ccnumber">Credit Card Number</label>
+          <label for="ccnumber">Credit Card Number {{cardType}}</label>
           {{input type="text"
             classNames="form-control"
             placeholder="--no dashes--"
             disabled=disabled
             autocomplete=true
-            value=hash.number}}
+            value=fields.number.value}}
+          <small>{{fields.number.error}}</small>
         </div>
       </div>
     </div>
@@ -32,7 +24,8 @@
             placeholder="MM"
             disabled=disabled
             maxlength=2
-            value=hash.exp_month}}
+            value=fields.exp_month.value}}
+          <small>{{fields.exp_month.error}}</small>
         </div>
       </div>
 
@@ -41,10 +34,11 @@
           <label for="year">Year</label>
           {{input type="text"
             classNames="form-control"
-            placeholder="YY"
+            placeholder="YYYY"
             disabled=disabled
-            maxlength=2
-            value=hash.exp_year}}
+            maxlength=4
+            value=fields.exp_year.value}}
+          <small>{{fields.exp_year.error}}</small>
         </div>
       </div>
 
@@ -56,7 +50,8 @@
             placeholder="XXX"
             disabled=disabled
             maxlength=3
-            value=hash.cvc}}
+            value=fields.cvc.value}}
+          <small>{{fields.cvc.error}}</small>
         </div>
       </div>
 
@@ -66,7 +61,7 @@
   <div class = "form-group">
     <button class="btn btn-success"
     {{bind-attr disabled="disabled"}}
-    {{action submit hash}}>
+    {{action submit}}>
       Subscribe!
     </button>
 

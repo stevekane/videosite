@@ -17,7 +17,16 @@ var UserSchema = new mongoose.Schema({
   temporary_password: {
     type: String,
     default: ""
-  }
+  },
+  customer_id: {
+    type: String,
+    default: ""
+  },
+  subscription_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: false,
+    ref: "Subscription"
+  },
 
 });
 
