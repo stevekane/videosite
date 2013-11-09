@@ -1,5 +1,5 @@
 var sendError = require('../../utils/http').sendError
-  , returnByType = require('../../utils/http').returnByType;
+  , sanitizeUser = require('../../utils/http').sanitizeUser;
 
 /*
 The current user is found at req.user
@@ -11,6 +11,6 @@ module.exports = function (req, res) {
   if (!user) {
     return sendError(res, new Error("No user found during login!"));
   } else {
-    return returnByType(res, "user", user);  
+    return res.send({user: sanitizeUser(user)});
   }
 }

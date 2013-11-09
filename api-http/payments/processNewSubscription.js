@@ -1,6 +1,7 @@
 var persistence = require('../../systems/persistence')
   , payments = require('../../systems/payments')
   , sanitizeUser = require('../../utils/http').sanitizeUser
+  , sanitizeSubscription = require('../../utils/http').sanitizeSubscription
   , sendError = require('../../utils/http').sendError
   , sendEmail = require('../../systems/email').sendEmail
   , template = require('../../templates/emails').subscribe
@@ -100,7 +101,7 @@ module.exports = function (req, res) {
 
     res.send({
       user: sanitizeUser(user),
-      subscription: subscription
+      subscription: sanitizeSubscription(subscription)
     })
   })
   .fail(function (err) {

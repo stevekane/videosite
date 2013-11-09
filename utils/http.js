@@ -42,5 +42,10 @@ module.exports.removeUnsafeFields = removeUnsafeFields;
 
 module.exports.sanitizeUser = removeUnsafeFields([
   "password",
-  "temporary_password"
+  "temporary_password",
+  "customer_id"
+]);
+
+module.exports.sanitizeSubscription = removeUnsafeFields([
+  "subscription_id"
 ]);
