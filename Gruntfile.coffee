@@ -12,16 +12,13 @@ module.exports = (grunt) ->
     emailsCompiled: "emailFunctions.js"
     emailsDir: "templates/emails"
 
-    #vendor directory and specific dependencies
-    vendor: "public/vendor"
-    emberVersion: "ember.js"
-    jqueryVersion: "jquery.js"
-    handlebarsVersion: "handlebars.js"
-
     #connect server settings
     port: 3000
     host: '0.0.0.0'
 
+    #ADD ALL THE ADMIN SHIT AND GET THE ADMIN ROUTE WORKING FOR EDITING SCREENCASTS
+
+    #CLIENTSIDE APP
     #js files
     jsDir: "public/javascripts"
     srcJs: "app.js"
