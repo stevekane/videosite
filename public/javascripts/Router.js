@@ -11,5 +11,5 @@ App.Router.map(function () {
     this.route('subscribe');
   });
   this.resource('videos');
-  this.resource('video', {path: "/videos/:video_slug"});
+  this.resource('video', {path: "/videos/:video_id"});
 });
