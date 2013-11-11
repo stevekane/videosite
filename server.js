@@ -4,6 +4,7 @@ var http = require('http')
   , configurePassport = require('./config/passport').configure
   , configureAppRoutes = require('./routes-http/app')
   , configureUserRoutes = require('./api-http/user')
+  , configureVideoRoutes = require('./api-http/videos')
   , configurePaymentRoutes = require('./api-http/payments')
   , config = require('./config/config.json');
 
@@ -28,6 +29,7 @@ app.use(express.favicon())
 configurePassport(passport);
 configureAppRoutes(app);
 configurePaymentRoutes(app);
+configureVideoRoutes(app);
 configureUserRoutes(app);
 
 server.listen(app.get('port'), function (err) {
