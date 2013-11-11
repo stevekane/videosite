@@ -1,0 +1,15 @@
+<div class="row">
+  <div class="col-md-3">
+
+    <ul class="list-group">
+      {{#each video in content}}
+        {{#link-to "video" video classNames="list-group-item"}}
+          {{video.title}}
+        {{/link-to}}
+      {{else}}
+        <li class="list-group-item text-warning">No videos</li>
+      {{/each}}
+    </ul>
+
+  </div>
+</div>
