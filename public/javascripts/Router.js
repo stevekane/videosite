@@ -10,7 +10,6 @@ App.Router.map(function () {
     this.route('changePassword');
     this.route('subscribe');
   });
-  this.resource('videos', function () {
-    this.resource('video', {path: "/:video_id"});
-  });
+  this.resource('videos');
+  this.resource('video', {path: "/videos/:video_id"});
 });

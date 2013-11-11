@@ -1,0 +1,23 @@
+<div class="row">
+  <ol class="breadcrumb">
+    <li>{{#link-to "videos"}}Videos{{/link-to}}</li>
+  </ol>
+</div>
+<div class="media">
+  <div class="media-header">
+    <h3>{{title}}</h3>
+    <h4>{{description}}</h4>
+    <h5>Published on: {{publication_date}}</h5>
+  </div> 
+  <video 
+  classNames="media-object"
+  height="480"
+  width="640"
+  controls=true
+  {{bind-attr src="mp4_url"}}>
+  </video> 
+  </div> 
+  <div class="media-footer">
+    <h4>{{keywords}}</h4> 
+  </div>
+</div>
