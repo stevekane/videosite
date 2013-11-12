@@ -1,6 +1,5 @@
 require('routes/Application.js');
 require('routes/Videos.js');
-require('routes/Video.js');
 
 App.Router.map(function () {
   this.resource('signup');
