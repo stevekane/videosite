@@ -6,3 +6,5 @@ require('controllers/Account.js');
 require('controllers/AccountChangeEmail.js');
 require('controllers/AccountChangePassword.js');
 require('controllers/AccountSubscribe.js');
+require('controllers/Video.js');
+require('controllers/Videos.js');

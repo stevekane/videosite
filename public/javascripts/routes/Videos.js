@@ -4,6 +4,6 @@ App.VideosRoute = Ember.Route.extend({
     var store = this.get('store');
 
     return store.find("video");
-  }
+  },
 
 });

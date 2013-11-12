@@ -1,5 +1,5 @@
 <!-- HEADER -->
-<nav class="navbar navbar-fixed-top navbar-inverse" role="navigation">
+<div class="navbar navbar-fixed-top navbar-inverse" role="navigation">
   <div class="container">
     <div class="navbar-header">
       {{#link-to "index" classNames="navbar-brand"}}
@@ -10,14 +10,14 @@
     <ul class="nav navbar-nav pull-right">
       {{#if activeUser}}
 
-          <span class="navbar-text">
-            {{#if activeUser.subscribed}}
-              Subscribed as
-            {{else}}
-              Signed in as  
-            {{/if}}
-            {{activeUser.email}}
-          </span> 
+        <span class="navbar-text">
+          {{#if activeUser.subscribed}}
+            Subscribed as
+          {{else}}
+            Signed in as  
+          {{/if}}
+          {{activeUser.email}}
+        </span> 
 
         <li>{{#link-to "account"}}View Account{{/link-to}}</li>
         <li><a {{action logout}}>Logout</a></li>
@@ -27,7 +27,7 @@
       {{/if}}
     </ul>
   </div>
-</nav>
+</div>
 
 <div class="container">
   {{outlet}}

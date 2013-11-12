@@ -4,6 +4,10 @@ App.ApplicationRoute = Ember.Route.extend({
   
   actions: {
     
+    gotoVideos: function () {
+      this.transitionTo("videos"); 
+    },
+
     logout: function () {
       var store = this.get('store')
         , userController = this.controllerFor('user');
